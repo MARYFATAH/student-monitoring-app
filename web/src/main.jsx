@@ -10,7 +10,8 @@ import { CourseList } from "./components/Course/CourseList.jsx";
 import { CourseDetails } from "./components/Course/CourseDetails.jsx";
 import { ParentDashboard } from "./components/Dashboard/ParentDashboard.jsx";
 import { TeacherDashboard } from "./components/Dashboard/TeacherDashboard.jsx";
-import { HeroPage } from "./HeroPage.jsx";
+import { Login } from "./components/Authentication/Login.jsx";
+import { SignUp } from "./components/Authentication/SignUp.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -23,6 +24,8 @@ createRoot(document.getElementById("root")).render(
         <Route path="/courses/:courseId" element={<CourseDetails />} />
         <Route path="/teacherdashboard" element={<TeacherDashboard />} />
         <Route path="/parentdashboard" element={<ParentDashboard />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<SignUp />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>

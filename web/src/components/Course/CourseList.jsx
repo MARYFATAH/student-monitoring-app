@@ -1,14 +1,16 @@
-export function CourseList() {
+import { CourseDetails } from "./CourseDEtails";
+
+export function CourseList({ courses = [] }) {
   return (
-    <div className="course-list">
-      <h2>Available Courses</h2>
-      <ul>
-        <li>Mathematics</li>
-        <li>Science</li>
-        <li>History</li>
-        <li>Art</li>
-        <li>Physical Education</li>
-      </ul>
+    <div>
+      {courses.length > 0 ? (
+        courses.map((course) => (
+          <CourseDetails key={course.id} course={course} />
+        ))
+      ) : (
+        <p>No courses available</p>
+      )}
+      <button className="dashboard-button">Add Course</button>
     </div>
   );
 }

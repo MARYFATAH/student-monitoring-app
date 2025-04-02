@@ -1,0 +1,13 @@
+.course-details-container {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  gap: 1rem;
+  border: 1px solid #a0a0a0;
+  border-radius: 5px;
+  margin: 20px;
+
+  width: 17rem;
+  height: 20rem;
+  background-color: #efe9f6;
+}

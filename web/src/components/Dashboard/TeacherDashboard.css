@@ -1,0 +1,87 @@
+/* Teacher Dashboard General Styles */
+.teacher-dashboard {
+  font-family: Arial, sans-serif;
+  background: #f8f9fa; /* Light background color */
+  padding: 10px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Sidebar Navigation */
+.dashboard-container {
+  display: flex;
+  flex-wrap: wrap; /* Allows wrapping on small screens */
+  justify-content: center; /* Centers content horizontally */
+}
+
+.dashboard-title {
+  font-size: 1.5rem;
+  color: #007bff;
+  margin-bottom: 20px;
+  text-align: center;
+  flex: 1; /* Allows title to stretch on smaller screens */
+}
+
+/* Dashboard Main Content */
+.dashboard-main {
+  flex: 1; /* Fills remaining space */
+  padding: 20px;
+  display: flex;
+  flex-wrap: wrap; /* Wraps cards on small screens */
+  justify-content: space-between; /* Space between elements */
+}
+
+/* Course List Container */
+.course-list {
+  width: 100%;
+}
+
+.course-list h2 {
+  font-size: 1.25rem;
+  margin-bottom: 10px;
+  text-align: center;
+  color: #333;
+}
+
+/* Individual Course Box */
+.course-box {
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  margin: 10px;
+  padding: 15px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  flex: 0 1 200px; /* Responsive width for each course box */
+  max-width: 100%; /* Ensures boxes don’t stretch too far */
+  text-align: center;
+}
+
+.course-box h3 {
+  font-size: 1rem;
+  color: #007bff; /* Highlight course name */
+  margin: 0;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .dashboard-main {
+    flex-direction: column; /* Stacks courses vertically */
+  }
+
+  .course-box {
+    width: 90%; /* Course boxes fill more space on small screens */
+    margin: 10px auto;
+  }
+}
+
+@media (max-width: 576px) {
+  .dashboard-title {
+    font-size: 1.2rem;
+  }
+
+  .course-box {
+    font-size: 0.9rem; /* Smaller text for mobile devices */
+    padding: 10px; /* Adjust padding for smaller screens */
+  }
+}
