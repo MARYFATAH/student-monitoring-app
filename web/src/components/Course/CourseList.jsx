@@ -5,7 +5,7 @@ export function CourseList({ courses = [] }) {
     <div>
       {courses.length > 0 ? (
         courses.map((course) => (
-          <CourseDetails key={course.id} course={course} />
+          <CourseDetails key={course.id} course={course.name} />
         ))
       ) : (
         <p>No courses available</p>

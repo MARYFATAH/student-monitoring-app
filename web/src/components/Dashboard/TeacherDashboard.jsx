@@ -1,21 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { SideBar } from "../SideBar";
-import { StudentList } from "../Students/StudentList";
 import { Link } from "react-router-dom";
+import { CourseContext } from "../../contexts/CourseContext"; // Import the context
 
 export function TeacherDashboard() {
+  const { courses, setCourses } = useContext(CourseContext); // Access courses from context
   const [activeSection, setActiveSection] = useState("courses");
   const [showModal, setShowModal] = useState(false); // State to show/hide modal
   const [newCourseName, setNewCourseName] = useState(""); // State for the new course name
   const [newStudentName, setNewStudentName] = useState(""); // State for the new student name
   const [isAddingCourse, setIsAddingCourse] = useState(true); // Modal type
-
-  const [courses, setCourses] = useState([
-    { id: 1, name: "Mathematics" },
-    { id: 2, name: "Science" },
-    { id: 3, name: "English" },
-    { id: 4, name: "History" },
-  ]);
 
   const [students, setStudents] = useState([
     { id: 1, name: "Alice" },
@@ -27,7 +21,7 @@ export function TeacherDashboard() {
   const handleAddCourse = () => {
     if (newCourseName.trim()) {
       const newCourse = { id: courses.length + 1, name: newCourseName };
-      setCourses([...courses, newCourse]);
+      setCourses([...courses, newCourse]); // Update courses in context
       setNewCourseName("");
       setShowModal(false);
     }
@@ -36,7 +30,7 @@ export function TeacherDashboard() {
   const handleAddStudent = () => {
     if (newStudentName.trim()) {
       const newStudent = { id: students.length + 1, name: newStudentName };
-      setStudents([...students, newStudent]);
+      setStudents([...students, newStudent]); // Update local students state
       setNewStudentName("");
       setShowModal(false);
     }
@@ -72,7 +66,7 @@ export function TeacherDashboard() {
                         Course details and information.
                       </p>
                       <button className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                        <Link to={`/course/${course.id}`}>
+                        <Link to={`/courses/${course.id}`}>
                           View Course Details
                         </Link>
                       </button>
