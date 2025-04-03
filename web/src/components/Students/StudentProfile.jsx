@@ -1,11 +1,13 @@
-export function StudentProfile({ student }) {
+import { students } from "../../Data/Course";
+export function StudentProfile() {
+  console.log(students);
   return (
-    <div className="student-profile">
-      <h2>{student.name}</h2>
-      <p>Age: {student.age}</p>
-      <p>Grade: {student.grade}</p>
-      <p>Attendance: {student.attendance}</p>
-      <p>Behavior: {student.behavior}</p>
+    <div>
+      {students.map((student) => (
+        <div key={student.id}>
+          <h2>{student.name}</h2>
+        </div>
+      ))}
     </div>
   );
 }
