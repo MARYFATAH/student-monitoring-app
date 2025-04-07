@@ -27,6 +27,12 @@ export function CourseSideBar({ setActiveSection }) {
         >
           👩‍🎓 Score Assignment
         </li>
+        <li
+          onClick={() => setActiveSection("homework")}
+          className="px-4 py-3 mb-2 cursor-pointer text-base rounded-md transition-all text-gray-800 hover:bg-purple-500 hover:text-white"
+        >
+          📅 Homework Management
+        </li>
       </ul>
     </div>
   );

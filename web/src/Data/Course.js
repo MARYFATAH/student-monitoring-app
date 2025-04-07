@@ -95,3 +95,20 @@ export const students = [
     address: "404 Birch St, Countyville",
   },
 ];
+
+export const events = [
+  {
+    id: 1,
+    name: "Math Competition",
+    description: "Join us for a math competition",
+    date: "2023-10-15",
+    time: "10:00 AM",
+  },
+  {
+    id: 2,
+    name: "Science Exhibition",
+    description: "Discover the wonders of science",
+    date: "2023-11-20",
+    time: "11:00 AM",
+  },
+];

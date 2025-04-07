@@ -1,17 +1,21 @@
 import React, { useState } from "react";
-import { SideBar } from "../SideBar";
+import { SideBar } from "./SideBar";
 import { CourseList } from "../Course/CourseList";
 import {
   courses as courseData,
   students as studentData,
+  events as eventData,
 } from "../../Data/Course";
 import { StudentList } from "../Students/StudentList";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { EventList } from "../Events/EventList";
 
 export function TeacherDashboard() {
   const [courses, setCourses] = useState(courseData);
   const [students, setStudents] = useState(studentData);
+  const [events, setEvents] = useState(eventData);
+  const [messages, setMessages] = useState([]);
   const [activeSection, setActiveSection] = useState("courses");
   const [showModal, setShowModal] = useState(false);
   const [isAddingCourse, setIsAddingCourse] = useState(true);
@@ -41,6 +45,8 @@ export function TeacherDashboard() {
       };
       setCourses([...courses, newCourse]);
       resetModal();
+    } else {
+      alert("Please fill in all course details.");
     }
   };
 
@@ -55,6 +61,8 @@ export function TeacherDashboard() {
       };
       setStudents([...students, newStudent]);
       resetModal();
+    } else {
+      alert("Please complete all student details.");
     }
   };
 
@@ -70,7 +78,7 @@ export function TeacherDashboard() {
   };
 
   return (
-    <div className="h-screen bg-gray-100 flex bg-purple-100">
+    <div className="h-screen flex bg-purple-100">
       {/* Sidebar */}
       <SideBar
         setActiveSection={setActiveSection}
@@ -79,16 +87,18 @@ export function TeacherDashboard() {
 
       {/* Main Content */}
       <div className="flex-grow p-6">
-        <h1 className="text-3xl font-bold text-gray-700 mb-6">
-          Teacher Dashboard
-        </h1>
-        <div className="flex flex-col  bg-white rounded-lg shadow-md p-6">
+        <div className="flex flex-col bg-white rounded-lg shadow-md p-6">
           {activeSection === "courses" && (
-            <div className=" space-y-4">
+            // Course List
+
+            <div className="space-y-4">
+              <h1 className="text-xl  font-semibold text-gray-800 mb-4">
+                Courses
+              </h1>
               <CourseList courses={courses} />
-              <div className=" flex justify-end">
+              <div className="flex justify-end">
                 <button
-                  className="bg-gray-500 hover:bg-green-700 text-white py-2 px-4 rounded"
+                  className="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded"
                   onClick={() => {
                     setIsAddingCourse(true);
                     setShowModal(true);
@@ -104,7 +114,7 @@ export function TeacherDashboard() {
               <StudentList students={students} />
               <div className="flex justify-end">
                 <button
-                  className="bg-gray-500 hover:bg-green-700 text-white py-2 px-4 rounded"
+                  className="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded"
                   onClick={() => {
                     setIsAddingCourse(false);
                     setShowModal(true);
@@ -113,6 +123,38 @@ export function TeacherDashboard() {
                   Add Student
                 </button>
               </div>
+            </div>
+          )}
+          {activeSection === "events" && (
+            <div className="space-y-4">
+              <EventList events={events} />
+              <div className="flex justify-end">
+                <button
+                  className="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded"
+                  onClick={() => {
+                    setShowModal(true);
+                    setIsAddingEvent(false); // Adjust for events handling logic
+                  }}
+                >
+                  Add Event
+                </button>
+              </div>
+            </div>
+          )}
+          {activeSection === "messages" && (
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                Messages Section
+              </h2>
+              {messages.length > 0 ? (
+                messages.map((message, index) => (
+                  <p key={index} className="text-gray-600">
+                    {message}
+                  </p>
+                ))
+              ) : (
+                <p className="text-gray-600">No messages available...</p>
+              )}
             </div>
           )}
         </div>

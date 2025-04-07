@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import { courses, students } from "../../Data/Course";
-import { CourseSideBar } from "../CourseSideBar";
+import { CourseSideBar } from "./CourseSideBar";
 
 export function CourseDetails() {
   const [activeSection, setActiveSection] = useState("courses"); // Active section in the sidebar
@@ -17,6 +17,10 @@ export function CourseDetails() {
   const [newTestName, setNewTestName] = useState(""); // Name of new test
   const [studentScores, setStudentScores] = useState({}); // Scores for each test and student
   const [isEditing, setIsEditing] = useState(false); // Edit mode for course details
+  const [homework, setHomework] = useState([]); // Homework list
+  const [newHomeworkName, setNewHomeworkName] = useState(""); // Name of new homework
+  const [newTeacherName, setNewTeacherName] = useState(""); // New teacher name
+  const [selectedSchedule, setSelectedSchedule] = useState(""); // New schedule
 
   if (!selectedCourse) {
     return (
@@ -25,6 +29,23 @@ export function CourseDetails() {
       </div>
     );
   }
+
+  const handleAddHomework = () => {
+    if (!newHomeworkName.trim()) {
+      alert("Homework name cannot be empty.");
+      return;
+    }
+
+    const newHomework = {
+      id: homework.length + 1,
+      name: newHomeworkName,
+      du_date: new Date().toLocaleDateString(), // Example due date
+      description: "Homework description here", // Example description
+    };
+
+    setHomework([...homework, newHomework]);
+    setNewHomeworkName(""); // Reset input field
+  };
 
   const handleEditCourse = () => {
     setIsEditing(!isEditing);
@@ -121,7 +142,16 @@ export function CourseDetails() {
               </h2>
               <p className="text-base text-gray-700 bg-gray-100 p-4 rounded-lg shadow">
                 {isEditing ? (
-                  <input type="text" />
+                  <input
+                    type="text"
+                    onChange={(e) => {
+                      setNewTeacherName(e.target.value); // Update the state
+                      console.log(e.target.value); // Log the value
+                    }}
+                    value={newTeacherName}
+                    placeholder="Enter teacher name"
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
                 ) : (
                   selectedCourse.teacher || "No teacher assigned"
                 )}
@@ -133,7 +163,13 @@ export function CourseDetails() {
               </h2>
               <p className="text-base text-gray-700 bg-gray-100 p-4 rounded-lg shadow">
                 {isEditing ? (
-                  <input type="text" />
+                  <input
+                    type="text"
+                    onChange={(e) => setSelectedSchedule(e.target.value)}
+                    value={selectedSchedule}
+                    placeholder="Enter schedule"
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
                 ) : (
                   selectedCourse.duration || "Schedule not available"
                 )}
@@ -285,6 +321,44 @@ export function CourseDetails() {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+        {activeSection === "homework" && (
+          <div>
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">
+              Homework List
+            </h2>
+            <ul className="list-disc list-inside mb-4">
+              {homework.length > 0
+                ? homework.map((hw) => <li key={hw.id}>{hw.name}</li>)
+                : "No homework added yet..."}
+            </ul>
+            <div className="flex items-center gap-4">
+              <input
+                type="text"
+                placeholder="Enter homework name"
+                value={newHomeworkName}
+                onChange={(e) => setNewHomeworkName(e.target.value)}
+                className="flex-1 bg-gray-100 p-2 rounded-lg shadow"
+              />
+              <input
+                type="date"
+                className="bg-gray-100 p-2 rounded-lg shadow"
+                placeholder="Due Date"
+                onChange={(e) => setNewHomeworkName(e.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="Enter homework description"
+                className="bg-gray-100 p-2 rounded-lg shadow"
+              />
+              <button
+                onClick={handleAddHomework}
+                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow transition-all duration-300"
+              >
+                Add Homework
+              </button>
+            </div>
           </div>
         )}
       </div>
