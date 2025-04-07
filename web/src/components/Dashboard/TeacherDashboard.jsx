@@ -1,35 +1,34 @@
 import React, { useState } from "react";
-import { SideBar } from "../SideBar";
+import { SideBar } from "./SideBar";
 import { CourseList } from "../Course/CourseList";
 import {
   courses as courseData,
   students as studentData,
+  events as eventData,
 } from "../../Data/Course";
-import { StudentProfile } from "../Students/StudentProfile";
 import { StudentList } from "../Students/StudentList";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { EventList } from "../Events/EventList";
 
 export function TeacherDashboard() {
-  // State for courses and students
   const [courses, setCourses] = useState(courseData);
   const [students, setStudents] = useState(studentData);
-
-  // State for active section and assignments
+  const [events, setEvents] = useState(eventData);
+  const [messages, setMessages] = useState([]);
   const [activeSection, setActiveSection] = useState("courses");
-  const [courseAssignments, setCourseAssignments] = useState({});
-
-  // Modal states
   const [showModal, setShowModal] = useState(false);
   const [isAddingCourse, setIsAddingCourse] = useState(true);
-
-  // Input fields
   const [newCourseName, setNewCourseName] = useState("");
   const [newTeacherName, setNewTeacherName] = useState("");
   const [newSchedule, setNewSchedule] = useState("");
   const [newDescription, setNewDescription] = useState("");
   const [newStudentName, setNewStudentName] = useState("");
   const [selectedCourseId, setSelectedCourseId] = useState("");
+  const [newDateOfBirth, setNewDateOfBirth] = useState(null);
+  const [newEmail, setNewEmail] = useState("");
+  const [newPhone, setNewPhone] = useState("");
 
-  // Add new course
   const handleAddCourse = () => {
     if (
       newCourseName.trim() &&
@@ -46,25 +45,27 @@ export function TeacherDashboard() {
       };
       setCourses([...courses, newCourse]);
       resetModal();
+    } else {
+      alert("Please fill in all course details.");
     }
   };
 
-  // Add new student and assign to course
   const handleAddStudent = () => {
-    if (newStudentName.trim() && selectedCourseId) {
-      const newStudent = { id: students.length + 1, name: newStudentName };
+    if (newStudentName.trim() && selectedCourseId && newDateOfBirth) {
+      const newStudent = {
+        id: students.length + 1,
+        firstname: newStudentName,
+        email: newEmail,
+        phone: newPhone,
+        dateOfBirth: newDateOfBirth.toISOString().split("T")[0],
+      };
       setStudents([...students, newStudent]);
-
-      // Assign the student to the selected course
-      setCourseAssignments((prev) => ({
-        ...prev,
-        [selectedCourseId]: [...(prev[selectedCourseId] || []), newStudent.id],
-      }));
       resetModal();
+    } else {
+      alert("Please complete all student details.");
     }
   };
 
-  // Reset modal
   const resetModal = () => {
     setNewCourseName("");
     setNewTeacherName("");
@@ -72,55 +73,89 @@ export function TeacherDashboard() {
     setNewDescription("");
     setNewStudentName("");
     setSelectedCourseId("");
+    setNewDateOfBirth(null);
     setShowModal(false);
   };
 
   return (
-    <div className="h-screen bg-gradient-to-r from-gray-100 to-gray-200 flex">
+    <div className="h-screen flex bg-purple-100">
       {/* Sidebar */}
       <SideBar
         setActiveSection={setActiveSection}
-        className="bg-blue-600 text-white w-full md:w-1/5 py-8 shadow-md"
+        className="w-1/4 bg-blue-600 text-white shadow-md"
       />
 
       {/* Main Content */}
-      <div className="flex-grow p-4 md:p-8">
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-700 mb-6">
-          Teacher Dashboard
-        </h1>
-        <div>
+      <div className="flex-grow p-6">
+        <div className="flex flex-col bg-white rounded-lg shadow-md p-6">
           {activeSection === "courses" && (
-            <>
-              <CourseList
-                courses={courses}
-                courseAssignments={courseAssignments}
-                students={students}
-              />
-              <button
-                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mt-6"
-                onClick={() => {
-                  setIsAddingCourse(true);
-                  setShowModal(true);
-                }}
-              >
-                Add Course
-              </button>
-            </>
+            // Course List
+
+            <div className="space-y-4">
+              <h1 className="text-xl  font-semibold text-gray-800 mb-4">
+                Courses
+              </h1>
+              <CourseList courses={courses} />
+              <div className="flex justify-end">
+                <button
+                  className="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded"
+                  onClick={() => {
+                    setIsAddingCourse(true);
+                    setShowModal(true);
+                  }}
+                >
+                  Add Course
+                </button>
+              </div>
+            </div>
           )}
           {activeSection === "students" && (
-            <>
-              <StudentList />
-
-              <button
-                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mt-6"
-                onClick={() => {
-                  setIsAddingCourse(false);
-                  setShowModal(true);
-                }}
-              >
-                Add Student
-              </button>
-            </>
+            <div className="space-y-4">
+              <StudentList students={students} />
+              <div className="flex justify-end">
+                <button
+                  className="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded"
+                  onClick={() => {
+                    setIsAddingCourse(false);
+                    setShowModal(true);
+                  }}
+                >
+                  Add Student
+                </button>
+              </div>
+            </div>
+          )}
+          {activeSection === "events" && (
+            <div className="space-y-4">
+              <EventList events={events} />
+              <div className="flex justify-end">
+                <button
+                  className="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded"
+                  onClick={() => {
+                    setShowModal(true);
+                    setIsAddingEvent(false); // Adjust for events handling logic
+                  }}
+                >
+                  Add Event
+                </button>
+              </div>
+            </div>
+          )}
+          {activeSection === "messages" && (
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                Messages Section
+              </h2>
+              {messages.length > 0 ? (
+                messages.map((message, index) => (
+                  <p key={index} className="text-gray-600">
+                    {message}
+                  </p>
+                ))
+              ) : (
+                <p className="text-gray-600">No messages available...</p>
+              )}
+            </div>
           )}
         </div>
       </div>
@@ -128,8 +163,8 @@ export function TeacherDashboard() {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-lg shadow-xl w-[90%] md:w-[50%]">
-            <h2 className="text-2xl font-bold text-gray-700 mb-4">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 md:w-1/2">
+            <h2 className="text-2xl font-bold mb-4">
               {isAddingCourse ? "Add New Course" : "Add New Student"}
             </h2>
             {isAddingCourse ? (
@@ -171,6 +206,20 @@ export function TeacherDashboard() {
                   value={newStudentName}
                   onChange={(e) => setNewStudentName(e.target.value)}
                 />
+                <input
+                  type="email"
+                  placeholder="Email"
+                  className="w-full p-2 border rounded mb-4"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Phone"
+                  className="w-full p-2 border rounded mb-4"
+                  value={newPhone}
+                  onChange={(e) => setNewPhone(e.target.value)}
+                />
                 <select
                   className="w-full p-2 border rounded mb-4"
                   value={selectedCourseId}
@@ -185,17 +234,23 @@ export function TeacherDashboard() {
                     </option>
                   ))}
                 </select>
+                <DatePicker
+                  selected={newDateOfBirth}
+                  onChange={(date) => setNewDateOfBirth(date)}
+                  dateFormat="dd/MM/yyyy"
+                  className="w-full p-2 border rounded mb-4"
+                />
               </>
             )}
             <div className="flex justify-end gap-2">
               <button
-                className="bg-red-500 hover:bg-red-700 text-white py-2 px-4 rounded"
+                className="bg-red-500 text-white py-2 px-4 rounded"
                 onClick={resetModal}
               >
                 Cancel
               </button>
               <button
-                className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded"
+                className="bg-blue-500 text-white py-2 px-4 rounded"
                 onClick={isAddingCourse ? handleAddCourse : handleAddStudent}
               >
                 {isAddingCourse ? "Add Course" : "Add Student"}
