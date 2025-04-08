@@ -1,86 +1,104 @@
 import React, { useState } from "react";
-import { SideBar } from "../SideBar";
+import { SideBar } from "./SideBar";
+import { CourseList } from "../Course/CourseList";
+import {
+  courses as courseData,
+  students as studentData,
+  events as eventData,
+} from "../../Data/Course";
 import { StudentList } from "../Students/StudentList";
-import { Link } from "react-router-dom";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { EventList } from "../Events/EventList";
 
 export function TeacherDashboard() {
+  const [courses, setCourses] = useState(courseData);
+  const [students, setStudents] = useState(studentData);
+  const [events, setEvents] = useState(eventData);
+  const [messages, setMessages] = useState([]);
   const [activeSection, setActiveSection] = useState("courses");
-  const [showModal, setShowModal] = useState(false); // State to show/hide modal
-  const [newCourseName, setNewCourseName] = useState(""); // State for the new course name
-  const [newStudentName, setNewStudentName] = useState(""); // State for the new student name
-  const [isAddingCourse, setIsAddingCourse] = useState(true); // Modal type
-
-  const [courses, setCourses] = useState([
-    { id: 1, name: "Mathematics" },
-    { id: 2, name: "Science" },
-    { id: 3, name: "English" },
-    { id: 4, name: "History" },
-  ]);
-
-  const [students, setStudents] = useState([
-    { id: 1, name: "Alice" },
-    { id: 2, name: "Bob" },
-    { id: 3, name: "Charlie" },
-    { id: 4, name: "Diana" },
-  ]);
+  const [showModal, setShowModal] = useState(false);
+  const [isAddingCourse, setIsAddingCourse] = useState(true);
+  const [newCourseName, setNewCourseName] = useState("");
+  const [newTeacherName, setNewTeacherName] = useState("");
+  const [newSchedule, setNewSchedule] = useState("");
+  const [newDescription, setNewDescription] = useState("");
+  const [newStudentName, setNewStudentName] = useState("");
+  const [selectedCourseId, setSelectedCourseId] = useState("");
+  const [newDateOfBirth, setNewDateOfBirth] = useState(null);
+  const [newEmail, setNewEmail] = useState("");
+  const [newPhone, setNewPhone] = useState("");
 
   const handleAddCourse = () => {
-    if (newCourseName.trim()) {
-      const newCourse = { id: courses.length + 1, name: newCourseName };
+    if (
+      newCourseName.trim() &&
+      newTeacherName.trim() &&
+      newSchedule.trim() &&
+      newDescription.trim()
+    ) {
+      const newCourse = {
+        id: courses.length + 1,
+        name: newCourseName,
+        teacher: newTeacherName,
+        schedule: newSchedule,
+        description: newDescription,
+      };
       setCourses([...courses, newCourse]);
-      setNewCourseName("");
-      setShowModal(false);
+      resetModal();
+    } else {
+      alert("Please fill in all course details.");
     }
   };
 
   const handleAddStudent = () => {
-    if (newStudentName.trim()) {
-      const newStudent = { id: students.length + 1, name: newStudentName };
+    if (newStudentName.trim() && selectedCourseId && newDateOfBirth) {
+      const newStudent = {
+        id: students.length + 1,
+        firstname: newStudentName,
+        email: newEmail,
+        phone: newPhone,
+        dateOfBirth: newDateOfBirth.toISOString().split("T")[0],
+      };
       setStudents([...students, newStudent]);
-      setNewStudentName("");
-      setShowModal(false);
+      resetModal();
+    } else {
+      alert("Please complete all student details.");
     }
   };
 
+  const resetModal = () => {
+    setNewCourseName("");
+    setNewTeacherName("");
+    setNewSchedule("");
+    setNewDescription("");
+    setNewStudentName("");
+    setSelectedCourseId("");
+    setNewDateOfBirth(null);
+    setShowModal(false);
+  };
+
   return (
-    <div className="h-screen bg-gray-100 flex">
+    <div className="h-screen flex bg-purple-100">
       {/* Sidebar */}
       <SideBar
         setActiveSection={setActiveSection}
-        className="bg-blue-600 text-white w-full md:w-1/5 flex-shrink-0 flex flex-col items-center py-8 gap-4"
+        className="w-1/4 bg-blue-600 text-white shadow-md"
       />
 
       {/* Main Content */}
-      <div className="flex-grow flex flex-col h-full">
-        <div className="p-4 md:p-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-700 mb-4 md:mb-6">
-            Teacher Dashboard
-          </h1>
-          <div className="flex flex-col items-center">
-            {activeSection === "courses" && (
-              <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
-                  {courses.map((course) => (
-                    <div
-                      key={course.id}
-                      className="bg-white p-4 md:p-6 rounded-lg shadow hover:shadow-lg transition"
-                    >
-                      <h2 className="text-lg md:text-xl font-semibold text-gray-800">
-                        {course.name}
-                      </h2>
-                      <p className="text-sm md:text-base text-gray-600 mt-2">
-                        Course details and information.
-                      </p>
-                      <button className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                        <Link to={`/course/${course.id}`}>
-                          View Course Details
-                        </Link>
-                      </button>
-                    </div>
-                  ))}
-                </div>
+      <div className="flex-grow p-6">
+        <div className="flex flex-col bg-white rounded-lg shadow-md p-6">
+          {activeSection === "courses" && (
+            // Course List
+
+            <div className="space-y-4">
+              <h1 className="text-xl  font-semibold text-gray-800 mb-4">
+                Courses
+              </h1>
+              <CourseList courses={courses} />
+              <div className="flex justify-end">
                 <button
-                  className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mt-6"
+                  className="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded"
                   onClick={() => {
                     setIsAddingCourse(true);
                     setShowModal(true);
@@ -88,28 +106,15 @@ export function TeacherDashboard() {
                 >
                   Add Course
                 </button>
-              </>
-            )}
-
-            {activeSection === "students" && (
-              <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
-                  {students.map((student) => (
-                    <div
-                      key={student.id}
-                      className="bg-white p-4 md:p-6 rounded-lg shadow hover:shadow-lg transition"
-                    >
-                      <h2 className="text-lg md:text-xl font-semibold text-gray-800">
-                        {student.name}
-                      </h2>
-                      <p className="text-sm md:text-base text-gray-600 mt-2">
-                        Student details and information.
-                      </p>
-                    </div>
-                  ))}
-                </div>
+              </div>
+            </div>
+          )}
+          {activeSection === "students" && (
+            <div className="space-y-4">
+              <StudentList students={students} />
+              <div className="flex justify-end">
                 <button
-                  className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mt-6"
+                  className="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded"
                   onClick={() => {
                     setIsAddingCourse(false);
                     setShowModal(true);
@@ -117,39 +122,135 @@ export function TeacherDashboard() {
                 >
                   Add Student
                 </button>
-              </>
-            )}
-          </div>
+              </div>
+            </div>
+          )}
+          {activeSection === "events" && (
+            <div className="space-y-4">
+              <EventList events={events} />
+              <div className="flex justify-end">
+                <button
+                  className="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded"
+                  onClick={() => {
+                    setShowModal(true);
+                    setIsAddingEvent(false); // Adjust for events handling logic
+                  }}
+                >
+                  Add Event
+                </button>
+              </div>
+            </div>
+          )}
+          {activeSection === "messages" && (
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                Messages Section
+              </h2>
+              {messages.length > 0 ? (
+                messages.map((message, index) => (
+                  <p key={index} className="text-gray-600">
+                    {message}
+                  </p>
+                ))
+              ) : (
+                <p className="text-gray-600">No messages available...</p>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-[90%] md:w-[50%]">
-            <h2 className="text-2xl font-bold text-gray-700 mb-4">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 md:w-1/2">
+            <h2 className="text-2xl font-bold mb-4">
               {isAddingCourse ? "Add New Course" : "Add New Student"}
             </h2>
-            <input
-              type="text"
-              placeholder={isAddingCourse ? "Course Name" : "Student Name"}
-              className="w-full p-2 border rounded mb-4"
-              value={isAddingCourse ? newCourseName : newStudentName}
-              onChange={(e) =>
-                isAddingCourse
-                  ? setNewCourseName(e.target.value)
-                  : setNewStudentName(e.target.value)
-              }
-            />
+            {isAddingCourse ? (
+              <>
+                <input
+                  type="text"
+                  placeholder="Course Name"
+                  className="w-full p-2 border rounded mb-4"
+                  value={newCourseName}
+                  onChange={(e) => setNewCourseName(e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Teacher Name"
+                  className="w-full p-2 border rounded mb-4"
+                  value={newTeacherName}
+                  onChange={(e) => setNewTeacherName(e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Schedule"
+                  className="w-full p-2 border rounded mb-4"
+                  value={newSchedule}
+                  onChange={(e) => setNewSchedule(e.target.value)}
+                />
+                <textarea
+                  placeholder="Description"
+                  className="w-full p-2 border rounded mb-4"
+                  value={newDescription}
+                  onChange={(e) => setNewDescription(e.target.value)}
+                />
+              </>
+            ) : (
+              <>
+                <input
+                  type="text"
+                  placeholder="Student Name"
+                  className="w-full p-2 border rounded mb-4"
+                  value={newStudentName}
+                  onChange={(e) => setNewStudentName(e.target.value)}
+                />
+                <input
+                  type="email"
+                  placeholder="Email"
+                  className="w-full p-2 border rounded mb-4"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Phone"
+                  className="w-full p-2 border rounded mb-4"
+                  value={newPhone}
+                  onChange={(e) => setNewPhone(e.target.value)}
+                />
+                <select
+                  className="w-full p-2 border rounded mb-4"
+                  value={selectedCourseId}
+                  onChange={(e) => setSelectedCourseId(e.target.value)}
+                >
+                  <option value="" disabled>
+                    Select a Course
+                  </option>
+                  {courses.map((course) => (
+                    <option key={course.id} value={course.id}>
+                      {course.name}
+                    </option>
+                  ))}
+                </select>
+                <DatePicker
+                  selected={newDateOfBirth}
+                  onChange={(date) => setNewDateOfBirth(date)}
+                  dateFormat="dd/MM/yyyy"
+                  className="w-full p-2 border rounded mb-4"
+                />
+              </>
+            )}
             <div className="flex justify-end gap-2">
               <button
-                className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-                onClick={() => setShowModal(false)}
+                className="bg-red-500 text-white py-2 px-4 rounded"
+                onClick={resetModal}
               >
                 Cancel
               </button>
               <button
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                className="bg-blue-500 text-white py-2 px-4 rounded"
                 onClick={isAddingCourse ? handleAddCourse : handleAddStudent}
               >
                 {isAddingCourse ? "Add Course" : "Add Student"}
