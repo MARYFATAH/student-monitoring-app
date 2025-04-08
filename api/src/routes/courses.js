@@ -5,12 +5,11 @@ import {
   createCourse,
   deleteCourse,
   updateCourse,
-} from "../handlers/courses.js";
-import {
   getStudentsInCourse,
   addStudentToCourse,
   removeStudentFromCourse,
-} from "../handlers/students.js";
+} from "../handlers/courses.js";
+
 import { requireAuth } from "../middleware/decodeAuthHeader.js";
 
 const router = express.Router();
