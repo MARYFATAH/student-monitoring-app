@@ -21,6 +21,7 @@ export function CourseDetails() {
   const [newHomeworkName, setNewHomeworkName] = useState(""); // Name of new homework
   const [newTeacherName, setNewTeacherName] = useState(""); // New teacher name
   const [selectedSchedule, setSelectedSchedule] = useState(""); // New schedule
+  const [selectedDescription, setSelectedDescription] = useState(""); // New description
 
   if (!selectedCourse) {
     return (
@@ -127,6 +128,7 @@ export function CourseDetails() {
       <CourseSideBar
         className="bg-blue-600 text-white w-full lg:w-1/4 h-auto lg:h-full py-8 shadow-md"
         setActiveSection={setActiveSection}
+        activeSection={activeSection}
       />
 
       <div className="flex-1 bg-white rounded-lg shadow-lg mx-4 my-6 lg:my-10 p-6 lg:p-10 overflow-y-auto">
@@ -148,8 +150,7 @@ export function CourseDetails() {
                       setNewTeacherName(e.target.value); // Update the state
                       console.log(e.target.value); // Log the value
                     }}
-                    value={newTeacherName}
-                    placeholder="Enter teacher name"
+                    value={newTeacherName || selectedCourse.teacher} // Show existing info if state is empty
                     className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 ) : (
@@ -166,7 +167,7 @@ export function CourseDetails() {
                   <input
                     type="text"
                     onChange={(e) => setSelectedSchedule(e.target.value)}
-                    value={selectedSchedule}
+                    value={selectedSchedule || selectedCourse.duration} // Show existing info if state is empty
                     placeholder="Enter schedule"
                     className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
@@ -181,7 +182,12 @@ export function CourseDetails() {
               </h2>
               <p className="text-base text-gray-700 bg-gray-100 p-4 rounded-lg shadow">
                 {isEditing ? (
-                  <input type="text" />
+                  <input
+                    type="text"
+                    onChange={(e) => setSelectedDescription(e.target.value)}
+                    value={selectedDescription || selectedCourse.description} // Show existing info if state is empty
+                    placeholder="Enter description"
+                  />
                 ) : (
                   selectedCourse.description || "No description available"
                 )}
