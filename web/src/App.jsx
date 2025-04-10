@@ -20,11 +20,7 @@ function App() {
   return (
     <>
       <HeroPage />
-      <StudentProfile students={students} />
-      <CourseDetails
-        students={students}
-        onAddTestToStudent={handleAddTestToStudent}
-      />
+
       <Outlet />
     </>
   );
