@@ -54,7 +54,25 @@ VALUES
     ('clerkId3', 'Bob Teacher','teacher'),
     ('clerkId4', 'Alice Student','student'),
     ('clerkId5', 'John Student','student'),
-    ('clerkId6', 'Charlie Student','student');
+    ('clerkId6', 'Charlie Student','student'),
+    ('clerkId7', 'Emily Student','student'),
+    ('clerkId8', 'Michael Student','student'),
+    ('clerkId9', 'Olivia Student','student'),
+    ('clerkId10', 'Sophia Student','student'),
+    ('clerkId11', 'Liam Student','student'),
+    ('clerkId12', 'Noah Student','student'),
+    ('clerkId13', 'Ava Student','student'),
+    ('clerkId14', 'Isabella Student','student'),
+    ('clerkId15', 'Mason Student','student'),
+    ('clerkId16', 'Lucas Student','student'),
+    ('clerkId17', 'Amelia Student','student'),
+    ('clerkId18', 'Harper Student','student'),
+    ('clerkId19', 'Evelyn Student','student'),
+    -- ('user_2vOdwaPvnq4CRVTX4fBaRcpZRjG', 'Maryam Admin', 'admin' ),
+    ('user_2vOdwaPvnq4CRVTX4fBaRcpZRjG', 'Maryam teacher', 'teacher' ),
+    ('user_2vTtGULPmuR6g4tCGOodztViTjk', 'Maryam Fattah student', 'student' ),
+    ('user_2vTuPIO9KgsP7fMA5nZ8UHy7erx', 'Ralf Teacher', 'teacher');
+
 
 INSERT INTO studentapp.courses (teacher_id, name)
 VALUES
@@ -62,7 +80,17 @@ VALUES
     ('clerkId2', 'History 101'),
     ('clerkId3', 'Science 101'),
     ('clerkId3', 'English 101'),
-    ('clerkId3', 'Art 101');
+    ('clerkId3', 'Art 101'),
+    ('user_2vOdwaPvnq4CRVTX4fBaRcpZRjG', 'Math 101'),
+    ('user_2vOdwaPvnq4CRVTX4fBaRcpZRjG', 'History 101'),
+    ('user_2vOdwaPvnq4CRVTX4fBaRcpZRjG', 'Science 101'),
+    ('user_2vOdwaPvnq4CRVTX4fBaRcpZRjG', 'English 101'),
+    ('user_2vOdwaPvnq4CRVTX4fBaRcpZRjG', 'Art 101'),
+    ('user_2vTuPIO9KgsP7fMA5nZ8UHy7erx', 'Math 102'),
+    ('user_2vTuPIO9KgsP7fMA5nZ8UHy7erx', 'History 102'),
+    ('user_2vTuPIO9KgsP7fMA5nZ8UHy7erx', 'Science 102'),
+    ('user_2vTuPIO9KgsP7fMA5nZ8UHy7erx', 'English 102'),
+    ('user_2vTuPIO9KgsP7fMA5nZ8UHy7erx', 'Art 102');
 
 INSERT INTO studentapp.students2courses (student_id,course_id )
 VALUES
@@ -70,5 +98,11 @@ VALUES
     ('clerkId5', 1),
     ('clerkId6', 1),
     ('clerkId4', 2),
-    ('clerkId5', 2);
+    ('clerkId5', 2),
+    ('user_2vTtGULPmuR6g4tCGOodztViTjk', 1),
+    ('user_2vTtGULPmuR6g4tCGOodztViTjk', 2),
+    ('user_2vTtGULPmuR6g4tCGOodztViTjk', 3),
+    ('user_2vTtGULPmuR6g4tCGOodztViTjk', 4),
+    ('user_2vTtGULPmuR6g4tCGOodztViTjk', 5);
+
 

@@ -29,13 +29,15 @@ export async function getCourseById(req, res) {
 }
 
 export async function createCourse(req, res) {
-  const { name } = req.body;
+  const { name, description } = req.body;
   const { userId } = req.auth;
   try {
     const [newCourse] = await db("courses")
       .insert({
         teacher_id: userId,
         name,
+        description,
+        created_at: new Date(),
       })
       .returning("*");
     return res.status(201).json(newCourse);

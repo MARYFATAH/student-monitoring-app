@@ -6,12 +6,13 @@
   "scripts": {
     "start": "node ./src/server",
     "dev": "node --watch ./src/server",
-    "db-reset:dev": "psql -f ./data/reset-db.sql"
+    "db-reset:dev": "psql -U postgres -d studentapp -f  ./data/reset-db.sql"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@clerk/express": "^1.4.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^5.1.0",
