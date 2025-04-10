@@ -1,21 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, use } from "react";
 import { SideBar } from "./SideBar";
 import { CourseList } from "../Course/CourseList";
 import { EventList } from "../Events/EventList";
 import { StudentList } from "../Students/StudentList";
 import { Modal } from "./Modal";
-import {
-  courses as courseData,
-  students as studentData,
-  events as eventData,
-} from "../../Data/Course";
+import { useAuth } from "@clerk/clerk-react";
+
+// import {
+//   courses as courseData,
+//   students as studentData,
+//   events as eventData,
+// } from "../../Data/Course";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-export function TeacherDashboard() {
-  const [courses, setCourses] = useState(courseData);
-  const [students, setStudents] = useState(studentData);
-  const [events, setEvents] = useState(eventData);
+export function TeacherDashboard({ courses, setCourses }) {
+  const { getToken } = useAuth(); // Clerk for authentication
+  // const [courses, setCourses] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [events, setEvents] = useState([]);
   const [messages, setMessages] = useState([]);
   const [activeSection, setActiveSection] = useState("courses");
 
@@ -28,6 +31,12 @@ export function TeacherDashboard() {
   const [newCourseName, setNewCourseName] = useState("");
   const [newCourseDescription, setNewCourseDescription] = useState("");
   const [newCourseTeacher, setNewCourseTeacher] = useState("");
+  const [selectedSchedule, setSelectedSchedule] = useState({
+    weekday: "",
+    time: "",
+  });
+  const [selectedDescription, setSelectedDescription] = useState("");
+  const [newTeacherName, setNewTeacherName] = useState("");
 
   // Student Inputs
   const [newStudentName, setNewStudentName] = useState("");
@@ -60,21 +69,43 @@ export function TeacherDashboard() {
   };
 
   // Add Course
-  const handleAddCourse = () => {
-    if (newCourseName && newCourseDescription && newCourseTeacher) {
-      const newCourse = {
-        id: courses.length + 1,
-        name: newCourseName,
-        description: newCourseDescription,
-        teacher: newCourseTeacher,
-      };
-      setCourses([...courses, newCourse]);
-      resetModal();
+  const handleAddCourse = async () => {
+    if (
+      newTeacherName &&
+      selectedSchedule.weekday &&
+      selectedSchedule.time &&
+      selectedDescription
+    ) {
+      try {
+        const token = await getToken(); // Authentication token
+        const response = await fetch("http://localhost:3000/courses", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            teacher_id: newTeacherName,
+            schedule: selectedSchedule, // Contains weekday and time
+            description: selectedDescription,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to add course: ${response.statusText}`);
+        }
+
+        const createdCourse = await response.json();
+        setCourses((prevCourses) => [...prevCourses, createdCourse]); // Update state with the new course
+        resetModal(); // Clear modal fields after submission
+      } catch (error) {
+        console.error("Error adding course:", error);
+        alert("Failed to add course. Please try again.");
+      }
     } else {
-      alert("Please fill out all course fields.");
+      alert("Please fill out all required fields before adding a course.");
     }
   };
-
   // Add Student
   const handleAddStudent = () => {
     if (
@@ -116,7 +147,7 @@ export function TeacherDashboard() {
   };
 
   return (
-    <div className="h-screen flex bg-purple-100">
+    <div className="h-screen flex bg-gradient-to-r from-blue-500 to-purple-500">
       {/* Sidebar */}
       <SideBar
         activeSection={activeSection}
@@ -126,7 +157,7 @@ export function TeacherDashboard() {
 
       {/* Main Content */}
       <div className="flex-grow p-6">
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className=" p-6">
           {/* Courses Section */}
           {activeSection === "courses" && (
             <div className="space-y-4">
@@ -134,7 +165,7 @@ export function TeacherDashboard() {
               <CourseList courses={courses} />
               <div className="flex justify-end">
                 <button
-                  className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700"
+                  className="bg-indigo-700 text-white py-2 px-4 rounded hover:bg-indigo-900"
                   onClick={() => setShowCourseModal(true)}
                 >
                   Add Course
@@ -185,30 +216,84 @@ export function TeacherDashboard() {
           onSubmit={handleAddCourse}
           submitText="Add Course"
         >
-          <input
-            type="text"
-            placeholder="Course Name"
-            className="w-full p-2 border rounded mb-4"
-            value={newCourseName}
-            onChange={(e) => setNewCourseName(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Description"
-            className="w-full p-2 border rounded mb-4"
-            value={newCourseDescription}
-            onChange={(e) => setNewCourseDescription(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Teacher"
-            className="w-full p-2 border rounded mb-4"
-            value={newCourseTeacher}
-            onChange={(e) => setNewCourseTeacher(e.target.value)}
-          />
+          <div className="space-y-6">
+            {/* Teacher Section */}
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800 mb-2">
+                Teacher
+              </h2>
+              <input
+                type="text"
+                placeholder="Enter Teacher Name"
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-100 shadow"
+                value={newTeacherName}
+                onChange={(e) => setNewTeacherName(e.target.value)}
+              />
+            </div>
+
+            {/* Schedule Section */}
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800 mb-2">
+                Schedule
+              </h2>
+              <div className="space-y-4">
+                <label className="block text-gray-800 font-medium mb-1">
+                  Weekday
+                </label>
+                <select
+                  value={selectedSchedule?.weekday || ""}
+                  onChange={(e) =>
+                    setSelectedSchedule({
+                      ...selectedSchedule,
+                      weekday: e.target.value,
+                    })
+                  }
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-100 shadow"
+                >
+                  <option value="" disabled>
+                    Select a day
+                  </option>
+                  <option value="Monday">Monday</option>
+                  <option value="Tuesday">Tuesday</option>
+                  <option value="Wednesday">Wednesday</option>
+                  <option value="Thursday">Thursday</option>
+                  <option value="Friday">Friday</option>
+                  <option value="Saturday">Saturday</option>
+                  <option value="Sunday">Sunday</option>
+                </select>
+
+                <label className="block text-gray-800 font-medium mb-1">
+                  Time
+                </label>
+                <input
+                  type="time"
+                  value={selectedSchedule?.time || ""}
+                  onChange={(e) =>
+                    setSelectedSchedule({
+                      ...selectedSchedule,
+                      time: e.target.value,
+                    })
+                  }
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-100 shadow"
+                />
+              </div>
+            </div>
+
+            {/* Description Section */}
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800 mb-2">
+                Description
+              </h2>
+              <textarea
+                placeholder="Enter Description"
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-100 shadow"
+                value={selectedDescription}
+                onChange={(e) => setSelectedDescription(e.target.value)}
+              />
+            </div>
+          </div>
         </Modal>
       )}
-
       {/* Student Modal */}
       {showStudentModal && (
         <Modal

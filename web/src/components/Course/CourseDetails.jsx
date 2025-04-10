@@ -1,67 +1,59 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { courses, students } from "../../Data/Course";
 import { CourseSideBar } from "./CourseSideBar";
+import { useAuth } from "@clerk/clerk-react";
+import { students } from "../../Data/Course"; // Sample student data
 
 export function CourseDetails() {
-  const [activeSection, setActiveSection] = useState("courses"); // Active section in the sidebar
-  const { courseId } = useParams();
-  const selectedCourse = courses.find(
-    (course) => course.id === parseInt(courseId, 10)
-  );
-
-  const [courseStudents, setCourseStudents] = useState([]); // Students in the course
-  const [selectedStudentId, setSelectedStudentId] = useState(""); // Individual selection
-  const [selectAll, setSelectAll] = useState(false); // Manage "Select All"
+  const { courseId } = useParams(); // Get courseId from the URL
+  const [activeSection, setActiveSection] = useState("courses");
+  const [courseDetails, setCourseDetails] = useState(null); // Course details
+  const [courseStudents, setCourseStudents] = useState([]); // List of students
+  const [selectedStudentId, setSelectedStudentId] = useState(""); // Individual student selection
+  const [selectAll, setSelectAll] = useState(false); // Select all students
   const [tests, setTests] = useState([]); // List of tests
-  const [newTestName, setNewTestName] = useState(""); // Name of new test
-  const [studentScores, setStudentScores] = useState({}); // Scores for each test and student
-  const [isEditing, setIsEditing] = useState(false); // Edit mode for course details
-  const [homework, setHomework] = useState([]); // Homework list
-  const [newHomeworkName, setNewHomeworkName] = useState(""); // Name of new homework
+  const [newTestName, setNewTestName] = useState(""); // New test name
+  const [studentScores, setStudentScores] = useState({}); // Scores of students for tests
+  const [homework, setHomework] = useState([]); // List of homework
+  const [newHomeworkName, setNewHomeworkName] = useState(""); // New homework name
+  const [newHomeworkDescription, setNewHomeworkDescription] = useState(""); // Homework description
+  const [newHomeworkDueDate, setNewHomeworkDueDate] = useState(""); // Homework due date
   const [newTeacherName, setNewTeacherName] = useState(""); // New teacher name
-  const [selectedSchedule, setSelectedSchedule] = useState(""); // New schedule
-  const [selectedDescription, setSelectedDescription] = useState(""); // New description
+  const [selectedSchedule, setSelectedSchedule] = useState(""); // Course schedule
+  const [selectedDescription, setSelectedDescription] = useState(""); // Course description
+  const [isEditing, setIsEditing] = useState(false); // Edit mode
+  const { getToken } = useAuth(); // Authentication token
 
-  if (!selectedCourse) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-red-400 to-red-600">
-        <h1 className="text-2xl font-semibold text-white">Course not found</h1>
-      </div>
-    );
-  }
-
-  const handleAddHomework = () => {
-    if (!newHomeworkName.trim()) {
-      alert("Homework name cannot be empty.");
-      return;
-    }
-
-    const newHomework = {
-      id: homework.length + 1,
-      name: newHomeworkName,
-      du_date: new Date().toLocaleDateString(), // Example due date
-      description: "Homework description here", // Example description
+  // Fetch course details when the component mounts
+  useEffect(() => {
+    const fetchCourseDetails = async () => {
+      try {
+        const token = await getToken();
+        const response = await fetch(
+          `http://localhost:3000/courses/${courseId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (!response.ok) {
+          throw new Error(`HTTP Error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        setCourseDetails(data);
+      } catch (err) {
+        console.error("Error fetching course details:", err);
+        setCourseDetails(null);
+      }
     };
 
-    setHomework([...homework, newHomework]);
-    setNewHomeworkName(""); // Reset input field
-  };
+    fetchCourseDetails();
+  }, [courseId]);
 
-  const handleEditCourse = () => {
-    setIsEditing(!isEditing);
-  };
-
-  const handleSaveCourse = () => {
-    // Save course details logic here
-    // For now, just log the changes
-    console.log("Course details saved:", selectedCourse);
-    // You can add logic to save the changes to the backend or state management
-
-    setIsEditing(false);
-  };
-
+  // Add new student logic
   const handleAddStudent = () => {
+    console.log("Adding student:", selectedStudentId, selectAll);
     const newStudents = selectAll
       ? students.filter(
           (student) => !courseStudents.some((s) => s.id === student.id)
@@ -71,15 +63,15 @@ export function CourseDetails() {
         );
 
     setCourseStudents([...courseStudents, ...newStudents]);
-    setSelectedStudentId(""); // Reset dropdown
-    setSelectAll(false); // Reset "Select All" checkbox
+    setSelectedStudentId("");
+    setSelectAll(false);
 
     const updatedStudentScores = { ...studentScores };
     newStudents.forEach((student) => {
       if (!updatedStudentScores[student.id]) {
         updatedStudentScores[student.id] = {};
         tests.forEach((test) => {
-          updatedStudentScores[student.id][test.id] = 0; // Default score
+          updatedStudentScores[student.id][test.id] = 0;
         });
       }
     });
@@ -87,6 +79,7 @@ export function CourseDetails() {
     setStudentScores(updatedStudentScores);
   };
 
+  // Add new test logic
   const handleAddTest = () => {
     if (!newTestName.trim()) {
       alert("Test name cannot be empty.");
@@ -102,12 +95,96 @@ export function CourseDetails() {
       if (!updatedStudentScores[student.id]) {
         updatedStudentScores[student.id] = {};
       }
-      updatedStudentScores[student.id][newTest.id] = 0; // Default score
+      updatedStudentScores[student.id][newTest.id] = 0;
     });
 
     setStudentScores(updatedStudentScores);
   };
 
+  // Add new homework logic
+  const handleAddHomework = () => {
+    if (!newHomeworkName.trim()) {
+      alert("Homework name cannot be empty.");
+      return;
+    }
+    const newHomework = {
+      id: homework.length + 1,
+      name: newHomeworkName,
+      description: newHomeworkDescription,
+      due_date: newHomeworkDueDate,
+    };
+    setHomework([...homework, newHomework]);
+    setNewHomeworkName("");
+    setNewHomeworkDescription("");
+    setNewHomeworkDueDate("");
+  };
+
+  //save course details logic
+  const handleSaveCourseDetails = async () => {
+    try {
+      const token = await getToken();
+      console.log("Saving course details");
+      console.log("Course ID:", courseId);
+      const response = await fetch(
+        `http://localhost:3000/courses/${courseId}`,
+        {
+          method: "Patch",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            teacher_id: newTeacherName,
+            duration: selectedSchedule,
+            description: selectedDescription,
+          }),
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP Error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      setCourseDetails(data);
+      console.log("Course details updated:", data);
+    } catch (err) {
+      console.error("Error saving course details:", err);
+    }
+    console.log("Course details saved:", {
+      teacher_id: newTeacherName,
+      duration: selectedSchedule,
+      description: selectedDescription,
+    });
+  };
+
+  // Edit course details logic
+  const handleEditCourseDetails = () => {
+    setIsEditing(true);
+  };
+
+  // Delete course logic
+  const handleDeleteCourse = async () => {
+    try {
+      const token = await getToken();
+      const response = await fetch(
+        `http://localhost:3000/courses/${courseId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP Error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log("Course deleted:", data);
+    } catch (err) {
+      console.error("Error deleting course:", err);
+    }
+  };
+
+  // Update scores logic
   const handleUpdateScore = (studentId, testId, score) => {
     if (score < 0) {
       alert("Score cannot be negative.");
@@ -123,6 +200,10 @@ export function CourseDetails() {
     }));
   };
 
+  if (!courseDetails) {
+    return <p>Loading course details...</p>;
+  }
+
   return (
     <div className="flex flex-col lg:flex-row h-screen bg-gradient-to-r from-blue-500 to-purple-500">
       <CourseSideBar
@@ -133,83 +214,138 @@ export function CourseDetails() {
 
       <div className="flex-1 bg-white rounded-lg shadow-lg mx-4 my-6 lg:my-10 p-6 lg:p-10 overflow-y-auto">
         <h1 className="text-3xl lg:text-4xl font-bold text-purple-700 text-center mb-8">
-          {selectedCourse.name} Course Details
+          Course Details
         </h1>
-
         {activeSection === "courses" && (
           <div className="space-y-6">
+            {/* Teacher Section */}
             <div>
               <h2 className="text-lg font-semibold text-gray-800 mb-2">
                 Teacher
               </h2>
-              <p className="text-base text-gray-700 bg-gray-100 p-4 rounded-lg shadow">
+              <div className="text-base text-gray-700 bg-gray-100 p-4 rounded-lg shadow">
                 {isEditing ? (
                   <input
                     type="text"
-                    onChange={(e) => {
-                      setNewTeacherName(e.target.value); // Update the state
-                      console.log(e.target.value); // Log the value
-                    }}
-                    value={newTeacherName || selectedCourse.teacher} // Show existing info if state is empty
+                    onChange={(e) => setNewTeacherName(e.target.value)}
+                    value={newTeacherName || courseDetails?.teacher_id || ""}
                     className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 ) : (
-                  selectedCourse.teacher || "No teacher assigned"
+                  courseDetails?.teacher_id || "No teacher assigned"
                 )}
-              </p>
+              </div>
             </div>
+
+            {/* Schedule Section */}
             <div>
               <h2 className="text-lg font-semibold text-gray-800 mb-2">
                 Schedule
               </h2>
-              <p className="text-base text-gray-700 bg-gray-100 p-4 rounded-lg shadow">
+              <div className="text-base text-gray-700 bg-gray-100 p-4 rounded-lg shadow">
                 {isEditing ? (
-                  <input
-                    type="text"
-                    onChange={(e) => setSelectedSchedule(e.target.value)}
-                    value={selectedSchedule || selectedCourse.duration} // Show existing info if state is empty
-                    placeholder="Enter schedule"
-                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
+                  <div className="space-y-4">
+                    {/* Weekdays Dropdown */}
+                    <label className="block text-gray-800 font-medium mb-1">
+                      Weekday
+                    </label>
+                    <select
+                      value={selectedSchedule?.weekday || ""}
+                      onChange={(e) =>
+                        setSelectedSchedule({
+                          ...selectedSchedule,
+                          weekday: e.target.value,
+                        })
+                      }
+                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-100 shadow"
+                    >
+                      <option value="" disabled>
+                        Select a day
+                      </option>
+                      <option value="Monday">Monday</option>
+                      <option value="Tuesday">Tuesday</option>
+                      <option value="Wednesday">Wednesday</option>
+                      <option value="Thursday">Thursday</option>
+                      <option value="Friday">Friday</option>
+                      <option value="Saturday">Saturday</option>
+                      <option value="Sunday">Sunday</option>
+                    </select>
+
+                    {/* Time Input */}
+                    <label className="block text-gray-800 font-medium mb-1">
+                      Time
+                    </label>
+                    <input
+                      type="time"
+                      value={selectedSchedule?.time || ""}
+                      onChange={(e) =>
+                        setSelectedSchedule({
+                          ...selectedSchedule,
+                          time: e.target.value,
+                        })
+                      }
+                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-100 shadow"
+                    />
+                  </div>
                 ) : (
-                  selectedCourse.duration || "Schedule not available"
+                  `${
+                    courseDetails?.schedule?.weekday || "Weekday not set"
+                  } at ${courseDetails?.schedule?.time || "Time not set"}`
                 )}
-              </p>
+              </div>
             </div>
+
+            {/* Description Section */}
             <div>
               <h2 className="text-lg font-semibold text-gray-800 mb-2">
                 Description
               </h2>
-              <p className="text-base text-gray-700 bg-gray-100 p-4 rounded-lg shadow">
+              <div className="text-base text-gray-700 bg-gray-100 p-4 rounded-lg shadow">
                 {isEditing ? (
-                  <input
-                    type="text"
+                  <textarea
                     onChange={(e) => setSelectedDescription(e.target.value)}
-                    value={selectedDescription || selectedCourse.description} // Show existing info if state is empty
+                    value={
+                      selectedDescription || courseDetails?.description || ""
+                    }
                     placeholder="Enter description"
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-100 shadow"
                   />
                 ) : (
-                  selectedCourse.description || "No description available"
+                  courseDetails?.description || "No description available"
                 )}
-              </p>
+              </div>
             </div>
+
+            {/* Buttons */}
             <button
-              onClick={handleEditCourse}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow transition-all duration-300"
+              onClick={() => setIsEditing(!isEditing)}
+              className="bg-indigo-900 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow transition-all duration-300"
             >
               {isEditing ? "Cancel" : "Edit Course Details"}
             </button>
+
+            <button
+              onClick={handleDeleteCourse}
+              className="ml-4 bg-pink-700 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg shadow transition-all duration-300"
+            >
+              Delete Course
+            </button>
+
             {isEditing && (
               <button
-                onClick={handleSaveCourse}
-                className="ml-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow transition-all duration-300"
+                onClick={handleSaveCourseDetails}
+                disabled={
+                  !newTeacherName ||
+                  !selectedSchedule?.weekday ||
+                  !selectedSchedule?.time
+                }
+                className="ml-4 bg-indigo-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow transition-all duration-300"
               >
                 Save Changes
               </button>
             )}
           </div>
         )}
-
         {activeSection === "scores" && (
           <div>
             <h2 className="text-lg font-semibold text-gray-800 mb-4">
@@ -235,7 +371,7 @@ export function CourseDetails() {
                 <option value="" disabled>
                   Select a student
                 </option>
-                {students.map((student) => (
+                {courseStudents.map((student) => (
                   <option key={student.id} value={student.id}>
                     {student.firstname} {student.lastname}
                   </option>
@@ -252,7 +388,7 @@ export function CourseDetails() {
         )}
 
         {activeSection === "tests" && (
-          <div className="mt-8">
+          <div>
             <h2 className="text-lg font-semibold text-gray-800 mb-4">
               Test List
             </h2>
@@ -261,24 +397,66 @@ export function CourseDetails() {
                 ? tests.map((test) => <li key={test.id}>{test.name}</li>)
                 : "No tests added yet..."}
             </ul>
-            <div className="flex items-center gap-4">
+            <input
+              type="text"
+              placeholder="Enter test name"
+              value={newTestName}
+              onChange={(e) => setNewTestName(e.target.value)}
+              className="flex-1 bg-gray-100 p-2 rounded-lg shadow"
+            />
+            <button
+              onClick={handleAddTest}
+              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow"
+            >
+              Add Test
+            </button>
+          </div>
+        )}
+
+        {activeSection === "homework" && (
+          <div>
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">
+              Homework List
+            </h2>
+            <ul className="list-disc list-inside mb-4">
+              {homework.length > 0
+                ? homework.map((hw) => (
+                    <li key={hw.id}>
+                      {hw.name} - Due: {hw.due_date || "No due date"}
+                    </li>
+                  ))
+                : "No homework added yet..."}
+            </ul>
+            <div className="space-y-4">
               <input
                 type="text"
-                placeholder="Enter test name"
-                value={newTestName}
-                onChange={(e) => setNewTestName(e.target.value)}
-                className="flex-1 bg-gray-100 p-2 rounded-lg shadow"
+                placeholder="Homework Name"
+                value={newHomeworkName}
+                onChange={(e) => setNewHomeworkName(e.target.value)}
+                className="w-full bg-gray-100 p-2 rounded-lg shadow"
+              />
+              <input
+                type="text"
+                placeholder="Homework Description"
+                value={newHomeworkDescription}
+                onChange={(e) => setNewHomeworkDescription(e.target.value)}
+                className="w-full bg-gray-100 p-2 rounded-lg shadow"
+              />
+              <input
+                type="date"
+                value={newHomeworkDueDate}
+                onChange={(e) => setNewHomeworkDueDate(e.target.value)}
+                className="w-full bg-gray-100 p-2 rounded-lg shadow"
               />
               <button
-                onClick={handleAddTest}
+                onClick={handleAddHomework}
                 className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow transition-all duration-300"
               >
-                Add Test
+                Add Homework
               </button>
             </div>
           </div>
         )}
-
         {activeSection === "scores" && (
           <div className="mt-8">
             <h2 className="text-lg font-semibold text-gray-800 mb-4">
@@ -327,44 +505,6 @@ export function CourseDetails() {
                 ))}
               </tbody>
             </table>
-          </div>
-        )}
-        {activeSection === "homework" && (
-          <div>
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">
-              Homework List
-            </h2>
-            <ul className="list-disc list-inside mb-4">
-              {homework.length > 0
-                ? homework.map((hw) => <li key={hw.id}>{hw.name}</li>)
-                : "No homework added yet..."}
-            </ul>
-            <div className="flex items-center gap-4">
-              <input
-                type="text"
-                placeholder="Enter homework name"
-                value={newHomeworkName}
-                onChange={(e) => setNewHomeworkName(e.target.value)}
-                className="flex-1 bg-gray-100 p-2 rounded-lg shadow"
-              />
-              <input
-                type="date"
-                className="bg-gray-100 p-2 rounded-lg shadow"
-                placeholder="Due Date"
-                onChange={(e) => setNewHomeworkName(e.target.value)}
-              />
-              <input
-                type="text"
-                placeholder="Enter homework description"
-                className="bg-gray-100 p-2 rounded-lg shadow"
-              />
-              <button
-                onClick={handleAddHomework}
-                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow transition-all duration-300"
-              >
-                Add Homework
-              </button>
-            </div>
           </div>
         )}
       </div>

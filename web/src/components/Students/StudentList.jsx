@@ -1,7 +1,32 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useAuth } from "@clerk/clerk-react";
 
-export function StudentList({ students = [] }) {
+export function StudentList() {
+  const [students, setStudents] = useState([]);
+  const { getToken } = useAuth();
+  const fetchStudents = async () => {
+    try {
+      const token = await getToken();
+      const response = await fetch("http://localhost:3000/students", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      setStudents(data);
+    } catch (error) {
+      console.error("Error fetching students:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchStudents();
+  }, []);
+  if (students.length > 0) {
+    console.log(students);
+  }
   return (
     <div className="p-6 md:p-12 bg-gradient-to-br from-gray-50 to-gray-100 h-[70vh] overflow-y-auto rounded-lg shadow-md">
       <h1 className="text-4xl font-bold text-purple-700 text-center mb-8">
