@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node ./src/server",
     "dev": "node --watch ./src/server",
-    "db-reset:dev": "psql -U postgres -d studentapp -f  ./data/reset-db.sql"
+    "db-reset:dev": "psql -U postgres -d studentapp -f  ./data/reset-db.sql",
+    "db-reset:ralf": "psql -f  ./data/reset-db.sql"
   },
   "author": "",
   "license": "ISC",

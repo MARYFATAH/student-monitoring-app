@@ -36,6 +36,7 @@ export async function getCourseById(req, res) {
 export async function createCourse(req, res) {
   const { name, description } = req.body;
   const { userId } = req.auth;
+  console.log("userId", userId);
   try {
     const [newCourse] = await db("courses")
       .insert({
@@ -99,6 +100,7 @@ export async function updateCourse(req, res) {
 export async function postCourse(req, res) {
   const { name, description } = req.body;
   const { userId } = req.auth;
+  console.log("userId", userId);
   try {
     const [newCourse] = await db("courses")
       .insert({

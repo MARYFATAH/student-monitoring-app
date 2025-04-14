@@ -14,13 +14,15 @@ import { useAuth } from "@clerk/clerk-react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-export function TeacherDashboard({ courses, setCourses }) {
+export function TeacherDashboard() {
   const { getToken } = useAuth(); // Clerk for authentication
-  // const [courses, setCourses] = useState([]);
+  const [courses, setCourses] = useState([]);
   const [students, setStudents] = useState([]);
   const [events, setEvents] = useState([]);
   const [messages, setMessages] = useState([]);
   const [activeSection, setActiveSection] = useState("courses");
+  const [loading, setLoading] = useState(true); // Loading state
+  const [error, setError] = useState(null); // Error state
 
   // Modals
   const [showCourseModal, setShowCourseModal] = useState(false);
@@ -51,8 +53,36 @@ export function TeacherDashboard({ courses, setCourses }) {
   const [newEventLocation, setNewEventLocation] = useState("");
 
   useEffect(() => {
-    console.log("Courses fetched:", courses);
-  }, [courses]);
+    const fetchCourses = async () => {
+      setLoading(true); // Set loading to true when fetching begins
+      setError(null); // Reset error state
+      try {
+        const token = await getToken(); // Retrieve JWT token
+        const response = await fetch("http://localhost:3000/courses", {
+          headers: {
+            Authorization: `Bearer ${token}`, // Attach Bearer token
+          },
+        });
+
+        // Handle non-OK responses
+        if (!response.ok) {
+          throw new Error(`HTTP Error! Status: ${response.status}`);
+        }
+
+        const data = await response.json(); // Parse JSON data
+        setCourses(data); // Update state with fetched courses
+        console.log(data); // Log data for debugging
+        console.log(data); // Log data for debugging
+      } catch (err) {
+        console.error("Error fetching courses:", err); // Log error
+        setError(err.message); // Update error state
+      } finally {
+        setLoading(false); // Set loading to false when fetch ends
+      }
+    };
+
+    fetchCourses(); // Call the fetch function
+  }, [getToken]); // Empty dependency array to run only on mount
 
   // Reset Modal Inputs
   const resetModal = () => {
@@ -177,7 +207,12 @@ export function TeacherDashboard({ courses, setCourses }) {
           {activeSection === "courses" && (
             <div className="space-y-4">
               <h1 className="text-2xl font-semibold text-gray-800">Courses</h1>
-              <CourseList courses={courses} />
+              <CourseList
+                courses={courses}
+                setCourses={setCourses}
+                error={error}
+                loading={loading}
+              />
               <div className="flex justify-end">
                 <button
                   className="bg-indigo-700 text-white py-2 px-4 rounded hover:bg-indigo-900"
