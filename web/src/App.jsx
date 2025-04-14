@@ -63,13 +63,12 @@ export default function App() {
 
   return (
     <>
-      <h1>Test</h1>
-      {/* <HeroPage />
+      <HeroPage />
       <TeacherDashboard courses={courses} setCourses={setCourses} />
       <CourseList courses={courses} />
       <StudentProfile students={students} setStudents={setStudents} />
       <CourseDetails courses={courses} setCourses={setCourses} />
-      <Outlet /> */}
+      <Outlet />
     </>
   );
 }
