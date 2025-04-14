@@ -6,7 +6,8 @@ export async function getCourses(req, res) {
   try {
     const result = await db("courses")
       .where({ teacher_id: userId })
-      .select("*");
+      .select("courses.*", "users.first_name", "users.last_name")
+      .leftJoin("users", "users.user_id", "courses.teacher_id");
     return res.json(result);
   } catch (err) {
     console.log("Error fetching users:", err);
@@ -17,7 +18,11 @@ export async function getCourses(req, res) {
 export async function getCourseById(req, res) {
   const { id } = req.params;
   try {
-    const result = await db("courses").where({ course_id: id }).first();
+    const result = await db("courses")
+      .where({ course_id: id })
+      .select("courses.*", "users.first_name", "users.last_name")
+      .leftJoin("users", "users.user_id", "courses.teacher_id")
+      .first();
     if (!result) {
       return res.status(404).json({ error: `Course not found` });
     }
@@ -87,6 +92,27 @@ export async function updateCourse(req, res) {
     return res.status(200).json(updatedCourse);
   } catch (err) {
     console.log("Error updating course:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+export async function postCourse(req, res) {
+  const { name, description } = req.body;
+  const { userId } = req.auth;
+  try {
+    const [newCourse] = await db("courses")
+      .insert({
+        teacher_id: userId,
+        name,
+        description,
+        weeklyDays,
+        weeklyHours,
+        created_at: new Date(),
+      })
+      .returning("*");
+    return res.status(201).json(newCourse);
+  } catch (err) {
+    console.log("Error creating course:", err);
     return res.status(500).json({ error: "Internal server error" });
   }
 }
