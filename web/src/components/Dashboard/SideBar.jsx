@@ -1,50 +1,60 @@
-import "./SideBar.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faEnvelope,
+  faCalendar,
+  faUserGraduate,
+} from "@fortawesome/free-solid-svg-icons";
+import { faBookOpen } from "@fortawesome/free-solid-svg-icons";
 
 export function SideBar({ activeSection, setActiveSection }) {
   return (
-    <div className="w-[300px] h-full bg-gray-100 flex flex-col rounded-tl-lg rounded-bl-lg p-4 shadow-md">
+    <div className="w-[300px] h-full bg-gray-100 flex flex-col justify-start rounded-tl-lg rounded-bl-lg p-4 shadow-md">
       <h2 className="text-xl font-bold text-purple-500 mb-5">Menu</h2>
 
       <ul className="list-none p-0">
         <li
           onClick={() => setActiveSection("courses")}
-          className={`px-4 py-3 mb-2 cursor-pointer text-base rounded-md transition-all ${
+          className={`flex items-center px-4 py-3 mb-2 cursor-pointer text-base rounded-md transition-all ${
             activeSection === "courses"
               ? "bg-purple-500 text-white"
               : "text-gray-800 hover:bg-purple-500 hover:text-white"
           }`}
         >
-          📚 Courses
+          <FontAwesomeIcon icon={faBookOpen} className="mr-3" />
+          <span>Courses</span>
         </li>
         <li
           onClick={() => setActiveSection("students")}
-          className={`px-4 py-3 mb-2 cursor-pointer text-base rounded-md transition-all ${
+          className={`flex items-center px-4 py-3 mb-2 cursor-pointer text-base rounded-md transition-all ${
             activeSection === "students"
               ? "bg-purple-500 text-white"
               : "text-gray-800 hover:bg-purple-500 hover:text-white"
           }`}
         >
-          👩‍🎓 Students
+          <FontAwesomeIcon icon={faUserGraduate} className="mr-3" />
+          <span>Students</span>
         </li>
         <li
           onClick={() => setActiveSection("events")}
-          className={`px-4 py-3 mb-2 cursor-pointer text-base rounded-md transition-all ${
+          className={`flex items-center px-4 py-3 mb-2 cursor-pointer text-base rounded-md transition-all ${
             activeSection === "events"
               ? "bg-purple-500 text-white"
               : "text-gray-800 hover:bg-purple-500 hover:text-white"
           }`}
         >
-          📅 Events
+          <FontAwesomeIcon icon={faCalendar} className="mr-3" />
+          <span>Events</span>
         </li>
         <li
           onClick={() => setActiveSection("messages")}
-          className={`px-4 py-3 mb-2 cursor-pointer text-base rounded-md transition-all ${
+          className={`flex items-center px-4 py-3 mb-2 cursor-pointer text-base rounded-md transition-all ${
             activeSection === "messages"
               ? "bg-purple-500 text-white"
               : "text-gray-800 hover:bg-purple-500 hover:text-white"
           }`}
         >
-          ✉️ Messages
+          <FontAwesomeIcon icon={faEnvelope} className="mr-3" />
+          <span>Messages</span>
         </li>
       </ul>
     </div>

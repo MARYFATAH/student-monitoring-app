@@ -50,6 +50,10 @@ export function TeacherDashboard({ courses, setCourses }) {
   const [newEventDate, setNewEventDate] = useState(null);
   const [newEventLocation, setNewEventLocation] = useState("");
 
+  useEffect(() => {
+    console.log("Courses fetched:", courses);
+  }, [courses]);
+
   // Reset Modal Inputs
   const resetModal = () => {
     setNewCourseName("");
@@ -71,7 +75,7 @@ export function TeacherDashboard({ courses, setCourses }) {
   // Add Course
   const handleAddCourse = async () => {
     if (
-      newTeacherName &&
+      newCourseName &&
       selectedSchedule.weekday &&
       selectedSchedule.time &&
       selectedDescription
@@ -85,9 +89,11 @@ export function TeacherDashboard({ courses, setCourses }) {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            teacher_id: newTeacherName,
-            schedule: selectedSchedule, // Contains weekday and time
-            description: selectedDescription,
+            teacher_id: token.user_id,
+            name: newCourseName,
+            description: newCourseDescription,
+            weeklyDay: selectedSchedule.weekday, // Contains weekday and time
+            weeklyTime: selectedSchedule.time,
           }),
         });
 
@@ -97,6 +103,9 @@ export function TeacherDashboard({ courses, setCourses }) {
 
         const createdCourse = await response.json();
         setCourses((prevCourses) => [...prevCourses, createdCourse]); // Update state with the new course
+        alert("Course added successfully!");
+        console.log("New Course:", createdCourse);
+
         resetModal(); // Clear modal fields after submission
       } catch (error) {
         console.error("Error adding course:", error);
@@ -107,29 +116,35 @@ export function TeacherDashboard({ courses, setCourses }) {
     }
   };
   // Add Student
-  const handleAddStudent = () => {
-    if (
-      newStudentName &&
-      newEmail &&
-      newPhone &&
-      selectedCourseId &&
-      newDateOfBirth
-    ) {
+  const handleAddStudent = async () => {
+    try {
       const newStudent = {
-        id: students.length + 1,
-        firstname: newStudentName,
+        name: newStudentName,
         email: newEmail,
-        phone: newPhone,
+        phone_number: newPhone,
         courseId: selectedCourseId,
-        dateOfBirth: newDateOfBirth.toISOString().split("T")[0],
+        dob: newDateOfBirth ? newDateOfBirth.toISOString() : null,
       };
-      setStudents([...students, newStudent]);
-      resetModal();
-    } else {
-      alert("Please fill out all student fields.");
+
+      const response = await fetch("http://localhost:3000/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newStudent),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add student");
+      }
+
+      alert("Student added successfully!");
+      resetModal(); // Reset modal state after successful submission
+    } catch (error) {
+      console.error("Error adding student:", error);
+      alert("There was an error adding the student.");
     }
   };
-
   // Add Event
   const handleAddEvent = () => {
     if (newEventName && newEventDate && newEventLocation) {
@@ -220,14 +235,14 @@ export function TeacherDashboard({ courses, setCourses }) {
             {/* Teacher Section */}
             <div>
               <h2 className="text-lg font-semibold text-gray-800 mb-2">
-                Teacher
+                Course {selectedCourseId ? "Update" : "Create"}
               </h2>
               <input
                 type="text"
-                placeholder="Enter Teacher Name"
+                placeholder="Enter Course Name"
                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-100 shadow"
-                value={newTeacherName}
-                onChange={(e) => setNewTeacherName(e.target.value)}
+                value={newCourseName}
+                onChange={(e) => setNewCourseName(e.target.value)}
               />
             </div>
 
@@ -267,6 +282,7 @@ export function TeacherDashboard({ courses, setCourses }) {
                 </label>
                 <input
                   type="time"
+                  placeholder="Enter Time"
                   value={selectedSchedule?.time || ""}
                   onChange={(e) =>
                     setSelectedSchedule({
@@ -331,8 +347,8 @@ export function TeacherDashboard({ courses, setCourses }) {
             <option value="" disabled>
               Select Course
             </option>
-            {courses.map((course) => (
-              <option key={course.id} value={course.id}>
+            {courses?.map((course) => (
+              <option key={course.course_id} value={course.course_id}>
                 {course.name}
               </option>
             ))}

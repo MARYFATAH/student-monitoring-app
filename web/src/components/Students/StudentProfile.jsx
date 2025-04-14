@@ -1,67 +1,170 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router";
-import { students } from "../../Data/Course";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { useAuth } from "@clerk/clerk-react";
+import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export function StudentProfile() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const { studentId } = useParams();
+  const [selectedStudent, setSelectedStudent] = useState(null);
   const [editedStudent, setEditedStudent] = useState(null);
+  const [tests, setTests] = useState([]);
+  const [error, setError] = useState(null);
 
-  const selectedStudent = students.find(
-    (student) => student.id === parseInt(studentId, 10)
-  );
+  const navigate = useNavigate();
 
-  // Test data for the student
-  const [tests] = useState([
-    { id: 1, name: "Math Test", score: 85, date: "2025-04-01" },
-    { id: 2, name: "Science Test", score: 90, date: "2025-03-25" },
-    { id: 3, name: "English Test", score: 88, date: "2025-03-18" },
-  ]);
+  const { getToken } = useAuth();
 
-  // Initialize editedStudent with the current student details
-  React.useEffect(() => {
-    if (selectedStudent) {
-      setEditedStudent({
-        ...selectedStudent,
-        dob: selectedDate || null,
-      });
+  console.log("studentId from useParams:", studentId);
+
+  // Fetch student profile and test data
+  useEffect(() => {
+    const fetchStudentProfile = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:3000/users/${studentId}`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch student profile");
+        }
+        const studentData = await response.json();
+        setSelectedStudent(studentData);
+        setEditedStudent(studentData);
+        setSelectedDate(studentData.dob ? new Date(studentData.dob) : null);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+
+    const fetchStudentTests = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:3000/tests?studentId=${studentId}`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch test data");
+        }
+        const testData = await response.json();
+        setTests(testData);
+      } catch (err) {
+        console.error("Error fetching tests:", err);
+      }
+    };
+
+    if (studentId) {
+      fetchStudentProfile();
+      fetchStudentTests();
     }
-  }, [selectedStudent, selectedDate]);
+  }, [studentId]);
 
-  if (!selectedStudent) {
-    return (
-      <div className="p-8 text-center text-red-600 font-semibold">
-        Student not found.
-      </div>
-    );
-  }
-
-  const handleDateChange = (date) => {
-    setSelectedDate(date);
-    setEditedStudent({ ...editedStudent, dob: date });
-  };
-
-  const handleEditToggle = () => {
-    setIsEditing(!isEditing);
-  };
-
+  // Handle changes to the profile
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setEditedStudent({ ...editedStudent, [name]: value });
   };
 
-  const saveChanges = () => {
-    console.log("Student updated:", editedStudent);
-    setIsEditing(false);
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
+    setEditedStudent({ ...editedStudent, dob: date.toISOString() });
   };
 
-  const deleteStudent = () => {
-    console.log("Student deleted:", selectedStudent);
-    alert("Student deleted successfully!");
+  const handleEditToggle = () => {
+    if (isEditing) {
+      // Cancel edits and reset to original data
+      setEditedStudent({ ...selectedStudent });
+      setSelectedDate(
+        selectedStudent.dob ? new Date(selectedStudent.dob) : null
+      );
+    }
+    setIsEditing(!isEditing);
   };
+
+  const saveChanges = async () => {
+    try {
+      const token = await getToken();
+      console.log("Saving changes:", editedStudent);
+      const response = await fetch(`http://localhost:3000/users/${studentId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          first_name: editedStudent.first_name,
+          last_name: editedStudent.last_name,
+          email: editedStudent.email,
+          phone_number: editedStudent.phone_number,
+          dob: editedStudent.dob,
+          address: editedStudent.address,
+        }),
+      });
+
+      if (!response.ok) {
+        // Log the specific error response from the backend
+        const errorData = await response.json();
+        console.error("Error from server:", errorData);
+        throw new Error(errorData.error || "Failed to save changes");
+      }
+
+      const updatedStudent = await response.json();
+      console.log("Updated student data:", updatedStudent);
+
+      // Update state and exit edit mode
+      setSelectedStudent(updatedStudent);
+      setEditedStudent(updatedStudent);
+
+      setIsEditing(false);
+      alert("Profile updated successfully!");
+    } catch (error) {
+      console.error("Error saving changes:", error.message);
+      alert("Failed to save changes. Please check your inputs or try again.");
+    }
+
+    // Redirect to the student profile page
+    navigate(`/users/${studentId}`);
+  };
+
+  const deleteStudent = async () => {
+    if (window.confirm("Are you sure you want to delete this student?")) {
+      try {
+        const response = await fetch(
+          `http://localhost:3000/users/${studentId}`,
+          {
+            method: "DELETE",
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to delete student");
+        }
+
+        alert("Student deleted successfully!");
+        // Redirect or update the UI after deletion
+        window.location.href = "/users"; // Redirect to user list
+      } catch (error) {
+        console.error("Error deleting student:", error);
+        alert("Failed to delete student. Please try again.");
+      }
+    }
+  };
+
+  if (error) {
+    return (
+      <div className="p-8 text-center text-red-600 font-semibold">{error}</div>
+    );
+  }
+
+  if (!selectedStudent) {
+    return (
+      <div className="p-8 text-center text-gray-700 font-semibold">
+        Loading student profile...
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gradient-to-r from-purple-500 to-blue-500 min-h-screen flex flex-col items-center py-10">
@@ -71,23 +174,23 @@ export function StudentProfile() {
             <>
               <input
                 type="text"
-                name="firstname"
-                value={editedStudent.firstname}
+                name="first_name"
+                value={editedStudent.first_name}
                 onChange={handleInputChange}
                 className="text-xl font-semibold text-gray-800 bg-gray-100 p-2 rounded focus:ring-2 focus:ring-purple-400 w-full mb-3"
                 placeholder="First Name"
               />
               <input
                 type="text"
-                name="lastname"
-                value={editedStudent.lastname}
+                name="last_name"
+                value={editedStudent.last_name}
                 onChange={handleInputChange}
                 className="text-xl font-semibold text-gray-800 bg-gray-100 p-2 rounded focus:ring-2 focus:ring-purple-400 w-full"
                 placeholder="Last Name"
               />
             </>
           ) : (
-            `${selectedStudent.firstname} ${selectedStudent.lastname}`
+            `${selectedStudent.first_name} ${selectedStudent.last_name} `
           )}
         </h1>
 
@@ -138,18 +241,19 @@ export function StudentProfile() {
             {isEditing ? (
               <input
                 type="tel"
-                name="phone"
-                value={editedStudent.phone}
+                name="phone_number"
+                value={editedStudent.phone_number}
                 onChange={handleInputChange}
                 className="w-full text-base text-gray-700 bg-gray-100 p-2 rounded shadow focus:ring-2 focus:ring-purple-400"
               />
             ) : (
               <p className="text-base text-gray-700 bg-gray-100 p-2 rounded shadow">
-                {selectedStudent.phone}
+                {selectedStudent.phone_number}
               </p>
             )}
           </div>
-          {/*Address */}
+
+          {/* Address */}
           <div>
             <h2 className="text-lg font-semibold text-gray-800 mb-2">
               Address
@@ -198,6 +302,7 @@ export function StudentProfile() {
         </div>
 
         <div className="flex justify-center mt-8 gap-4">
+          {/* Save/Cancel or Edit Button */}
           {isEditing ? (
             <button
               onClick={saveChanges}
@@ -213,6 +318,8 @@ export function StudentProfile() {
               Edit Profile
             </button>
           )}
+
+          {/* Delete Button */}
           <button
             onClick={deleteStudent}
             className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-6 rounded shadow transition duration-300"

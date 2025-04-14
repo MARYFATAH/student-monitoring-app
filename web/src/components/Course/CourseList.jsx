@@ -29,6 +29,7 @@ export function CourseList() {
         const data = await response.json(); // Parse JSON data
         setCourses(data); // Update state with fetched courses
         console.log(data); // Log data for debugging
+        console.log(data); // Log data for debugging
       } catch (err) {
         console.error("Error fetching courses:", err); // Log error
         setError(err.message); // Update error state
@@ -58,25 +59,30 @@ export function CourseList() {
       {!loading && !error && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {courses.length > 0 ? (
-            courses.map((course) => (
-              <div
-                key={course.course_id}
-                className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl hover:scale-105 transition duration-300"
-              >
-                <h2 className="text-xl font-bold text-gray-800 mb-2">
-                  {course.name}
-                </h2>
-                <p className="text-gray-600 mb-4">
-                  {course.description || "No description available."}
-                </p>
-                <Link
-                  to={`/courses/${course.course_id}`}
-                  className="block text-center bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300"
-                >
-                  View Details
-                </Link>
-              </div>
-            ))
+            courses.map(
+              (course) => (
+                console.log(course),
+                (
+                  <div
+                    key={course.course_id}
+                    className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl hover:scale-105 transition duration-300"
+                  >
+                    <h2 className="text-xl font-bold text-gray-800 mb-2">
+                      {course.name}
+                    </h2>
+                    <p className="text-gray-600 mb-4">
+                      {course.description || "No description available."}
+                    </p>
+                    <Link
+                      to={`/courses/${course.course_id}`}
+                      className="block text-center bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300"
+                    >
+                      View Details
+                    </Link>
+                  </div>
+                )
+              )
+            )
           ) : (
             <p className="text-gray-600 text-lg text-center">
               No courses available...

@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { CourseSideBar } from "./CourseSideBar";
 import { useAuth } from "@clerk/clerk-react";
 import { students } from "../../Data/Course"; // Sample student data
+import { useNavigate } from "react-router-dom"; // For navigation
 
 export function CourseDetails() {
   const { courseId } = useParams(); // Get courseId from the URL
@@ -19,6 +20,7 @@ export function CourseDetails() {
   const [newHomeworkDescription, setNewHomeworkDescription] = useState(""); // Homework description
   const [newHomeworkDueDate, setNewHomeworkDueDate] = useState(""); // Homework due date
   const [newTeacherName, setNewTeacherName] = useState(""); // New teacher name
+  const [newTeacherLastName, setNewTeacherLastName] = useState(""); // New teacher last name
   const [selectedSchedule, setSelectedSchedule] = useState(""); // Course schedule
   const [selectedDescription, setSelectedDescription] = useState(""); // Course description
   const [isEditing, setIsEditing] = useState(false); // Edit mode
@@ -50,6 +52,31 @@ export function CourseDetails() {
 
     fetchCourseDetails();
   }, [courseId]);
+
+  //Patch course details logic
+  const updateCourse = async (courseId, updatedData) => {
+    try {
+      const token = await getToken();
+      const response = await fetch(
+        `http://localhost:3000/courses/${courseId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(updatedData),
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP Error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      setCourseDetails(data);
+    } catch (err) {
+      console.error("Error updating course details:", err);
+    }
+  };
 
   // Add new student logic
   const handleAddStudent = () => {
@@ -120,45 +147,49 @@ export function CourseDetails() {
   };
 
   //save course details logic
-  const handleSaveCourseDetails = async () => {
-    try {
-      const token = await getToken();
-      console.log("Saving course details");
-      console.log("Course ID:", courseId);
-      const response = await fetch(
-        `http://localhost:3000/courses/${courseId}`,
-        {
-          method: "Patch",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            teacher_id: newTeacherName,
-            duration: selectedSchedule,
-            description: selectedDescription,
-          }),
-        }
-      );
-      if (!response.ok) {
-        throw new Error(`HTTP Error! Status: ${response.status}`);
-      }
-      const data = await response.json();
-      setCourseDetails(data);
-      console.log("Course details updated:", data);
-    } catch (err) {
-      console.error("Error saving course details:", err);
-    }
-    console.log("Course details saved:", {
-      teacher_id: newTeacherName,
-      duration: selectedSchedule,
-      description: selectedDescription,
-    });
-  };
 
-  // Edit course details logic
-  const handleEditCourseDetails = () => {
-    setIsEditing(true);
+  const handleSaveCourseDetails = async () => {
+    if (
+      newTeacherName &&
+      selectedSchedule?.weekday &&
+      selectedSchedule?.time &&
+      selectedDescription
+    ) {
+      try {
+        const updatedCourseData = {
+          teacher_name: newTeacherName,
+          schedule: {
+            weeklyDays: selectedSchedule.weekday,
+            weeklyHours: selectedSchedule.time,
+          },
+          description: selectedDescription,
+        };
+
+        const response = await updateCourse(
+          courseDetails.id,
+          updatedCourseData
+        );
+
+        if (!response.ok) {
+          throw new Error(`Failed to update course: ${response.statusText}`);
+        }
+
+        const updatedCourse = await response.json();
+        setCourses((prevCourses) =>
+          prevCourses.map((course) =>
+            course.id === updatedCourse.id ? updatedCourse : course
+          )
+        );
+
+        alert("Course details updated successfully!");
+        setIsEditing(false); // Exit editing mode after saving
+      } catch (error) {
+        console.error("Error saving course details:", error);
+        alert("Failed to save course details. Please try again.");
+      }
+    } else {
+      alert("Please fill out all fields before saving changes.");
+    }
   };
 
   // Delete course logic
@@ -214,7 +245,7 @@ export function CourseDetails() {
 
       <div className="flex-1 bg-white rounded-lg shadow-lg mx-4 my-6 lg:my-10 p-6 lg:p-10 overflow-y-auto">
         <h1 className="text-3xl lg:text-4xl font-bold text-purple-700 text-center mb-8">
-          Course Details
+          Course " {courseDetails.name} " Details
         </h1>
         {activeSection === "courses" && (
           <div className="space-y-6">
@@ -228,11 +259,17 @@ export function CourseDetails() {
                   <input
                     type="text"
                     onChange={(e) => setNewTeacherName(e.target.value)}
-                    value={newTeacherName || courseDetails?.teacher_id || ""}
+                    value={
+                      newTeacherName ||
+                      courseDetails?.first_name +
+                        " " +
+                        courseDetails?.last_name ||
+                      ""
+                    }
                     className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 ) : (
-                  courseDetails?.teacher_id || "No teacher assigned"
+                  courseDetails?.first_name || "No teacher assigned"
                 )}
               </div>
             </div>
@@ -325,7 +362,7 @@ export function CourseDetails() {
             </button>
 
             <button
-              onClick={handleDeleteCourse}
+              onClick={(handleDeleteCourse, () => setActiveSection("courses"))}
               className="ml-4 bg-pink-700 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg shadow transition-all duration-300"
             >
               Delete Course

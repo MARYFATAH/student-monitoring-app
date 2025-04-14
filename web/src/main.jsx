@@ -30,6 +30,7 @@ createRoot(document.getElementById("root")).render(
           <Route path="/" element={<App />} />
           <Route path="/students" element={<StudentList />} />
           <Route path="/students/:studentId" element={<StudentProfile />} />
+          <Route path="/users/:studentId" element={<StudentProfile />} />
           <Route path="/courses" element={<CourseList />} />
           <Route path="/courses/:courseId" element={<CourseDetails />} />
           <Route path="/teacherdashboard" element={<TeacherDashboard />} />
