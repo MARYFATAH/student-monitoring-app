@@ -77,12 +77,18 @@ import {
 
 export function Login() {
   return (
-    <header>
-      <SignedOut>
-        <SignInButton />
+    <header className="h-screen bg-gradient-to-r from-blue-500 to-purple-600 flex flex-col justify-center items-center">
+      <h1 className="text-3xl font-bold text-white mb-4 text-center">
+        Welcome to the Student Management System
+      </h1>
+      <SignedOut className="flex justify-center items-center h-screen bg-gradient-to-r from-blue-500 to-purple-600">
+        <SignInButton className="bg-white text-blue-600 hover:bg-gray-200 font-bold py-2 px-6 rounded-lg transition-colors duration-300" />
       </SignedOut>
-      <SignedIn>
-        <UserButton />
+      <SignedIn className="flex justify-center items-center h-screen bg-gradient-to-r from-blue-500 to-purple-600">
+        <h1 className="text-3xl font-bold text-white mb-4 text-center">
+          Welcome back!
+        </h1>
+        <UserButton className="bg-white text-blue-600 hover:bg-gray-200 font-bold py-2 px-6 rounded-lg transition-colors duration-300" />
       </SignedIn>
     </header>
   );

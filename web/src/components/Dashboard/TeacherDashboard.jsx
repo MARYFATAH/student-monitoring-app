@@ -1,263 +1,449 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, use } from "react";
 import { SideBar } from "./SideBar";
 import { CourseList } from "../Course/CourseList";
-import {
-  courses as courseData,
-  students as studentData,
-  events as eventData,
-} from "../../Data/Course";
+import { EventList } from "../Events/EventList";
 import { StudentList } from "../Students/StudentList";
+import { Modal } from "./Modal";
+import { useAuth } from "@clerk/clerk-react";
+
+// import {
+//   courses as courseData,
+//   students as studentData,
+//   events as eventData,
+// } from "../../Data/Course";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { EventList } from "../Events/EventList";
 
 export function TeacherDashboard() {
-  const [courses, setCourses] = useState(courseData);
-  const [students, setStudents] = useState(studentData);
-  const [events, setEvents] = useState(eventData);
+  const { getToken } = useAuth(); // Clerk for authentication
+  const [courses, setCourses] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [events, setEvents] = useState([]);
   const [messages, setMessages] = useState([]);
   const [activeSection, setActiveSection] = useState("courses");
-  const [showModal, setShowModal] = useState(false);
-  const [isAddingCourse, setIsAddingCourse] = useState(true);
+  const [loading, setLoading] = useState(true); // Loading state
+  const [error, setError] = useState(null); // Error state
+
+  // Modals
+  const [showCourseModal, setShowCourseModal] = useState(false);
+  const [showStudentModal, setShowStudentModal] = useState(false);
+  const [showEventModal, setShowEventModal] = useState(false);
+
+  // Course Inputs
   const [newCourseName, setNewCourseName] = useState("");
+  const [newCourseDescription, setNewCourseDescription] = useState("");
+  const [newCourseTeacher, setNewCourseTeacher] = useState("");
+  const [selectedSchedule, setSelectedSchedule] = useState({
+    weekday: "",
+    time: "",
+  });
+  const [selectedDescription, setSelectedDescription] = useState("");
   const [newTeacherName, setNewTeacherName] = useState("");
-  const [newSchedule, setNewSchedule] = useState("");
-  const [newDescription, setNewDescription] = useState("");
-  const [newStudentName, setNewStudentName] = useState("");
-  const [selectedCourseId, setSelectedCourseId] = useState("");
-  const [newDateOfBirth, setNewDateOfBirth] = useState(null);
+
+  // Student Inputs
+  const [newStudentFirstName, setNewStudentFirstName] = useState("");
+  const [newStudentLastName, setNewStudentLastName] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newPhone, setNewPhone] = useState("");
+  const [selectedCourseId, setSelectedCourseId] = useState("");
+  const [newDateOfBirth, setNewDateOfBirth] = useState(null);
 
-  const handleAddCourse = () => {
-    if (
-      newCourseName.trim() &&
-      newTeacherName.trim() &&
-      newSchedule.trim() &&
-      newDescription.trim()
-    ) {
-      const newCourse = {
-        id: courses.length + 1,
-        name: newCourseName,
-        teacher: newTeacherName,
-        schedule: newSchedule,
-        description: newDescription,
-      };
-      setCourses([...courses, newCourse]);
-      resetModal();
-    } else {
-      alert("Please fill in all course details.");
-    }
-  };
+  // Event Inputs
+  const [newEventName, setNewEventName] = useState("");
+  const [newEventDate, setNewEventDate] = useState(null);
+  const [newEventLocation, setNewEventLocation] = useState("");
 
-  const handleAddStudent = () => {
-    if (newStudentName.trim() && selectedCourseId && newDateOfBirth) {
-      const newStudent = {
-        id: students.length + 1,
-        firstname: newStudentName,
-        email: newEmail,
-        phone: newPhone,
-        dateOfBirth: newDateOfBirth.toISOString().split("T")[0],
-      };
-      setStudents([...students, newStudent]);
-      resetModal();
-    } else {
-      alert("Please complete all student details.");
-    }
-  };
+  // Fetch Students
 
+  // Fetch Courses
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      setLoading(true); // Set loading to true when fetching begins
+      setError(null); // Reset error state
+      try {
+        const token = await getToken(); // Retrieve JWT token
+        const response = await fetch("http://localhost:3000/courses", {
+          headers: {
+            Authorization: `Bearer ${token}`, // Attach Bearer token
+          },
+        });
+
+        // Handle non-OK responses
+        if (!response.ok) {
+          throw new Error(`HTTP Error! Status: ${response.status}`);
+        }
+
+        const data = await response.json(); // Parse JSON data
+        setCourses(data); // Update state with fetched courses
+        console.log(data); // Log data for debugging
+        console.log(data); // Log data for debugging
+      } catch (err) {
+        console.error("Error fetching courses:", err); // Log error
+        setError(err.message); // Update error state
+      } finally {
+        setLoading(false); // Set loading to false when fetch ends
+      }
+    };
+
+    fetchCourses(); // Call the fetch function
+  }, [getToken]); // Empty dependency array to run only on mount
+
+  // Reset Modal Inputs
   const resetModal = () => {
     setNewCourseName("");
-    setNewTeacherName("");
-    setNewSchedule("");
-    setNewDescription("");
-    setNewStudentName("");
+    setNewCourseDescription("");
+    setNewCourseTeacher("");
+    setNewStudentFirstName("");
+    setNewStudentLastName("");
+    setNewEmail("");
+    setNewPhone("");
     setSelectedCourseId("");
     setNewDateOfBirth(null);
-    setShowModal(false);
+    setNewEventName("");
+    setNewEventDate(null);
+    setNewEventLocation("");
+    setShowCourseModal(false);
+    setShowStudentModal(false);
+    setShowEventModal(false);
+  };
+
+  // Add Course
+  const handleAddCourse = async () => {
+    if (
+      newCourseName &&
+      selectedSchedule.weekday &&
+      selectedSchedule.time &&
+      newCourseDescription
+    ) {
+      try {
+        const token = await getToken(); // Authentication token
+        const response = await fetch("http://localhost:3000/courses", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            teacher_id: token.user_id,
+            name: newCourseName,
+            description: newCourseDescription,
+            weeklyday: selectedSchedule.weekday, // Contains weekday and time
+            weeklytime: selectedSchedule.time,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to add course: ${response.statusText}`);
+        }
+
+        const createdCourse = await response.json();
+        setCourses((prevCourses) => [...prevCourses, createdCourse]); // Update state with the new course
+        alert("Course added successfully!");
+        console.log("New Course:", createdCourse);
+
+        resetModal(); // Clear modal fields after submission
+      } catch (error) {
+        console.error("Error adding course:", error);
+        alert("Failed to add course. Please try again.");
+      }
+    } else {
+      alert("Please fill out all required fields before adding a course.");
+    }
+  };
+  // Add Student
+  const handleAddStudent = async () => {
+    try {
+      const newStudent = {
+        user_id: students.length + 1,
+        first_name: newStudentFirstName,
+        last_name: newStudentLastName,
+        email: newEmail,
+        phone_number: newPhone,
+        course_id: selectedCourseId,
+        dob: newDateOfBirth ? newDateOfBirth.toISOString() : null,
+      };
+
+      console.log("New Student:", newStudent); // Log the new student data
+      const response = await fetch("http://localhost:3000/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newStudent),
+      });
+
+      if (!response.ok) {
+        console.error("Failed to add student:", response.statusText);
+        throw new Error("Failed to add student");
+      }
+
+      alert("Student added successfully!");
+      resetModal(); // Reset modal state after successful submission
+    } catch (error) {
+      console.error("Error adding student:", error);
+      alert("There was an error adding the student.");
+    }
+  };
+  // Add Event
+  const handleAddEvent = () => {
+    if (newEventName && newEventDate && newEventLocation) {
+      const newEvent = {
+        id: events.length + 1,
+        name: newEventName,
+        date: newEventDate.toISOString().split("T")[0],
+        location: newEventLocation,
+      };
+      setEvents([...events, newEvent]);
+      resetModal();
+    } else {
+      alert("Please fill out all event fields.");
+    }
   };
 
   return (
-    <div className="h-screen flex bg-purple-100">
+    <div className="h-screen flex bg-gradient-to-r from-blue-500 to-purple-500">
       {/* Sidebar */}
       <SideBar
+        activeSection={activeSection}
         setActiveSection={setActiveSection}
         className="w-1/4 bg-blue-600 text-white shadow-md"
       />
 
       {/* Main Content */}
       <div className="flex-grow p-6">
-        <div className="flex flex-col bg-white rounded-lg shadow-md p-6">
+        <div className=" p-6">
+          {/* Courses Section */}
           {activeSection === "courses" && (
-            // Course List
-
             <div className="space-y-4">
-              <h1 className="text-xl  font-semibold text-gray-800 mb-4">
-                Courses
-              </h1>
-              <CourseList courses={courses} />
+              <h1 className="text-2xl font-semibold text-gray-800">Courses</h1>
+              <CourseList
+                courses={courses}
+                setCourses={setCourses}
+                error={error}
+                loading={loading}
+              />
               <div className="flex justify-end">
                 <button
-                  className="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded"
-                  onClick={() => {
-                    setIsAddingCourse(true);
-                    setShowModal(true);
-                  }}
+                  className="bg-indigo-700 text-white py-2 px-4 rounded hover:bg-indigo-900"
+                  onClick={() => setShowCourseModal(true)}
                 >
                   Add Course
                 </button>
               </div>
             </div>
           )}
+
+          {/* Students Section */}
           {activeSection === "students" && (
             <div className="space-y-4">
+              <h1 className="text-2xl font-semibold text-gray-800">Students</h1>
               <StudentList students={students} />
               <div className="flex justify-end">
                 <button
-                  className="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded"
-                  onClick={() => {
-                    setIsAddingCourse(false);
-                    setShowModal(true);
-                  }}
+                  className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700"
+                  onClick={() => setShowStudentModal(true)}
                 >
                   Add Student
                 </button>
               </div>
             </div>
           )}
+
+          {/* Events Section */}
           {activeSection === "events" && (
             <div className="space-y-4">
+              <h1 className="text-2xl font-semibold text-gray-800">Events</h1>
               <EventList events={events} />
               <div className="flex justify-end">
                 <button
-                  className="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded"
-                  onClick={() => {
-                    setShowModal(true);
-                    setIsAddingEvent(false); // Adjust for events handling logic
-                  }}
+                  className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700"
+                  onClick={() => setShowEventModal(true)}
                 >
                   Add Event
                 </button>
               </div>
             </div>
           )}
-          {activeSection === "messages" && (
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                Messages Section
-              </h2>
-              {messages.length > 0 ? (
-                messages.map((message, index) => (
-                  <p key={index} className="text-gray-600">
-                    {message}
-                  </p>
-                ))
-              ) : (
-                <p className="text-gray-600">No messages available...</p>
-              )}
-            </div>
-          )}
         </div>
       </div>
 
-      {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 md:w-1/2">
-            <h2 className="text-2xl font-bold mb-4">
-              {isAddingCourse ? "Add New Course" : "Add New Student"}
-            </h2>
-            {isAddingCourse ? (
-              <>
-                <input
-                  type="text"
-                  placeholder="Course Name"
-                  className="w-full p-2 border rounded mb-4"
-                  value={newCourseName}
-                  onChange={(e) => setNewCourseName(e.target.value)}
-                />
-                <input
-                  type="text"
-                  placeholder="Teacher Name"
-                  className="w-full p-2 border rounded mb-4"
-                  value={newTeacherName}
-                  onChange={(e) => setNewTeacherName(e.target.value)}
-                />
-                <input
-                  type="text"
-                  placeholder="Schedule"
-                  className="w-full p-2 border rounded mb-4"
-                  value={newSchedule}
-                  onChange={(e) => setNewSchedule(e.target.value)}
-                />
-                <textarea
-                  placeholder="Description"
-                  className="w-full p-2 border rounded mb-4"
-                  value={newDescription}
-                  onChange={(e) => setNewDescription(e.target.value)}
-                />
-              </>
-            ) : (
-              <>
-                <input
-                  type="text"
-                  placeholder="Student Name"
-                  className="w-full p-2 border rounded mb-4"
-                  value={newStudentName}
-                  onChange={(e) => setNewStudentName(e.target.value)}
-                />
-                <input
-                  type="email"
-                  placeholder="Email"
-                  className="w-full p-2 border rounded mb-4"
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                />
-                <input
-                  type="text"
-                  placeholder="Phone"
-                  className="w-full p-2 border rounded mb-4"
-                  value={newPhone}
-                  onChange={(e) => setNewPhone(e.target.value)}
-                />
+      {/* Course Modal */}
+      {showCourseModal && (
+        <Modal
+          title="Add New Course"
+          onCancel={resetModal}
+          onSubmit={handleAddCourse}
+          submitText="Add Course"
+        >
+          <div className="space-y-6">
+            {/* Teacher Section */}
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800 mb-2">
+                Course {selectedCourseId ? "Update" : "Create"}
+              </h2>
+              <input
+                type="text"
+                placeholder="Enter Course Name"
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-100 shadow"
+                value={newCourseName}
+                onChange={(e) => setNewCourseName(e.target.value)}
+              />
+            </div>
+
+            {/* Schedule Section */}
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800 mb-2">
+                Schedule
+              </h2>
+              <div className="space-y-4">
+                <label className="block text-gray-800 font-medium mb-1">
+                  Weekday
+                </label>
                 <select
-                  className="w-full p-2 border rounded mb-4"
-                  value={selectedCourseId}
-                  onChange={(e) => setSelectedCourseId(e.target.value)}
+                  value={selectedSchedule?.weekday || ""}
+                  onChange={(e) =>
+                    setSelectedSchedule({
+                      ...selectedSchedule,
+                      weekday: e.target.value,
+                    })
+                  }
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-100 shadow"
                 >
                   <option value="" disabled>
-                    Select a Course
+                    Select a day
                   </option>
-                  {courses.map((course) => (
-                    <option key={course.id} value={course.id}>
-                      {course.name}
-                    </option>
-                  ))}
+                  <option value="Monday">Monday</option>
+                  <option value="Tuesday">Tuesday</option>
+                  <option value="Wednesday">Wednesday</option>
+                  <option value="Thursday">Thursday</option>
+                  <option value="Friday">Friday</option>
+                  <option value="Saturday">Saturday</option>
+                  <option value="Sunday">Sunday</option>
                 </select>
-                <DatePicker
-                  selected={newDateOfBirth}
-                  onChange={(date) => setNewDateOfBirth(date)}
-                  dateFormat="dd/MM/yyyy"
-                  className="w-full p-2 border rounded mb-4"
+
+                <label className="block text-gray-800 font-medium mb-1">
+                  Time
+                </label>
+                <input
+                  type="time"
+                  placeholder="Enter Time"
+                  value={selectedSchedule?.time || ""}
+                  onChange={(e) =>
+                    setSelectedSchedule({
+                      ...selectedSchedule,
+                      time: e.target.value,
+                    })
+                  }
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-100 shadow"
                 />
-              </>
-            )}
-            <div className="flex justify-end gap-2">
-              <button
-                className="bg-red-500 text-white py-2 px-4 rounded"
-                onClick={resetModal}
-              >
-                Cancel
-              </button>
-              <button
-                className="bg-blue-500 text-white py-2 px-4 rounded"
-                onClick={isAddingCourse ? handleAddCourse : handleAddStudent}
-              >
-                {isAddingCourse ? "Add Course" : "Add Student"}
-              </button>
+              </div>
+            </div>
+
+            {/* Description Section */}
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800 mb-2">
+                Description
+              </h2>
+              <textarea
+                placeholder="Enter Description"
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-100 shadow"
+                value={newCourseDescription}
+                onChange={(e) => setNewCourseDescription(e.target.value)}
+              />
             </div>
           </div>
-        </div>
+        </Modal>
+      )}
+      {/* Student Modal */}
+      {showStudentModal && (
+        <Modal
+          title="Add New Student"
+          onCancel={resetModal}
+          onSubmit={handleAddStudent}
+          submitText="Add Student"
+        >
+          <input
+            type="text"
+            placeholder="Student First Name"
+            className="w-full p-2 border rounded mb-4"
+            value={newStudentFirstName}
+            onChange={(e) => setNewStudentFirstName(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Student Last Name"
+            className="w-full p-2 border rounded mb-4"
+            value={newStudentLastName}
+            onChange={(e) => setNewStudentLastName(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Email"
+            className="w-full p-2 border rounded mb-4"
+            value={newEmail}
+            onChange={(e) => setNewEmail(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Phone"
+            className="w-full p-2 border rounded mb-4"
+            value={newPhone}
+            onChange={(e) => setNewPhone(e.target.value)}
+          />
+          <select
+            className="w-full p-2 border rounded mb-4"
+            value={selectedCourseId}
+            onChange={(e) => setSelectedCourseId(e.target.value)}
+          >
+            <option value="" disabled>
+              Select Course
+            </option>
+            {courses?.map((course) => (
+              <option key={course.course_id} value={course.course_id}>
+                {course.name}
+              </option>
+            ))}
+          </select>
+          <input
+            type="date"
+            placeholder="Date of Birth"
+            className="w-full p-2 border rounded mb-4"
+            value={newDateOfBirth?.toISOString().split("T")[0] || ""}
+            onChange={(e) => setNewDateOfBirth(new Date(e.target.value))}
+          />
+        </Modal>
+      )}
+
+      {/* Event Modal */}
+      {showEventModal && (
+        <Modal
+          title="Add New Event"
+          onCancel={resetModal}
+          onSubmit={handleAddEvent}
+          submitText="Add Event"
+        >
+          <input
+            type="text"
+            placeholder="Event Name"
+            className="w-full p-2 border rounded mb-4"
+            value={newEventName}
+            onChange={(e) => setNewEventName(e.target.value)}
+          />
+          <DatePicker
+            selected={newEventDate}
+            onChange={(date) => setNewEventDate(date)}
+            dateFormat="dd/MM/yyyy"
+            className="w-full p-2 border rounded mb-4"
+          />
+          <input
+            type="text"
+            placeholder="Event Location"
+            className="w-full p-2 border rounded mb-4"
+            value={newEventLocation}
+            onChange={(e) => setNewEventLocation(e.target.value)}
+          />
+        </Modal>
       )}
     </div>
   );
