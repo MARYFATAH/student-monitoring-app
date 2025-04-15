@@ -89,17 +89,25 @@ export const getUserById = async (req, res) => {
   }
 };
 
-//Create a new user
-export async function postStudent(req, res) {
-  const { userId } = req.auth;
+export async function createStudent(req, res) {
+  const { userId } = req.auth || {}; // Ensure userId comes from req.auth
   const { first_name, last_name, email } = req.body;
+
+  // Validate userId presence
+  if (!userId) {
+    return res
+      .status(400)
+      .json({ error: "User ID is required to add a student" });
+  }
+
   try {
     const [createdUser] = await db("users")
       .insert({ user_id: userId, first_name, last_name, email })
       .returning("*");
+
     return res.status(201).json(createdUser);
   } catch (err) {
-    console.log("Error creating user:", err);
+    console.error("Error creating user:", err);
     return res.status(500).json({ error: "Internal server error" });
   }
 }

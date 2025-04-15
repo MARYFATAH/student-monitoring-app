@@ -34,7 +34,7 @@ export async function getCourseById(req, res) {
 }
 
 export async function createCourse(req, res) {
-  const { name, description } = req.body;
+  const { name, description, weeklyday, weeklytime } = req.body;
   const { userId } = req.auth;
   console.log("userId", userId);
   try {
@@ -43,6 +43,8 @@ export async function createCourse(req, res) {
         teacher_id: userId,
         name,
         description,
+        weeklyday,
+        weeklytime,
         created_at: new Date(),
       })
       .returning("*");

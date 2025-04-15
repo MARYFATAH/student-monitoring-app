@@ -41,7 +41,8 @@ export function TeacherDashboard() {
   const [newTeacherName, setNewTeacherName] = useState("");
 
   // Student Inputs
-  const [newStudentName, setNewStudentName] = useState("");
+  const [newStudentFirstName, setNewStudentFirstName] = useState("");
+  const [newStudentLastName, setNewStudentLastName] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newPhone, setNewPhone] = useState("");
   const [selectedCourseId, setSelectedCourseId] = useState("");
@@ -51,6 +52,10 @@ export function TeacherDashboard() {
   const [newEventName, setNewEventName] = useState("");
   const [newEventDate, setNewEventDate] = useState(null);
   const [newEventLocation, setNewEventLocation] = useState("");
+
+  // Fetch Students
+
+  // Fetch Courses
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -89,7 +94,8 @@ export function TeacherDashboard() {
     setNewCourseName("");
     setNewCourseDescription("");
     setNewCourseTeacher("");
-    setNewStudentName("");
+    setNewStudentFirstName("");
+    setNewStudentLastName("");
     setNewEmail("");
     setNewPhone("");
     setSelectedCourseId("");
@@ -108,7 +114,7 @@ export function TeacherDashboard() {
       newCourseName &&
       selectedSchedule.weekday &&
       selectedSchedule.time &&
-      selectedDescription
+      newCourseDescription
     ) {
       try {
         const token = await getToken(); // Authentication token
@@ -122,8 +128,8 @@ export function TeacherDashboard() {
             teacher_id: token.user_id,
             name: newCourseName,
             description: newCourseDescription,
-            weeklyDay: selectedSchedule.weekday, // Contains weekday and time
-            weeklyTime: selectedSchedule.time,
+            weeklyday: selectedSchedule.weekday, // Contains weekday and time
+            weeklytime: selectedSchedule.time,
           }),
         });
 
@@ -149,13 +155,16 @@ export function TeacherDashboard() {
   const handleAddStudent = async () => {
     try {
       const newStudent = {
-        name: newStudentName,
+        user_id: students.length + 1,
+        first_name: newStudentFirstName,
+        last_name: newStudentLastName,
         email: newEmail,
         phone_number: newPhone,
-        courseId: selectedCourseId,
+        course_id: selectedCourseId,
         dob: newDateOfBirth ? newDateOfBirth.toISOString() : null,
       };
 
+      console.log("New Student:", newStudent); // Log the new student data
       const response = await fetch("http://localhost:3000/users", {
         method: "POST",
         headers: {
@@ -165,6 +174,7 @@ export function TeacherDashboard() {
       });
 
       if (!response.ok) {
+        console.error("Failed to add student:", response.statusText);
         throw new Error("Failed to add student");
       }
 
@@ -338,8 +348,8 @@ export function TeacherDashboard() {
               <textarea
                 placeholder="Enter Description"
                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-100 shadow"
-                value={selectedDescription}
-                onChange={(e) => setSelectedDescription(e.target.value)}
+                value={newCourseDescription}
+                onChange={(e) => setNewCourseDescription(e.target.value)}
               />
             </div>
           </div>
@@ -355,10 +365,17 @@ export function TeacherDashboard() {
         >
           <input
             type="text"
-            placeholder="Student Name"
+            placeholder="Student First Name"
             className="w-full p-2 border rounded mb-4"
-            value={newStudentName}
-            onChange={(e) => setNewStudentName(e.target.value)}
+            value={newStudentFirstName}
+            onChange={(e) => setNewStudentFirstName(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Student Last Name"
+            className="w-full p-2 border rounded mb-4"
+            value={newStudentLastName}
+            onChange={(e) => setNewStudentLastName(e.target.value)}
           />
           <input
             type="text"
@@ -388,11 +405,12 @@ export function TeacherDashboard() {
               </option>
             ))}
           </select>
-          <DatePicker
-            selected={newDateOfBirth}
-            onChange={(date) => setNewDateOfBirth(date)}
-            dateFormat="dd/MM/yyyy"
+          <input
+            type="date"
+            placeholder="Date of Birth"
             className="w-full p-2 border rounded mb-4"
+            value={newDateOfBirth?.toISOString().split("T")[0] || ""}
+            onChange={(e) => setNewDateOfBirth(new Date(e.target.value))}
           />
         </Modal>
       )}

@@ -41,6 +41,12 @@ export function CourseList({ courses, setCourses, loading, error }) {
                     <p className="text-gray-600 mb-4">
                       {course.description || "No description available."}
                     </p>
+                    <p className="text-gray-600 mb-4">
+                      Weekly Days: {course.weeklyday}
+                    </p>
+                    <p className="text-gray-600 mb-4">
+                      Weekly Hours: {course.weeklytime}
+                    </p>
                     <Link
                       to={`/courses/${course.course_id}`}
                       className="block text-center bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300"
