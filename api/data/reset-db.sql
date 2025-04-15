@@ -73,7 +73,7 @@ VALUES
     ('clerkId19', 'Evelyn', 'Student','student'),
     ('user_2vOdwaPvnq4CRVTX4fBaRcpZRjG', 'Maryam', 'Teacher', 'teacher' ),
     ('user_2vTtGULPmuR6g4tCGOodztViTjk', 'Maryam Fattah', 'Student', 'student' ),
-    ('user_2vTuPIO9KgsP7fMA5nZ8UHy7erx', 'Ralf', 'Teacher', 'teacher');
+    ('user_2vOyBjnxrbBBEjNb3VkO8FdzZzB', 'Ralf', 'Teacher', 'teacher');
 
 INSERT INTO studentapp.courses (teacher_id, name)
 VALUES
@@ -87,11 +87,11 @@ VALUES
     ('user_2vOdwaPvnq4CRVTX4fBaRcpZRjG', 'Science 101'),
     ('user_2vOdwaPvnq4CRVTX4fBaRcpZRjG', 'English 101'),
     ('user_2vOdwaPvnq4CRVTX4fBaRcpZRjG', 'Art 101'),
-    ('user_2vTuPIO9KgsP7fMA5nZ8UHy7erx', 'Math 102'),
-    ('user_2vTuPIO9KgsP7fMA5nZ8UHy7erx', 'History 102'),
-    ('user_2vTuPIO9KgsP7fMA5nZ8UHy7erx', 'Science 102'),
-    ('user_2vTuPIO9KgsP7fMA5nZ8UHy7erx', 'English 102'),
-    ('user_2vTuPIO9KgsP7fMA5nZ8UHy7erx', 'Art 102');
+    ('user_2vOyBjnxrbBBEjNb3VkO8FdzZzB', 'Math 102'),
+    ('user_2vOyBjnxrbBBEjNb3VkO8FdzZzB', 'History 102'),
+    ('user_2vOyBjnxrbBBEjNb3VkO8FdzZzB', 'Science 102'),
+    ('user_2vOyBjnxrbBBEjNb3VkO8FdzZzB', 'English 102'),
+    ('user_2vOyBjnxrbBBEjNb3VkO8FdzZzB', 'Art 102');
 
 INSERT INTO studentapp.students2courses (student_id, course_id)
 VALUES
