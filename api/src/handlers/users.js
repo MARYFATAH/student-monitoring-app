@@ -1,4 +1,5 @@
 import { db } from "../util/db.js";
+import { v4 as uuidv4 } from "uuid";
 
 // Fetch all users with an optional role filter
 export async function getUsers(req, res) {
@@ -72,12 +73,25 @@ export const getUserById = async (req, res) => {
   }
 };
 
+// {
+//   "role": "student",
+//   "course_id": "13",
+//   "user_id": 1,
+//   "first_name": "Otto",
+//   "last_name": "hghg",
+//   "email": "hghghg@kjkjkj.de",
+//   "phone_number": "hghg",
+//   "dob": "2025-04-17T00:00:00.000Z"
+// }
+
 // Create a new user (e.g., student or teacher)
 export async function createStudent(req, res) {
   const { first_name, last_name, email, dob, phone_number } = req.body;
+  const user_id = uuidv4();
   try {
     const [createdUser] = await db("users")
       .insert({
+        user_id,
         first_name,
         last_name,
         email,

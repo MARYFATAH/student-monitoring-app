@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from "react";
-import { Modal } from "./Modal";
 import { useAuth } from "@clerk/clerk-react";
-
+import React, { useState } from "react";
 import "react-datepicker/dist/react-datepicker.css";
+import { useAppState } from "../../state/useAppState";
+import { Modal } from "./Modal";
 
 export function AddStudent({
   courses,
-  students,
-  setStudents,
+  // students,
+  // setStudents,
   setShowStudentModal,
 }) {
   const [newStudentFirstName, setNewStudentFirstName] = useState("");
@@ -18,6 +18,7 @@ export function AddStudent({
   const [selectedCourseId, setSelectedCourseId] = useState("");
   const [isSaving, setIsSaving] = useState(false); // State for loading feedback
   const { getToken } = useAuth(); // Clerk authentication hook
+  const addStudent = useAppState((state) => state.addStudent);
 
   async function save() {
     if (
@@ -42,7 +43,7 @@ export function AddStudent({
         body: JSON.stringify({
           role: "student",
           course_id: selectedCourseId,
-          user_id: students.length + 1, // Assuming user_id is auto-incremented
+          // user_id: students.length + 1, // Assuming user_id is auto-incremented
           first_name: newStudentFirstName,
           last_name: newStudentLastName,
           email: newStudentEmail,
@@ -52,7 +53,8 @@ export function AddStudent({
       });
       if (response.ok) {
         const newStudent = await response.json();
-        setStudents([...students, newStudent]);
+        // setStudents([...students, newStudent]);
+        addStudent(newStudent);
         alert("Student added successfully!");
         console.log("New Student:", newStudent); // Log the new student data
         resetModal(); // Reset modal fields after submission
@@ -64,6 +66,7 @@ export function AddStudent({
       alert("Failed to add student. Please try again.");
     } finally {
       setIsSaving(false); // End saving process
+      // setStudents([]);
     }
   }
 

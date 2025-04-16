@@ -145,7 +145,7 @@ export function TeacherDashboard() {
               <h1 className="text-xl lg:text-2xl font-semibold text-gray-800">
                 Students
               </h1>
-              <StudentList students={students} />
+              <StudentList />
               <div className="flex justify-end">
                 <button
                   className="bg-indigo-700 text-white py-2 px-4 rounded hover:bg-indigo-900 lg:px-6"

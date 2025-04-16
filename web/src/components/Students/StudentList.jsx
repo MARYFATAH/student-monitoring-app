@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@clerk/clerk-react";
+import { useAppState } from "../../state/useAppState";
 
 export function StudentList() {
   // State for students, loading, and errors
-  const [students, setStudents] = useState([]);
+  // const [students, setStudents] = useState([]);
+  const students = useAppState((state) => state.students);
+  console.debug("students:", students);
+  const setStudents = useAppState((state) => state.setStudents);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -27,6 +31,7 @@ export function StudentList() {
       }
 
       const data = await response.json(); // Parse JSON response
+      console.debug("setStudents(data):", data);
       setStudents(data); // Update students state
     } catch (error) {
       console.error("Error fetching students:", error);
