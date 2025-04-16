@@ -121,6 +121,8 @@ export function StudentProfile() {
       alert("Profile updated successfully!");
     } catch (error) {
       console.error("Error saving changes:", error.message);
+      // Show a user-friendly error message
+      console.error("Error saving changes:", error);
       alert("Failed to save changes. Please check your inputs or try again.");
     }
 

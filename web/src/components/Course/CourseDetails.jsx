@@ -3,7 +3,6 @@ import { Navigate, useParams } from "react-router-dom";
 import { CourseSideBar } from "./CourseSideBar";
 import { useAuth } from "@clerk/clerk-react";
 import { students } from "../../Data/Course"; // Sample student data
-import { useNavigate } from "react-router-dom"; // For navigation
 
 export function CourseDetails() {
   const { courseId } = useParams(); // Get courseId from the URL
@@ -19,7 +18,7 @@ export function CourseDetails() {
   const [newHomeworkName, setNewHomeworkName] = useState(""); // New homework name
   const [newHomeworkDescription, setNewHomeworkDescription] = useState(""); // Homework description
   const [newHomeworkDueDate, setNewHomeworkDueDate] = useState(""); // Homework due date
-  const [newTeacherName, setNewTeacherName] = useState(""); // New teacher name
+  const [newTeacherFirstName, setNewTeacherFirstName] = useState(""); // New teacher name
   const [newTeacherLastName, setNewTeacherLastName] = useState(""); // New teacher last name
   const [selectedSchedule, setSelectedSchedule] = useState(""); // Course schedule
   const [selectedDescription, setSelectedDescription] = useState(""); // Course description
@@ -55,6 +54,16 @@ export function CourseDetails() {
 
   //Patch course details logic
   const updateCourse = async (courseId, updatedData) => {
+    if (!courseId || !updatedData) {
+      console.error("Invalid course ID or updated data.");
+      return;
+    }
+    if (!updatedData.weeklyday || !updatedData.weeklytime) {
+      console.error("Invalid schedule data.");
+      return;
+    }
+    console.log("Updating course with ID:", courseId, "and data:", updatedData);
+    // Validate updatedData structure
     try {
       const token = await getToken();
       const response = await fetch(
@@ -68,6 +77,8 @@ export function CourseDetails() {
           body: JSON.stringify(updatedData),
         }
       );
+
+      // Handle non-OK responses
       if (!response.ok) {
         throw new Error(`HTTP Error! Status: ${response.status}`);
       }
@@ -149,47 +160,75 @@ export function CourseDetails() {
   //save course details logic
 
   const handleSaveCourseDetails = async () => {
-    if (
-      newTeacherName &&
+    // Validate input fields upfront
+    const areFieldsValid =
+      newTeacherFirstName &&
+      newTeacherLastName &&
       selectedSchedule?.weekday &&
       selectedSchedule?.time &&
-      selectedDescription
-    ) {
-      try {
-        const updatedCourseData = {
-          teacher_name: newTeacherName,
-          schedule: {
-            weeklyDays: selectedSchedule.weekday,
-            weeklyHours: selectedSchedule.time,
-          },
-          description: selectedDescription,
-        };
+      selectedDescription;
 
-        const response = await updateCourse(
-          courseDetails.id,
-          updatedCourseData
-        );
-
-        if (!response.ok) {
-          throw new Error(`Failed to update course: ${response.statusText}`);
-        }
-
-        const updatedCourse = await response.json();
-        setCourses((prevCourses) =>
-          prevCourses.map((course) =>
-            course.id === updatedCourse.id ? updatedCourse : course
-          )
-        );
-
-        alert("Course details updated successfully!");
-        setIsEditing(false); // Exit editing mode after saving
-      } catch (error) {
-        console.error("Error saving course details:", error);
-        alert("Failed to save course details. Please try again.");
-      }
-    } else {
+    if (!areFieldsValid) {
       alert("Please fill out all fields before saving changes.");
+      return; // Exit early if validation fails
     }
+
+    // Construct updated course data
+    const updatedCourseData = {
+      first_name: newTeacherFirstName,
+      last_name: newTeacherLastName,
+      name: courseDetails.name,
+      weeklyday: selectedSchedule.weekday,
+      weeklytime: selectedSchedule.time,
+      teacher_id: courseDetails.teacher_id,
+      description: selectedDescription,
+    };
+
+    try {
+      // Make API call to update course details
+      const response = await updateCourse(courseDetails.id, updatedCourseData);
+
+      // Handle non-OK responses
+      if (!response.ok) {
+        throw new Error(`Failed to update course: ${response.statusText}`);
+      }
+
+      // Parse updated course data
+      const updatedCourse = await response.json();
+
+      // Update courses state
+      setCourses((prevCourses) =>
+        prevCourses.map((course) =>
+          course.id === updatedCourse.id ? updatedCourse : course
+        )
+      );
+      console.log("Updated Course:", updatedCourse);
+
+      // Notify user and exit editing mode
+      displayNotification("Course details updated successfully!", "success");
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Error saving course details:", error);
+      displayNotification(
+        "Failed to save course details. Please try again.",
+        "error"
+      );
+    }
+  };
+
+  // Notification helper
+  const displayNotification = (message, type) => {
+    if (type === "success") {
+      // Replace with a notification library for better UI
+      alert(message); // Example fallback
+    } else if (type === "error") {
+      alert(message); // Example fallback
+    }
+  };
+
+  // Edit course logic
+  const handleEditCourse = () => {
+    setIsEditing(true); // Enter editing mode
   };
 
   // Delete course logic
@@ -258,18 +297,13 @@ export function CourseDetails() {
                 {isEditing ? (
                   <input
                     type="text"
-                    onChange={(e) => setNewTeacherName(e.target.value)}
-                    value={
-                      newTeacherName ||
-                      courseDetails?.first_name +
-                        " " +
-                        courseDetails?.last_name ||
-                      ""
-                    }
+                    onChange={(e) => setNewTeacherFirstName(e.target.value)}
+                    value={courseDetails.first_name || ""}
+                    placeholder="Enter teacher's first name"
                     className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 ) : (
-                  courseDetails?.first_name || "No teacher assigned"
+                  courseDetails.first_name || "No teacher assigned"
                 )}
               </div>
             </div>
@@ -287,7 +321,7 @@ export function CourseDetails() {
                       Weekday
                     </label>
                     <select
-                      value={selectedSchedule?.weekday || ""}
+                      value={selectedSchedule.weekday}
                       onChange={(e) =>
                         setSelectedSchedule({
                           ...selectedSchedule,
@@ -309,9 +343,6 @@ export function CourseDetails() {
                     </select>
 
                     {/* Time Input */}
-                    <label className="block text-gray-800 font-medium mb-1">
-                      Time
-                    </label>
                     <input
                       type="time"
                       value={selectedSchedule?.time || ""}
@@ -325,9 +356,9 @@ export function CourseDetails() {
                     />
                   </div>
                 ) : (
-                  `${
-                    courseDetails?.schedule?.weekday || "Weekday not set"
-                  } at ${courseDetails?.schedule?.time || "Time not set"}`
+                  `${courseDetails?.weeklyday || "Weekday not set"} at ${
+                    courseDetails?.weeklytime || "Time not set"
+                  }`
                 )}
               </div>
             </div>
@@ -372,7 +403,7 @@ export function CourseDetails() {
               <button
                 onClick={handleSaveCourseDetails}
                 disabled={
-                  !newTeacherName ||
+                  !newTeacherFirstName ||
                   !selectedSchedule?.weekday ||
                   !selectedSchedule?.time
                 }

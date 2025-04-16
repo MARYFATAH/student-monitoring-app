@@ -11,6 +11,6 @@ const router = express.Router();
 router.get("/", getUsers);
 router.get("/my-profile", getUser);
 router.patch("/:id", updateUser);
-router.post("/:id", createStudent);
+router.post("/", createStudent);
 
 export default router;

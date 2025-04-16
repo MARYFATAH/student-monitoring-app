@@ -1,28 +1,32 @@
-import React from "react";
+import React, { useState } from "react";
 import "react-datepicker/dist/react-datepicker.css";
 import { Modal } from "./Modal";
-import { useState } from "react";
+import { useAuth } from "@clerk/clerk-react";
 
-export function AddCourse() {
+export function AddCourse({ courses, setCourses, setShowCourseModal }) {
   const [newCourseName, setNewCourseName] = useState("");
   const [newCourseDescription, setNewCourseDescription] = useState("");
+
   const [selectedSchedule, setSelectedSchedule] = useState({
     weekday: "",
     time: "",
   });
+  const [isSaving, setIsSaving] = useState(false); // State for loading feedback
+  const { getToken } = useAuth(); // Clerk authentication hook
 
   async function save() {
     if (
-      !newCourseName ||
-      !selectedSchedule.weekday ||
-      !selectedSchedule.time ||
-      newCourseDescription
+      !newCourseName.trim() ||
+      !selectedSchedule.weekday.trim() ||
+      !selectedSchedule.time.trim() ||
+      !newCourseDescription.trim()
     ) {
       alert("Please fill out all required fields before adding a course.");
       return;
     }
 
     try {
+      setIsSaving(true); // Start saving process
       const token = await getToken(); // Authentication token
       const response = await fetch("http://localhost:3000/courses", {
         method: "POST",
@@ -31,10 +35,10 @@ export function AddCourse() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          teacher_id: token.user_id,
+          course_id: courses.length + 1, // Assuming course_id is auto-incremented
           name: newCourseName,
           description: newCourseDescription,
-          weeklyday: selectedSchedule.weekday, // Contains weekday and time
+          weeklyday: selectedSchedule.weekday,
           weeklytime: selectedSchedule.time,
         }),
       });
@@ -50,23 +54,29 @@ export function AddCourse() {
 
       resetModal(); // Clear modal fields after submission
     } catch (error) {
-      console.error("Error adding course:", error);
+      console.error("Error adding course:", error.message || error);
       alert("Failed to add course. Please try again.");
+    } finally {
+      setIsSaving(false); // End saving process
     }
   }
+
+  const resetModal = () => {
+    setShowCourseModal(false); // Close modal
+  };
 
   return (
     <Modal
       title="Add New Course"
       onCancel={resetModal}
       onSubmit={save}
-      submitText="Add Course"
+      submitText={isSaving ? "Saving..." : "Add Course"}
     >
       <div className="space-y-6">
         {/* Teacher Section */}
         <div>
           <h2 className="text-lg font-semibold text-gray-800 mb-2">
-            Course {selectedCourseId ? "Update" : "Create"}
+            Course Creation
           </h2>
           <input
             type="text"
@@ -74,6 +84,7 @@ export function AddCourse() {
             className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-100 shadow"
             value={newCourseName}
             onChange={(e) => setNewCourseName(e.target.value)}
+            aria-label="Course Name"
           />
         </div>
 
@@ -109,7 +120,6 @@ export function AddCourse() {
             <label className="block text-gray-800 font-medium mb-1">Time</label>
             <input
               type="time"
-              placeholder="Enter Time"
               value={selectedSchedule?.time || ""}
               onChange={(e) =>
                 setSelectedSchedule({
@@ -118,6 +128,7 @@ export function AddCourse() {
                 })
               }
               className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-100 shadow"
+              aria-label="Course Time"
             />
           </div>
         </div>
@@ -132,11 +143,10 @@ export function AddCourse() {
             className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-100 shadow"
             value={newCourseDescription}
             onChange={(e) => setNewCourseDescription(e.target.value)}
+            aria-label="Course Description"
           />
         </div>
       </div>
-
-      <input type="submit" value="Add Course" />
     </Modal>
   );
 }

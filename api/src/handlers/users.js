@@ -1,5 +1,6 @@
 import { db } from "../util/db.js";
 
+// Fetch all users with an optional role filter
 export async function getUsers(req, res) {
   const { role } = req.query;
   try {
@@ -10,43 +11,30 @@ export async function getUsers(req, res) {
     const result = await query;
     return res.json(result);
   } catch (err) {
-    console.log("Error fetching users:", err);
+    console.error("Error fetching users:", err);
     return res.status(500).json({ error: "Internal server error" });
   }
 }
 
+// Fetch a single user based on the authenticated user ID
 export async function getUser(req, res) {
   const { userId } = req.auth;
   try {
-    const result = await "users".select("*").where({ user_id: userId });
+    const result = await db("users")
+      .select("*")
+      .where({ user_id: userId })
+      .first();
+    if (!result) {
+      return res.status(404).json({ error: "User not found" });
+    }
     return res.json(result);
   } catch (err) {
-    console.log("Error fetching user:", err);
+    console.error("Error fetching user:", err);
     return res.status(500).json({ error: "Internal server error" });
   }
 }
 
-export async function updateCourse(req, res) {
-  const { id } = req.params;
-  const updateFields = req.body;
-
-  delete updateFields.user_id;
-
-  try {
-    const [updatedUser] = await db("users")
-      .where({ user_id: id })
-      .update(updateFields)
-      .returning("*");
-    if (!updatedUser) {
-      return res.status(404).json({ error: `User ${id} not found` });
-    }
-    return res.status(200).json(updatedUser);
-  } catch (err) {
-    console.log("Error updating user:", err);
-    return res.status(500).json({ error: "Internal server error" });
-  }
-}
-
+// Update user information
 export async function updateUser(req, res) {
   const { id } = req.params;
   const updateFields = req.body;
@@ -55,33 +43,28 @@ export async function updateUser(req, res) {
     const [updatedUser] = await db("users")
       .where({ user_id: id })
       .update(updateFields)
-      .returning("*");
+      .returning("*"); // Remove if unsupported
     if (!updatedUser) {
       return res.status(404).json({ error: `User ${id} not found` });
     }
     return res.status(200).json(updatedUser);
   } catch (err) {
-    console.log("Error updating user:", err);
+    console.error("Error updating user:", err);
     return res.status(500).json({ error: "Internal server error" });
   }
 }
 
+// Fetch user by ID from URL parameters
 export const getUserById = async (req, res) => {
-  const { userId } = req.params; // Extract userId from the URL parameters
-
+  const { userId } = req.params;
   try {
-    // Query the database to find the user by their ID
     const user = await db("users")
       .select("*")
       .where({ user_id: userId })
       .first();
-
-    // Check if the user exists
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-
-    // Respond with the user data
     return res.json(user);
   } catch (error) {
     console.error("Error fetching user by ID:", error);
@@ -89,22 +72,21 @@ export const getUserById = async (req, res) => {
   }
 };
 
+// Create a new user (e.g., student or teacher)
 export async function createStudent(req, res) {
-  const { userId } = req.auth || {}; // Ensure userId comes from req.auth
-  const { first_name, last_name, email } = req.body;
-
-  // Validate userId presence
-  if (!userId) {
-    return res
-      .status(400)
-      .json({ error: "User ID is required to add a student" });
-  }
-
+  const { first_name, last_name, email, dob, phone_number } = req.body;
   try {
     const [createdUser] = await db("users")
-      .insert({ user_id: userId, first_name, last_name, email })
-      .returning("*");
-
+      .insert({
+        first_name,
+        last_name,
+        email,
+        created_at: new Date(),
+        role: "student",
+        dob,
+        phone_number,
+      })
+      .returning("*"); // Remove if unsupported
     return res.status(201).json(createdUser);
   } catch (err) {
     console.error("Error creating user:", err);
