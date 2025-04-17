@@ -6,7 +6,7 @@ import {
   UserButton,
 } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
-import { ProfileContext } from "../../Context/ProfileProvider";
+import { ProfileContext } from "../../Context/ProfileContext.js";
 
 export function Login() {
   const { profile, loading, error } = useContext(ProfileContext);
@@ -15,10 +15,22 @@ export function Login() {
   // Handle redirection based on role after login
   useEffect(() => {
     if (loading || error) return; // Wait for profile to load or handle errors
-
-    if (profile?.role === "teacher") {
+    if (!profile) return; // If no profile, do nothing
+    // console.debug("Profile:", profile);
+    //   {
+    //     "user_id": "user_2vlZdvA4w0gbX9w4oFdRkTaGghC",
+    //     "phone_number": null,
+    //     "address": null,
+    //     "first_name": "Sascha",
+    //     "last_name": "Teacher",
+    //     "dob": null,
+    //     "email": null,
+    //   >>>>>>>>>>>>>>>  "role": "teacher", <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    //     "created_at": "2025-04-16T08:12:04.621Z"
+    // }
+    if (profile.role === "teacher") {
       navigate("/teacherdashboard");
-    } else if (profile?.role === "parent" || profile?.role === "student") {
+    } else if (profile.role === "parent" || profile.role === "student") {
       navigate("/parentdashboard");
     }
   }, [profile, loading, error, navigate]);

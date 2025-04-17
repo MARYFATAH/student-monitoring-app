@@ -4,7 +4,7 @@ import cors from "cors";
 import { decodeAuthHeader } from "./middleware/decodeAuthHeader.js";
 import users from "./routes/users.js";
 import courses from "./routes/courses.js";
-import { clerkMiddleware } from "@clerk/express";
+import { clerkMiddleware, createClerkClient, getAuth } from "@clerk/express";
 // Adding these additional routes for enhanced functionality
 import { getUsers, getUserById } from "./handlers/users.js";
 
@@ -13,14 +13,33 @@ const PORT = process.env.PORT || 3000;
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(clerkMiddleware());
+
+app.use((req, _, next) => {
+  console.debug("Incoming request:", req.method, req.path);
+  next();
+});
 
 app.get("/", (_, res) => {
   return res.json({ msg: "Welcome to the Student Monitoring API API" });
 });
 
-app.get("/users", getUsers); // Handles ?role=student query
-app.get("/users/:userId", getUserById); // Handles /clerkId4 path parameter
+app.use(clerkMiddleware());
+
+app.use((req, _, next) => {
+  req.auth = getAuth(req);
+  if (!req.auth.userId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  next();
+});
+
+// app.use((req, _, next) => {
+//   console.debug("req.auth.userId:", req.auth.userId);
+//   next();
+// });
+
+// app.get("/users", getUsers); // Handles ?role=student query
+// app.get("/users/:userId", getUserById); // Handles /clerkId4 path parameter
 
 // Existing routes
 app.use("/users", users);
