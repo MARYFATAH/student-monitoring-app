@@ -161,16 +161,19 @@ export function CourseDetails() {
 
   const handleSaveCourseDetails = async () => {
     // Validate input fields upfront
-    const areFieldsValid =
-      newTeacherFirstName &&
-      newTeacherLastName &&
-      selectedSchedule?.weekday &&
-      selectedSchedule?.time &&
-      selectedDescription;
+    if (!newTeacherFirstName || !newTeacherLastName) {
+      alert("Teacher's first and last names are required.");
+      return;
+    }
 
-    if (!areFieldsValid) {
-      alert("Please fill out all fields before saving changes.");
-      return; // Exit early if validation fails
+    if (!selectedSchedule?.weekday || !selectedSchedule?.time) {
+      alert("Please select both weekday and time for the schedule.");
+      return;
+    }
+
+    if (!selectedDescription) {
+      alert("Course description is required.");
+      return;
     }
 
     // Construct updated course data
@@ -185,16 +188,23 @@ export function CourseDetails() {
     };
 
     try {
+      setLoading(true); // Start loading indicator
+      console.log("Updated course data being sent:", updatedCourseData);
+
       // Make API call to update course details
       const response = await updateCourse(courseDetails.id, updatedCourseData);
 
-      // Handle non-OK responses
-      if (!response.ok) {
+      console.log("API response:", response);
+
+      if (response.status === 404) {
+        throw new Error("Course not found. It might have been deleted.");
+      } else if (!response.ok) {
         throw new Error(`Failed to update course: ${response.statusText}`);
       }
 
       // Parse updated course data
       const updatedCourse = await response.json();
+      console.log("Updated course from API:", updatedCourse);
 
       // Update courses state
       setCourses((prevCourses) =>
@@ -202,20 +212,23 @@ export function CourseDetails() {
           course.id === updatedCourse.id ? updatedCourse : course
         )
       );
-      console.log("Updated Course:", updatedCourse);
 
       // Notify user and exit editing mode
-      displayNotification("Course details updated successfully!", "success");
+      displayNotification("Course details updated successfully!", "success", {
+        autoClose: true,
+        closeDelay: 3000,
+      });
       setIsEditing(false);
     } catch (error) {
       console.error("Error saving course details:", error);
       displayNotification(
-        "Failed to save course details. Please try again.",
+        error.message || "An unexpected error occurred. Please try again.",
         "error"
       );
+    } finally {
+      setLoading(false); // End loading indicator
     }
   };
-
   // Notification helper
   const displayNotification = (message, type) => {
     if (type === "success") {
@@ -275,14 +288,14 @@ export function CourseDetails() {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen bg-gradient-to-r from-blue-500 to-purple-500">
+    <div className="flex flex-col lg:flex-row h-screen bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg shadow-lg overflow-hidden">
       <CourseSideBar
         className="bg-blue-600 text-white w-full lg:w-1/4 h-auto lg:h-full py-8 shadow-md"
         setActiveSection={setActiveSection}
         activeSection={activeSection}
       />
 
-      <div className="flex-1 bg-white rounded-lg shadow-lg mx-4 my-6 lg:my-10 p-6 lg:p-10 overflow-y-auto">
+      <div className="flex-1 bg-white rounded-lg shadow-lg mx-4 my-6 lg:my-10 p-6 lg:p-10 overflow-y-auto sm:mx-2 lg:mx-4 sm:p-4 lg:p-10 ">
         <h1 className="text-3xl lg:text-4xl font-bold text-purple-700 text-center mb-8">
           Course " {courseDetails.name} " Details
         </h1>

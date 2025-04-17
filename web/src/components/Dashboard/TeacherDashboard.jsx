@@ -24,22 +24,11 @@ export function TeacherDashboard() {
   const [showEventModal, setShowEventModal] = useState(false);
   const [showCourseModal, setShowCourseModal] = useState(false);
 
-  // Course Inputs
-  const [selectedDescription, setSelectedDescription] = useState("");
-  const [newTeacherName, setNewTeacherName] = useState("");
-
-  // Student Inputs
-  const [newStudentFirstName, setNewStudentFirstName] = useState("");
-  const [newStudentLastName, setNewStudentLastName] = useState("");
-  const [newEmail, setNewEmail] = useState("");
-  const [newPhone, setNewPhone] = useState("");
-  const [selectedCourseId, setSelectedCourseId] = useState("");
-  const [newDateOfBirth, setNewDateOfBirth] = useState(null);
-
   // Event Inputs
   const [newEventName, setNewEventName] = useState("");
   const [newEventDate, setNewEventDate] = useState(null);
   const [newEventLocation, setNewEventLocation] = useState("");
+  const [newEventDescription, setNewEventDescription] = useState("");
 
   // Fetch Courses
   useEffect(() => {
@@ -74,12 +63,6 @@ export function TeacherDashboard() {
 
   // Reset Modal Inputs
   const resetModal = () => {
-    setNewStudentFirstName("");
-    setNewStudentLastName("");
-    setNewEmail("");
-    setNewPhone("");
-    setSelectedCourseId("");
-    setNewDateOfBirth(null);
     setNewEventName("");
     setNewEventDate(null);
     setNewEventLocation("");
@@ -90,22 +73,47 @@ export function TeacherDashboard() {
 
   // Add Event
   const handleAddEvent = () => {
-    if (newEventName && newEventDate && newEventLocation) {
-      const newEvent = {
-        id: events.length + 1,
-        name: newEventName,
-        date: newEventDate.toISOString().split("T")[0],
-        location: newEventLocation,
-      };
-      setEvents([...events, newEvent]);
-      resetModal();
-    } else {
-      alert("Please fill out all event fields.");
+    if (!newEventName.trim() || !newEventDate || !newEventLocation.trim()) {
+      alert("Please fill out all required fields before adding an event.");
+      return;
     }
+
+    const newEvent = {
+      name: newEventName,
+      date: newEventDate.toISOString(),
+      location: newEventLocation,
+      description: newEventDescription,
+    };
+
+    fetch("http://localhost:3000/events", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify(newEvent),
+    })
+      .then((response) => {
+        if (response.ok) {
+          alert("Event added successfully!");
+          resetModal();
+        } else {
+          alert("Failed to add event. Please try again.");
+        }
+      })
+      .catch((error) => {
+        console.error("Error adding event:", error);
+        alert("An error occurred while adding the event. Please try again.");
+      });
+
+    const updatedEvents = [...events, newEvent];
+    setEvents(updatedEvents);
+
+    resetModal();
   };
 
   return (
-    <div className="h-screen flex bg-gradient-to-r from-blue-500 to-purple-500">
+    <div className="h-screen flex bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg shadow-lg">
       {/* Sidebar */}
       <SideBar
         activeSection={activeSection}
@@ -119,7 +127,7 @@ export function TeacherDashboard() {
           {/* Courses Section */}
           {activeSection === "courses" && (
             <div className="space-y-4">
-              <h1 className="text-xl lg:text-2xl font-semibold text-gray-800">
+              <h1 className="text-xl lg:text-2xl font-semibold text-white">
                 Courses
               </h1>
               <CourseList
@@ -142,7 +150,7 @@ export function TeacherDashboard() {
           {/* Students Section */}
           {activeSection === "students" && (
             <div className="space-y-4">
-              <h1 className="text-xl lg:text-2xl font-semibold text-gray-800">
+              <h1 className="text-xl lg:text-2xl font-semibold text-white">
                 Students
               </h1>
               <StudentList />
@@ -166,7 +174,7 @@ export function TeacherDashboard() {
               <EventList events={events} />
               <div className="flex justify-end">
                 <button
-                  className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700 lg:px-6"
+                  className="bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-900 lg:px-6"
                   onClick={() => setShowEventModal(true)}
                 >
                   Add Event
@@ -223,6 +231,13 @@ export function TeacherDashboard() {
             className="w-full p-2 lg:p-3 border rounded mb-4"
             value={newEventLocation}
             onChange={(e) => setNewEventLocation(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Event Description"
+            className="w-full p-2 lg:p-3 border rounded mb-4"
+            value={newEventDescription}
+            onChange={(e) => setNewEventDescription(e.target.value)}
           />
         </Modal>
       )}

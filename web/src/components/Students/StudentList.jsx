@@ -48,9 +48,9 @@ export function StudentList() {
 
   return (
     <div className="p-6 md:p-12 bg-gradient-to-br from-gray-50 to-gray-100 h-[70vh] overflow-y-auto rounded-lg shadow-md">
-      <h1 className="text-4xl font-bold text-purple-700 text-center mb-8">
+      {/* <h1 className="text-4xl font-bold text-purple-700 text-center mb-8">
         Student List
-      </h1>
+      </h1> */}
 
       {/* Error Message */}
       {error && <p className="text-red-500 text-center">{error}</p>}
