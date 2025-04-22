@@ -1,263 +1,246 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { SideBar } from "./SideBar";
 import { CourseList } from "../Course/CourseList";
-import {
-  courses as courseData,
-  students as studentData,
-  events as eventData,
-} from "../../Data/Course";
+import { EventList } from "../Events/EventList";
 import { StudentList } from "../Students/StudentList";
+import { Modal } from "./Modal";
+import { useAuth } from "@clerk/clerk-react";
+import { AddCourse } from "./AddCourse";
+import { AddStudent } from "./AddStudent";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { EventList } from "../Events/EventList";
+import { SignOutButton } from "@clerk/clerk-react";
 
 export function TeacherDashboard() {
-  const [courses, setCourses] = useState(courseData);
-  const [students, setStudents] = useState(studentData);
-  const [events, setEvents] = useState(eventData);
-  const [messages, setMessages] = useState([]);
+  const { getToken } = useAuth(); // Clerk for authentication
+  const [courses, setCourses] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [events, setEvents] = useState([]);
   const [activeSection, setActiveSection] = useState("courses");
-  const [showModal, setShowModal] = useState(false);
-  const [isAddingCourse, setIsAddingCourse] = useState(true);
-  const [newCourseName, setNewCourseName] = useState("");
-  const [newTeacherName, setNewTeacherName] = useState("");
-  const [newSchedule, setNewSchedule] = useState("");
-  const [newDescription, setNewDescription] = useState("");
-  const [newStudentName, setNewStudentName] = useState("");
-  const [selectedCourseId, setSelectedCourseId] = useState("");
-  const [newDateOfBirth, setNewDateOfBirth] = useState(null);
-  const [newEmail, setNewEmail] = useState("");
-  const [newPhone, setNewPhone] = useState("");
+  const [loading, setLoading] = useState(true); // Loading state
+  const [error, setError] = useState(null); // Error state
 
-  const handleAddCourse = () => {
-    if (
-      newCourseName.trim() &&
-      newTeacherName.trim() &&
-      newSchedule.trim() &&
-      newDescription.trim()
-    ) {
-      const newCourse = {
-        id: courses.length + 1,
-        name: newCourseName,
-        teacher: newTeacherName,
-        schedule: newSchedule,
-        description: newDescription,
-      };
-      setCourses([...courses, newCourse]);
-      resetModal();
-    } else {
-      alert("Please fill in all course details.");
-    }
-  };
+  // Modal states
+  const [showStudentModal, setShowStudentModal] = useState(false);
+  const [showEventModal, setShowEventModal] = useState(false);
+  const [showCourseModal, setShowCourseModal] = useState(false);
 
-  const handleAddStudent = () => {
-    if (newStudentName.trim() && selectedCourseId && newDateOfBirth) {
-      const newStudent = {
-        id: students.length + 1,
-        firstname: newStudentName,
-        email: newEmail,
-        phone: newPhone,
-        dateOfBirth: newDateOfBirth.toISOString().split("T")[0],
-      };
-      setStudents([...students, newStudent]);
-      resetModal();
-    } else {
-      alert("Please complete all student details.");
-    }
-  };
+  // Event Inputs
+  const [newEventName, setNewEventName] = useState("");
+  const [newEventDate, setNewEventDate] = useState(null);
+  const [newEventLocation, setNewEventLocation] = useState("");
+  const [newEventDescription, setNewEventDescription] = useState("");
 
+  // Fetch Courses
+  useEffect(() => {
+    const fetchCourses = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const token = await getToken();
+        const response = await fetch("http://localhost:3000/courses", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP Error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setCourses(data);
+        console.log(data);
+      } catch (err) {
+        console.error("Error fetching courses:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, [getToken]);
+
+  // Reset Modal Inputs
   const resetModal = () => {
-    setNewCourseName("");
-    setNewTeacherName("");
-    setNewSchedule("");
-    setNewDescription("");
-    setNewStudentName("");
-    setSelectedCourseId("");
-    setNewDateOfBirth(null);
-    setShowModal(false);
+    setNewEventName("");
+    setNewEventDate(null);
+    setNewEventLocation("");
+    setShowCourseModal(false);
+    setShowStudentModal(false);
+    setShowEventModal(false);
+  };
+
+  // Add Event
+  const handleAddEvent = () => {
+    if (!newEventName.trim() || !newEventDate || !newEventLocation.trim()) {
+      alert("Please fill out all required fields before adding an event.");
+      return;
+    }
+
+    const newEvent = {
+      name: newEventName,
+      date: newEventDate.toISOString(),
+      location: newEventLocation,
+      description: newEventDescription,
+    };
+
+    fetch("http://localhost:3000/events", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify(newEvent),
+    })
+      .then((response) => {
+        if (response.ok) {
+          alert("Event added successfully!");
+          resetModal();
+        } else {
+          alert("Failed to add event. Please try again.");
+        }
+      })
+      .catch((error) => {
+        console.error("Error adding event:", error);
+        alert("An error occurred while adding the event. Please try again.");
+      });
+
+    const updatedEvents = [...events, newEvent];
+    setEvents(updatedEvents);
+
+    resetModal();
   };
 
   return (
-    <div className="h-screen flex bg-purple-100">
+    <div className="h-screen flex bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg shadow-lg">
       {/* Sidebar */}
       <SideBar
+        activeSection={activeSection}
         setActiveSection={setActiveSection}
-        className="w-1/4 bg-blue-600 text-white shadow-md"
+        className="w-full lg:w-1/4 bg-blue-600 text-white shadow-md hidden lg:block"
       />
 
       {/* Main Content */}
-      <div className="flex-grow p-6">
-        <div className="flex flex-col bg-white rounded-lg shadow-md p-6">
+      <div className="flex-grow p-4 lg:p-6">
+        <div className="p-4 lg:p-6">
+          {/* Courses Section */}
           {activeSection === "courses" && (
-            // Course List
-
             <div className="space-y-4">
-              <h1 className="text-xl  font-semibold text-gray-800 mb-4">
+              <h1 className="text-xl lg:text-2xl font-semibold text-white">
                 Courses
               </h1>
-              <CourseList courses={courses} />
+              <CourseList
+                courses={courses}
+                setCourses={setCourses}
+                error={error}
+                loading={loading}
+              />
               <div className="flex justify-end">
                 <button
-                  className="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded"
-                  onClick={() => {
-                    setIsAddingCourse(true);
-                    setShowModal(true);
-                  }}
+                  className="bg-indigo-700 text-white py-2 px-4 rounded hover:bg-indigo-900 lg:px-6"
+                  onClick={() => setShowCourseModal(true)}
                 >
                   Add Course
                 </button>
               </div>
             </div>
           )}
+
+          {/* Students Section */}
           {activeSection === "students" && (
             <div className="space-y-4">
-              <StudentList students={students} />
+              <h1 className="text-xl lg:text-2xl font-semibold text-white">
+                Students
+              </h1>
+              <StudentList />
               <div className="flex justify-end">
                 <button
-                  className="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded"
-                  onClick={() => {
-                    setIsAddingCourse(false);
-                    setShowModal(true);
-                  }}
+                  className="bg-indigo-700 text-white py-2 px-4 rounded hover:bg-indigo-900 lg:px-6"
+                  onClick={() => setShowStudentModal(true)}
                 >
                   Add Student
                 </button>
               </div>
             </div>
           )}
+
+          {/* Events Section */}
           {activeSection === "events" && (
             <div className="space-y-4">
+              <h1 className="text-xl lg:text-2xl font-semibold text-gray-800">
+                Events
+              </h1>
               <EventList events={events} />
               <div className="flex justify-end">
                 <button
-                  className="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded"
-                  onClick={() => {
-                    setShowModal(true);
-                    setIsAddingEvent(false); // Adjust for events handling logic
-                  }}
+                  className="bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-900 lg:px-6"
+                  onClick={() => setShowEventModal(true)}
                 >
                   Add Event
                 </button>
               </div>
             </div>
           )}
-          {activeSection === "messages" && (
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                Messages Section
-              </h2>
-              {messages.length > 0 ? (
-                messages.map((message, index) => (
-                  <p key={index} className="text-gray-600">
-                    {message}
-                  </p>
-                ))
-              ) : (
-                <p className="text-gray-600">No messages available...</p>
-              )}
-            </div>
-          )}
         </div>
       </div>
 
-      {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 md:w-1/2">
-            <h2 className="text-2xl font-bold mb-4">
-              {isAddingCourse ? "Add New Course" : "Add New Student"}
-            </h2>
-            {isAddingCourse ? (
-              <>
-                <input
-                  type="text"
-                  placeholder="Course Name"
-                  className="w-full p-2 border rounded mb-4"
-                  value={newCourseName}
-                  onChange={(e) => setNewCourseName(e.target.value)}
-                />
-                <input
-                  type="text"
-                  placeholder="Teacher Name"
-                  className="w-full p-2 border rounded mb-4"
-                  value={newTeacherName}
-                  onChange={(e) => setNewTeacherName(e.target.value)}
-                />
-                <input
-                  type="text"
-                  placeholder="Schedule"
-                  className="w-full p-2 border rounded mb-4"
-                  value={newSchedule}
-                  onChange={(e) => setNewSchedule(e.target.value)}
-                />
-                <textarea
-                  placeholder="Description"
-                  className="w-full p-2 border rounded mb-4"
-                  value={newDescription}
-                  onChange={(e) => setNewDescription(e.target.value)}
-                />
-              </>
-            ) : (
-              <>
-                <input
-                  type="text"
-                  placeholder="Student Name"
-                  className="w-full p-2 border rounded mb-4"
-                  value={newStudentName}
-                  onChange={(e) => setNewStudentName(e.target.value)}
-                />
-                <input
-                  type="email"
-                  placeholder="Email"
-                  className="w-full p-2 border rounded mb-4"
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                />
-                <input
-                  type="text"
-                  placeholder="Phone"
-                  className="w-full p-2 border rounded mb-4"
-                  value={newPhone}
-                  onChange={(e) => setNewPhone(e.target.value)}
-                />
-                <select
-                  className="w-full p-2 border rounded mb-4"
-                  value={selectedCourseId}
-                  onChange={(e) => setSelectedCourseId(e.target.value)}
-                >
-                  <option value="" disabled>
-                    Select a Course
-                  </option>
-                  {courses.map((course) => (
-                    <option key={course.id} value={course.id}>
-                      {course.name}
-                    </option>
-                  ))}
-                </select>
-                <DatePicker
-                  selected={newDateOfBirth}
-                  onChange={(date) => setNewDateOfBirth(date)}
-                  dateFormat="dd/MM/yyyy"
-                  className="w-full p-2 border rounded mb-4"
-                />
-              </>
-            )}
-            <div className="flex justify-end gap-2">
-              <button
-                className="bg-red-500 text-white py-2 px-4 rounded"
-                onClick={resetModal}
-              >
-                Cancel
-              </button>
-              <button
-                className="bg-blue-500 text-white py-2 px-4 rounded"
-                onClick={isAddingCourse ? handleAddCourse : handleAddStudent}
-              >
-                {isAddingCourse ? "Add Course" : "Add Student"}
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* Course Modal */}
+      {showCourseModal && (
+        <AddCourse
+          courses={courses}
+          setCourses={setCourses}
+          setShowCourseModal={setShowCourseModal}
+        />
+      )}
+      {/* Student Modal */}
+      {showStudentModal && (
+        <AddStudent
+          courses={courses}
+          students={students}
+          setStudents={setStudents}
+          setShowStudentModal={setShowStudentModal}
+        />
+      )}
+
+      {/* Event Modal */}
+      {showEventModal && (
+        <Modal
+          title="Add New Event"
+          onCancel={resetModal}
+          onSubmit={handleAddEvent}
+          submitText="Add Event"
+          className="max-w-full lg:max-w-lg p-4 lg:p-6 mx-auto"
+        >
+          <input
+            type="text"
+            placeholder="Event Name"
+            className="w-full p-2 lg:p-3 border rounded mb-4"
+            value={newEventName}
+            onChange={(e) => setNewEventName(e.target.value)}
+          />
+          <DatePicker
+            selected={newEventDate}
+            onChange={(date) => setNewEventDate(date)}
+            dateFormat="dd/MM/yyyy"
+            className="w-full p-2 lg:p-3 border rounded mb-4"
+          />
+          <input
+            type="text"
+            placeholder="Event Location"
+            className="w-full p-2 lg:p-3 border rounded mb-4"
+            value={newEventLocation}
+            onChange={(e) => setNewEventLocation(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Event Description"
+            className="w-full p-2 lg:p-3 border rounded mb-4"
+            value={newEventDescription}
+            onChange={(e) => setNewEventDescription(e.target.value)}
+          />
+        </Modal>
       )}
     </div>
   );

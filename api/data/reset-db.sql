@@ -1,7 +1,5 @@
 CREATE SCHEMA IF NOT EXISTS studentapp;
 
-
-
 DROP TYPE IF EXISTS studentapp.role CASCADE;
 
 CREATE TYPE studentapp.role AS ENUM ('user','admin', 'student', 'teacher', 'parent');
@@ -11,7 +9,12 @@ DROP TABLE IF EXISTS studentapp.users CASCADE;
 CREATE TABLE studentapp.users
 (
     user_id VARCHAR(255) PRIMARY KEY,
-    username VARCHAR(255),
+    phone_number VARCHAR(255),
+    address VARCHAR(255),
+    first_name VARCHAR(255),
+    last_name VARCHAR(255),
+    dob DATE,
+    email VARCHAR(255),
     role studentapp.role NOT NULL DEFAULT 'student',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -23,6 +26,9 @@ CREATE TABLE studentapp.courses
     teacher_id VARCHAR(255) NOT NULL,
     name VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    description TEXT,
+    weeklyday VARCHAR(255),
+    weeklytime VARCHAR(255),
     FOREIGN KEY (teacher_id) REFERENCES studentapp.users(user_id) ON DELETE CASCADE
 );
 
@@ -35,9 +41,6 @@ CREATE TABLE studentapp.parents2students
     FOREIGN KEY (student_id) REFERENCES studentapp.users(user_id) ON DELETE CASCADE
 );
 
-
-
-
 DROP TABLE IF EXISTS studentapp.students2courses CASCADE;
 CREATE TABLE studentapp.students2courses
 (
@@ -47,14 +50,32 @@ CREATE TABLE studentapp.students2courses
     FOREIGN KEY (course_id) REFERENCES studentapp.courses(course_id) ON DELETE CASCADE
 );
 
-INSERT INTO studentapp.users (user_id, username, role)
+INSERT INTO studentapp.users (user_id, first_name, last_name, role)
 VALUES
-    ('clerkId1', 'Joe Admin','admin'),
-    ('clerkId2', 'Jane Teacher','teacher'),
-    ('clerkId3', 'Bob Teacher','teacher'),
-    ('clerkId4', 'Alice Student','student'),
-    ('clerkId5', 'John Student','student'),
-    ('clerkId6', 'Charlie Student','student');
+    ('clerkId1', 'Joe','Admin','admin'),
+    ('clerkId2', 'Jane', 'Teacher','teacher'),
+    ('clerkId3', 'Bob', 'Teacher','teacher'),
+    ('clerkId4', 'Alice', 'Student','student'),
+    ('clerkId5', 'John', 'Student','student'),
+    ('clerkId6', 'Charlie', 'Student','student'),
+    ('clerkId7', 'Emily', 'Student','student'),
+    ('clerkId8', 'Michael', 'Student','student'),
+    ('clerkId9', 'Olivia', 'Student','student'),
+    ('clerkId10', 'Sophia', 'Student','student'),
+    ('clerkId11', 'Liam', 'Student','student'),
+    ('clerkId12', 'Noah', 'Student','student'),
+    ('clerkId13', 'Ava', 'Student','student'),
+    ('clerkId14', 'Isabella', 'Student','student'),
+    ('clerkId15', 'Mason', 'Student','student'),
+    ('clerkId16', 'Lucas', 'Student','student'),
+    ('clerkId17', 'Amelia', 'Student','student'),
+    ('clerkId18', 'Harper', 'Student','student'),
+    ('clerkId19', 'Evelyn', 'Student','student'),
+    ('user_2vOdwaPvnq4CRVTX4fBaRcpZRjG', 'Maryam', 'Teacher', 'teacher' ),
+    ('user_2vTtGULPmuR6g4tCGOodztViTjk', 'Maryam Fattah', 'Student', 'parent' ),
+    ('user_2vTuPIO9KgsP7fMA5nZ8UHy7erx', 'John', 'Teacher', 'teacher'),
+    ('user_2vOyBjnxrbBBEjNb3VkO8FdzZzB', 'Ralf', 'Teacher', 'teacher'),
+    ('user_2vlZdvA4w0gbX9w4oFdRkTaGghC', 'Sascha', 'Teacher', 'teacher');
 
 INSERT INTO studentapp.courses (teacher_id, name)
 VALUES
@@ -62,13 +83,31 @@ VALUES
     ('clerkId2', 'History 101'),
     ('clerkId3', 'Science 101'),
     ('clerkId3', 'English 101'),
-    ('clerkId3', 'Art 101');
+    ('clerkId3', 'Art 101'),
+    ('user_2vOdwaPvnq4CRVTX4fBaRcpZRjG', 'Math 101'),
+    ('user_2vOdwaPvnq4CRVTX4fBaRcpZRjG', 'History 101'),
+    ('user_2vOdwaPvnq4CRVTX4fBaRcpZRjG', 'Science 101'),
+    ('user_2vOdwaPvnq4CRVTX4fBaRcpZRjG', 'English 101'),
+    ('user_2vOdwaPvnq4CRVTX4fBaRcpZRjG', 'Art 101'),
+    ('user_2vOyBjnxrbBBEjNb3VkO8FdzZzB', 'Math 102'),
+    ('user_2vOyBjnxrbBBEjNb3VkO8FdzZzB', 'History 102'),
+    ('user_2vlZdvA4w0gbX9w4oFdRkTaGghC', 'Science 102'),
+    ('user_2vlZdvA4w0gbX9w4oFdRkTaGghC', 'English 102'),   
+    ('user_2vlZdvA4w0gbX9w4oFdRkTaGghC', 'English 102'),
+    ('user_2vTuPIO9KgsP7fMA5nZ8UHy7erx', 'Math 102'),
+    ('user_2vTuPIO9KgsP7fMA5nZ8UHy7erx', 'History 102'),
+    ('user_2vTuPIO9KgsP7fMA5nZ8UHy7erx', 'Science 102'),
+    ('user_2vOyBjnxrbBBEjNb3VkO8FdzZzB', 'Art 102');
 
-INSERT INTO studentapp.students2courses (student_id,course_id )
+INSERT INTO studentapp.students2courses (student_id, course_id)
 VALUES
     ('clerkId4', 1),
     ('clerkId5', 1),
     ('clerkId6', 1),
     ('clerkId4', 2),
-    ('clerkId5', 2);
-
+    ('clerkId5', 2),
+    ('user_2vTtGULPmuR6g4tCGOodztViTjk', 1),
+    ('user_2vlZdvA4w0gbX9w4oFdRkTaGghC', 2),
+    ('user_2vlZdvA4w0gbX9w4oFdRkTaGghC', 3),
+    ('user_2vTtGULPmuR6g4tCGOodztViTjk', 4),
+    ('user_2vTtGULPmuR6g4tCGOodztViTjk', 5);
