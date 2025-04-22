@@ -50,7 +50,6 @@ export function AddCourse({ courses, setCourses, setShowCourseModal }) {
       const createdCourse = await response.json();
       setCourses((prevCourses) => [...prevCourses, createdCourse]); // Update state with the new course
       alert("Course added successfully!");
-      console.log("New Course:", createdCourse);
 
       resetModal(); // Clear modal fields after submission
     } catch (error) {

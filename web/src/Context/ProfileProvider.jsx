@@ -24,7 +24,7 @@ export function ProfileProvider({ children }) {
           },
         });
         const data = await response.json();
-        console.log("Profile data:", data);
+
         setProfile(data);
       } catch (err) {
         console.error("Error fetching profile:", err);

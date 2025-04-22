@@ -9,6 +9,7 @@ export function CourseDetails() {
   const [courseDetails, setCourseDetails] = useState(null); // Course details
   const [courseStudents, setCourseStudents] = useState([]); // List of students
   const [loadingStudents, setLoadingStudents] = useState(false);
+  const [addedStudents, setAddedStudents] = useState([]); // List of added students
   const [courses, setCourses] = useState([]); // List of courses
   const [students, setStudents] = useState([]); // List of all students
   const [selectedStudentId, setSelectedStudentId] = useState(""); // Individual student selection
@@ -59,61 +60,25 @@ export function CourseDetails() {
   }, [courseId]);
 
   //Patch course details logic
-  const updateCourse = async (updatedData) => {
-    // Validate courseId and updatedData
-    console.log("Updating course with ID:", courseId, "and data:", updatedData);
-    if (!courseId || !updatedData) {
-      console.error("Invalid course ID or updated data.");
-      return;
-    }
-    if (!updatedData.weeklyday || !updatedData.weeklytime) {
-      console.error("Invalid schedule data.");
-      return;
-    }
-    console.log("Updating course with ID:", courseId, "and data:", updatedData);
-    // Validate updatedData structure
-    try {
-      const token = await getToken();
-      const response = await fetch(
-        `http://localhost:3000/courses/${courseId}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(updatedData),
-        }
-      );
 
-      // Handle non-OK responses
-      if (!response.ok) {
-        throw new Error(`HTTP Error! Status: ${response.status}`);
-      }
-      const data = await response.json();
-      setCourseDetails(data);
-      console.log("Course details updated:", data);
-    } catch (err) {
-      console.error("Error updating course details:", err);
-    }
-  };
   // Fetch students in course logic
   const fetchStudentsInCourse = async () => {
     try {
       const token = await getToken();
-      const response = await fetch(
-        `http://localhost:3000/courses/${courseId}/students`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`http://localhost:3000/users?role=student`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (!response.ok) {
         throw new Error(`HTTP Error! Status: ${response.status}`);
       }
       const data = await response.json();
       setCourseStudents(data);
+      console.log("Students in course:", courseStudents);
+      console.log("All students:", data);
+      setStudents(data); // Set all students
+      console.log("All students:", data);
     } catch (err) {
       console.error("Error fetching students in course:", err);
     }
@@ -127,16 +92,20 @@ export function CourseDetails() {
     const fetchAllStudents = async () => {
       try {
         const token = await getToken();
-        const response = await fetch("http://localhost:3000/students", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          "http://localhost:3000/users?role=student",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         if (!response.ok) {
           throw new Error(`HTTP Error! Status: ${response.status}`);
         }
         const data = await response.json();
-        setStudents(data);
+        setCourseStudents(data);
+        console.log("All students:", data);
       } catch (err) {
         console.error("Error fetching all students:", err);
       }
@@ -145,36 +114,43 @@ export function CourseDetails() {
   }, []);
   // Add new student logic
   const handleAddStudent = () => {
-    console.log("Adding student:", selectedStudentId, selectAll);
-
-    if (selectAll) {
-      const newStudents = students.filter(
-        (student) => !courseStudents.some((s) => s.id === student.id) // Exclude already added students
-      );
-      setCourseStudents([...courseStudents, ...newStudents]);
-      setSelectAll(false);
-      updateStudentScores(newStudents);
-      return;
-    }
-
     if (!selectedStudentId) {
       alert("Please select a student to add.");
       return;
     }
 
-    const newStudent = students.find(
-      (student) => student.id === parseInt(selectedStudentId, 10)
+    const newStudent = courseStudents.find(
+      (student) =>
+        Number(student.id) === Number(selectedStudentId) ||
+        Number(student.user_id) === Number(selectedStudentId)
     );
+
+    console.log("Selected student ID:", selectedStudentId);
+    console.log("Available students:", courseStudents);
+    console.log("New student:", newStudent);
+
     if (!newStudent) {
-      alert("Student not found.");
+      alert("Student not found. Check API response.");
       return;
     }
 
-    setCourseStudents([...courseStudents, newStudent]); // Add student to course
-    updateStudentScores([newStudent]);
-    setSelectedStudentId(""); // Clear selection
-  };
+    if (!addedStudents.some((s) => s.id === newStudent.id)) {
+      setAddedStudents([...addedStudents, newStudent]);
+      setStudents(students.filter((student) => student.id !== newStudent.id));
+      setSelectAll(false);
 
+      // Initialize student scores
+      setStudentScores((prevScores) => ({
+        ...prevScores,
+        [newStudent.id]: tests.reduce((acc, test) => {
+          acc[test.id] = 0;
+          return acc;
+        }, {}),
+      }));
+    }
+
+    setSelectedStudentId("");
+  };
   // edit course logic
 
   const handleEditMode = () => {
@@ -250,9 +226,6 @@ export function CourseDetails() {
         }
       );
 
-      console.log("Saving course details:", updatedData);
-      console.log("Response status:", response.status);
-
       if (!response.ok) {
         const errorDetails = await response.text(); // Fetch error details if available
         throw new Error(
@@ -261,8 +234,6 @@ export function CourseDetails() {
       }
 
       const updatedCourse = await response.json();
-      console.log("Updated course response:", updatedCourse);
-      console.log("Updated course ID:", updatedCourse.data.course_id);
       if (!updatedCourse || !updatedCourse.data.course_id) {
         throw new Error("Invalid response structure. Missing course data.");
       }
@@ -558,16 +529,11 @@ export function CourseDetails() {
                 <option value="" disabled>
                   Select a student
                 </option>
-                {students.map(
-                  (student) => (
-                    console.log("Student:", student) || "Student not found",
-                    (
-                      <option key={student.id} value={student.id}>
-                        {student.firstname} {student.lastname}
-                      </option>
-                    )
-                  )
-                )}
+                {courseStudents.map((student) => (
+                  <option key={student.id} value={student.id}>
+                    {student.first_name} {student.last_name}
+                  </option>
+                ))}
               </select>
             )}
             <button
@@ -669,10 +635,10 @@ export function CourseDetails() {
                 </tr>
               </thead>
               <tbody>
-                {courseStudents.map((student) => (
+                {addedStudents.map((student) => (
                   <tr key={student.id}>
                     <td className="border border-gray-400 px-4 py-2">
-                      {student.firstname} {student.lastname}
+                      {student.first_name} {student.last_name}
                     </td>
                     {tests.map((test) => (
                       <td
@@ -681,6 +647,8 @@ export function CourseDetails() {
                       >
                         <input
                           type="number"
+                          min="1"
+                          max="6"
                           value={studentScores[student.id]?.[test.id] || 0}
                           onChange={(e) =>
                             handleUpdateScore(
