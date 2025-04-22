@@ -50,7 +50,6 @@ export function TeacherDashboard() {
 
         const data = await response.json();
         setCourses(data);
-        console.log(data);
       } catch (err) {
         console.error("Error fetching courses:", err);
         setError(err.message);

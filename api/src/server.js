@@ -53,9 +53,6 @@ app.patch("/users/:userId", async (req, res) => {
   const { userId } = req.params;
   const updatedData = req.body;
 
-  console.log("PATCH request received for userId:", userId);
-  console.log("Payload received:", updatedData);
-
   try {
     const updatedStudent = await db("users")
       .where({ user_id: userId })

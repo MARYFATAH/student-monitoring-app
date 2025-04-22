@@ -56,7 +56,7 @@ export function AddStudent({
         // setStudents([...students, newStudent]);
         addStudent(newStudent);
         alert("Student added successfully!");
-        console.log("New Student:", newStudent); // Log the new student data
+
         resetModal(); // Reset modal fields after submission
       } else {
         alert("Failed to add student. Please try again.");
