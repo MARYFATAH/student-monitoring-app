@@ -24,40 +24,47 @@ export function StudentProfile() {
   // Fetch student profile and test data
   useEffect(() => {
     const fetchStudentProfile = async () => {
+      const token = await getToken();
+
       try {
         const response = await fetch(
-          `http://localhost:3000/users/${studentId}`
+          `http://localhost:3000/users/${studentId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
         if (!response.ok) {
-          throw new Error("Failed to fetch student profile");
+          throw new Error("Failed to fetch student data");
         }
         const studentData = await response.json();
         setSelectedStudent(studentData);
-        setEditedStudent(studentData);
+        setEditedStudent({ ...studentData });
         setSelectedDate(studentData.dob ? new Date(studentData.dob) : null);
       } catch (err) {
-        setError(err.message);
+        console.error("Error fetching student profile:", err);
       }
     };
 
-    const fetchStudentTests = async () => {
-      try {
-        const response = await fetch(
-          `http://localhost:3000/tests?studentId=${studentId}`
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch test data");
-        }
-        const testData = await response.json();
-        setTests(testData);
-      } catch (err) {
-        console.error("Error fetching tests:", err);
-      }
-    };
+    // const fetchStudentTests = async () => {
+    //   try {
+    //     const response = await fetch(
+    //       `http://localhost:3000/tests?studentId=${studentId}`
+    //     );
+    //     if (!response.ok) {
+    //       throw new Error("Failed to fetch test data");
+    //     }
+    //     const testData = await response.json();
+    //     setTests(testData);
+    //   } catch (err) {
+    //     console.error("Error fetching tests:", err);
+    //   }
+    // };
 
     if (studentId) {
       fetchStudentProfile();
-      fetchStudentTests();
+      //fetchStudentTests();
     }
   }, [studentId]);
 

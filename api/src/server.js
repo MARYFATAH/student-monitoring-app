@@ -20,12 +20,12 @@ app.use((req, _, next) => {
 });
 
 app.get("/", (_, res) => {
-  return res.json({ msg: "Welcome to the Student Monitoring API API" });
+  return res.json({ msg: "Welcome to the Student Monitoring APP" });
 });
 
 app.use(clerkMiddleware());
 
-app.use((req, _, next) => {
+app.use((req, res, next) => {
   req.auth = getAuth(req);
   if (!req.auth.userId) {
     return res.status(401).json({ error: "Unauthorized" });
@@ -33,13 +33,13 @@ app.use((req, _, next) => {
   next();
 });
 
-// app.use((req, _, next) => {
-//   console.debug("req.auth.userId:", req.auth.userId);
-//   next();
-// });
+app.use((req, _, next) => {
+  console.debug("req.auth.userId:", req.auth.userId);
+  next();
+});
 
-// app.get("/users", getUsers); // Handles ?role=student query
-// app.get("/users/:userId", getUserById); // Handles /clerkId4 path parameter
+app.get("/users", getUsers); // Handles ?role=student query
+app.get("/users/:userId", getUserById); // Handles /clerkId4 path parameter
 
 // Existing routes
 app.use("/users", users);

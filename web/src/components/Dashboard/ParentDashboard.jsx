@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { SideBar } from "./SideBar";
+import { SignOutButton } from "@clerk/clerk-react"; // Clerk for authentication
 
 import { EventList } from "../Events/EventList"; // Displays events related to their children
 import { StudentProfile } from "../Students/StudentProfile";

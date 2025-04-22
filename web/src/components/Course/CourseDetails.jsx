@@ -2,13 +2,15 @@ import React, { useEffect, useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { CourseSideBar } from "./CourseSideBar";
 import { useAuth } from "@clerk/clerk-react";
-import { students } from "../../Data/Course"; // Sample student data
 
 export function CourseDetails() {
   const { courseId } = useParams(); // Get courseId from the URL
   const [activeSection, setActiveSection] = useState("courses");
   const [courseDetails, setCourseDetails] = useState(null); // Course details
   const [courseStudents, setCourseStudents] = useState([]); // List of students
+  const [loadingStudents, setLoadingStudents] = useState(false);
+  const [courses, setCourses] = useState([]); // List of courses
+  const [students, setStudents] = useState([]); // List of all students
   const [selectedStudentId, setSelectedStudentId] = useState(""); // Individual student selection
   const [selectAll, setSelectAll] = useState(false); // Select all students
   const [tests, setTests] = useState([]); // List of tests
@@ -22,7 +24,10 @@ export function CourseDetails() {
   const [newTeacherLastName, setNewTeacherLastName] = useState(""); // New teacher last name
   const [selectedSchedule, setSelectedSchedule] = useState(""); // Course schedule
   const [selectedDescription, setSelectedDescription] = useState(""); // Course description
+  const [newCourseName, setNewCourseName] = useState(""); // New course name
   const [isEditing, setIsEditing] = useState(false); // Edit mode
+  const [loading, setLoading] = useState(false); // Loading state
+
   const { getToken } = useAuth(); // Authentication token
 
   // Fetch course details when the component mounts
@@ -42,6 +47,7 @@ export function CourseDetails() {
           throw new Error(`HTTP Error! Status: ${response.status}`);
         }
         const data = await response.json();
+        console.log("Course details:", data);
         setCourseDetails(data);
       } catch (err) {
         console.error("Error fetching course details:", err);
@@ -53,7 +59,9 @@ export function CourseDetails() {
   }, [courseId]);
 
   //Patch course details logic
-  const updateCourse = async (courseId, updatedData) => {
+  const updateCourse = async (updatedData) => {
+    // Validate courseId and updatedData
+    console.log("Updating course with ID:", courseId, "and data:", updatedData);
     if (!courseId || !updatedData) {
       console.error("Invalid course ID or updated data.");
       return;
@@ -84,37 +92,99 @@ export function CourseDetails() {
       }
       const data = await response.json();
       setCourseDetails(data);
+      console.log("Course details updated:", data);
     } catch (err) {
       console.error("Error updating course details:", err);
     }
   };
+  // Fetch students in course logic
+  const fetchStudentsInCourse = async () => {
+    try {
+      const token = await getToken();
+      const response = await fetch(
+        `http://localhost:3000/courses/${courseId}/students`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP Error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      setCourseStudents(data);
+    } catch (err) {
+      console.error("Error fetching students in course:", err);
+    }
+  };
 
+  useEffect(() => {
+    fetchStudentsInCourse();
+  }, []); // Fetch students in course when the component mounts
+
+  useEffect(() => {
+    const fetchAllStudents = async () => {
+      try {
+        const token = await getToken();
+        const response = await fetch("http://localhost:3000/students", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP Error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        setStudents(data);
+      } catch (err) {
+        console.error("Error fetching all students:", err);
+      }
+    };
+    fetchAllStudents(); // Fetch all students when the component mounts
+  }, []);
   // Add new student logic
   const handleAddStudent = () => {
     console.log("Adding student:", selectedStudentId, selectAll);
-    const newStudents = selectAll
-      ? students.filter(
-          (student) => !courseStudents.some((s) => s.id === student.id)
-        )
-      : students.filter(
-          (student) => parseInt(selectedStudentId) === student.id
-        );
 
-    setCourseStudents([...courseStudents, ...newStudents]);
-    setSelectedStudentId("");
-    setSelectAll(false);
+    if (selectAll) {
+      const newStudents = students.filter(
+        (student) => !courseStudents.some((s) => s.id === student.id) // Exclude already added students
+      );
+      setCourseStudents([...courseStudents, ...newStudents]);
+      setSelectAll(false);
+      updateStudentScores(newStudents);
+      return;
+    }
 
-    const updatedStudentScores = { ...studentScores };
-    newStudents.forEach((student) => {
-      if (!updatedStudentScores[student.id]) {
-        updatedStudentScores[student.id] = {};
-        tests.forEach((test) => {
-          updatedStudentScores[student.id][test.id] = 0;
-        });
-      }
+    if (!selectedStudentId) {
+      alert("Please select a student to add.");
+      return;
+    }
+
+    const newStudent = students.find(
+      (student) => student.id === parseInt(selectedStudentId, 10)
+    );
+    if (!newStudent) {
+      alert("Student not found.");
+      return;
+    }
+
+    setCourseStudents([...courseStudents, newStudent]); // Add student to course
+    updateStudentScores([newStudent]);
+    setSelectedStudentId(""); // Clear selection
+  };
+
+  // edit course logic
+
+  const handleEditMode = () => {
+    setNewCourseName(courseDetails?.name || "");
+    setSelectedSchedule({
+      weeklyday: courseDetails?.weeklyday || "",
+      weeklytime: courseDetails?.weeklytime || "",
     });
-
-    setStudentScores(updatedStudentScores);
+    setSelectedDescription(courseDetails?.description || "");
+    setIsEditing(true);
   };
 
   // Add new test logic
@@ -159,93 +229,82 @@ export function CourseDetails() {
 
   //save course details logic
 
-  const handleSaveCourseDetails = async () => {
-    // Validate input fields upfront
-    if (!newTeacherFirstName || !newTeacherLastName) {
-      alert("Teacher's first and last names are required.");
+  const handleSaveCourseDetails = async (updatedData) => {
+    if (!courseId || !updatedData || !Object.keys(updatedData).length) {
+      console.error("Invalid course ID or update data.");
+      alert("Cannot update course details due to missing information.");
       return;
     }
-
-    if (!selectedSchedule?.weekday || !selectedSchedule?.time) {
-      alert("Please select both weekday and time for the schedule.");
-      return;
-    }
-
-    if (!selectedDescription) {
-      alert("Course description is required.");
-      return;
-    }
-
-    // Construct updated course data
-    const updatedCourseData = {
-      first_name: newTeacherFirstName,
-      last_name: newTeacherLastName,
-      name: courseDetails.name,
-      weeklyday: selectedSchedule.weekday,
-      weeklytime: selectedSchedule.time,
-      teacher_id: courseDetails.teacher_id,
-      description: selectedDescription,
-    };
 
     try {
-      setLoading(true); // Start loading indicator
-      console.log("Updated course data being sent:", updatedCourseData);
+      const token = await getToken(); // Clerk auth
+      const response = await fetch(
+        `http://localhost:3000/courses/${courseId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(updatedData),
+        }
+      );
 
-      // Make API call to update course details
-      const response = await updateCourse(courseDetails.id, updatedCourseData);
+      console.log("Saving course details:", updatedData);
+      console.log("Response status:", response.status);
 
-      console.log("API response:", response);
-
-      if (response.status === 404) {
-        throw new Error("Course not found. It might have been deleted.");
-      } else if (!response.ok) {
-        throw new Error(`Failed to update course: ${response.statusText}`);
+      if (!response.ok) {
+        const errorDetails = await response.text(); // Fetch error details if available
+        throw new Error(
+          `HTTP Error! Status: ${response.status}, Details: ${errorDetails}`
+        );
       }
 
-      // Parse updated course data
       const updatedCourse = await response.json();
-      console.log("Updated course from API:", updatedCourse);
+      console.log("Updated course response:", updatedCourse);
+      console.log("Updated course ID:", updatedCourse.data.course_id);
+      if (!updatedCourse || !updatedCourse.data.course_id) {
+        throw new Error("Invalid response structure. Missing course data.");
+      }
 
-      // Update courses state
-      setCourses((prevCourses) =>
-        prevCourses.map((course) =>
-          course.id === updatedCourse.id ? updatedCourse : course
-        )
-      );
+      console.log("Updated course data:", updatedCourse);
 
-      // Notify user and exit editing mode
-      displayNotification("Course details updated successfully!", "success", {
-        autoClose: true,
-        closeDelay: 3000,
+      setCourses((prevCourses) => {
+        const updatedState = prevCourses.map((course) =>
+          course.id === courseId ? { ...course, ...updatedCourse } : course
+        );
+
+        console.log("Updated state after save:", updatedState);
+        if (!updatedState.some((course) => course.id === courseId)) {
+          console.warn("Course not found in state. Adding it as new.");
+          return [...prevCourses, updatedCourse]; // Fallback to append new course
+        }
+
+        return updatedState;
       });
-      setIsEditing(false);
+
+      alert("Course details updated successfully!");
+      setIsEditing(false); // Exit edit mode
     } catch (error) {
-      console.error("Error saving course details:", error);
-      displayNotification(
-        error.message || "An unexpected error occurred. Please try again.",
-        "error"
+      console.error("Error updating course:", error.message || error);
+      alert(
+        "Failed to update course. Please check your connection or try again."
       );
-    } finally {
-      setLoading(false); // End loading indicator
     }
   };
-  // Notification helper
-  const displayNotification = (message, type) => {
-    if (type === "success") {
-      // Replace with a notification library for better UI
-      alert(message); // Example fallback
-    } else if (type === "error") {
-      alert(message); // Example fallback
-    }
-  };
-
-  // Edit course logic
-  const handleEditCourse = () => {
-    setIsEditing(true); // Enter editing mode
-  };
-
   // Delete course logic
   const handleDeleteCourse = async () => {
+    if (!courseId) {
+      console.error("Invalid course ID:", courseId);
+      alert("Unable to delete. Course ID is missing.");
+      return;
+    }
+
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this course?"
+    );
+    if (!confirmDelete) return;
+
     try {
       const token = await getToken();
       const response = await fetch(
@@ -257,13 +316,35 @@ export function CourseDetails() {
           },
         }
       );
+
       if (!response.ok) {
-        throw new Error(`HTTP Error! Status: ${response.status}`);
+        if (response.status === 403) {
+          throw new Error(
+            "Unauthorized access. You do not have permission to delete this course."
+          );
+        } else if (response.status === 404) {
+          throw new Error(
+            "Course not found. It may have been deleted already."
+          );
+        } else {
+          throw new Error(`HTTP Error! Status: ${response.status}`);
+        }
       }
+
       const data = await response.json();
       console.log("Course deleted:", data);
+
+      // Update state to remove the course
+      setCourses((prevCourses) =>
+        prevCourses.filter((course) => course.course_id !== courseId)
+      );
+
+      alert("Course deleted successfully!");
     } catch (err) {
       console.error("Error deleting course:", err);
+      alert(
+        err.message || "An unexpected error occurred while deleting the course."
+      );
     }
   };
 
@@ -302,131 +383,156 @@ export function CourseDetails() {
         {activeSection === "courses" && (
           <div className="space-y-6">
             {/* Teacher Section */}
-            <div>
-              <h2 className="text-lg font-semibold text-gray-800 mb-2">
-                Teacher
-              </h2>
-              <div className="text-base text-gray-700 bg-gray-100 p-4 rounded-lg shadow">
-                {isEditing ? (
-                  <input
-                    type="text"
-                    onChange={(e) => setNewTeacherFirstName(e.target.value)}
-                    value={courseDetails.first_name || ""}
-                    placeholder="Enter teacher's first name"
-                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                ) : (
-                  courseDetails.first_name || "No teacher assigned"
-                )}
-              </div>
-            </div>
-
-            {/* Schedule Section */}
-            <div>
-              <h2 className="text-lg font-semibold text-gray-800 mb-2">
-                Schedule
-              </h2>
-              <div className="text-base text-gray-700 bg-gray-100 p-4 rounded-lg shadow">
-                {isEditing ? (
-                  <div className="space-y-4">
-                    {/* Weekdays Dropdown */}
-                    <label className="block text-gray-800 font-medium mb-1">
-                      Weekday
-                    </label>
-                    <select
-                      value={selectedSchedule.weekday}
-                      onChange={(e) =>
-                        setSelectedSchedule({
-                          ...selectedSchedule,
-                          weekday: e.target.value,
-                        })
-                      }
-                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-100 shadow"
-                    >
-                      <option value="" disabled>
-                        Select a day
-                      </option>
-                      <option value="Monday">Monday</option>
-                      <option value="Tuesday">Tuesday</option>
-                      <option value="Wednesday">Wednesday</option>
-                      <option value="Thursday">Thursday</option>
-                      <option value="Friday">Friday</option>
-                      <option value="Saturday">Saturday</option>
-                      <option value="Sunday">Sunday</option>
-                    </select>
-
-                    {/* Time Input */}
+            <div className="space-y-6">
+              {/* Course Name */}
+              <div>
+                <h2 className="text-lg font-semibold text-gray-800 mb-2">
+                  Course Name
+                </h2>
+                <div className="text-base text-gray-700 bg-gray-100 p-4 rounded-lg shadow">
+                  {isEditing ? (
                     <input
-                      type="time"
-                      value={selectedSchedule?.time || ""}
-                      onChange={(e) =>
-                        setSelectedSchedule({
-                          ...selectedSchedule,
-                          time: e.target.value,
-                        })
-                      }
+                      type="text"
+                      onChange={(e) => setNewCourseName(e.target.value)}
+                      value={newCourseName}
+                      placeholder="Enter course name"
+                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  ) : (
+                    courseDetails?.name || "No course name available"
+                  )}
+                </div>
+              </div>
+
+              {/* Schedule Section */}
+              <div>
+                <h2 className="text-lg font-semibold text-gray-800 mb-2">
+                  Schedule
+                </h2>
+                <div className="text-base text-gray-700 bg-gray-100 p-4 rounded-lg shadow">
+                  {isEditing ? (
+                    <div className="space-y-4">
+                      {/* Weekdays Dropdown */}
+                      <label className="block text-gray-800 font-medium mb-1">
+                        Weekday
+                      </label>
+                      <select
+                        value={selectedSchedule.weeklyday}
+                        onChange={(e) =>
+                          setSelectedSchedule({
+                            ...selectedSchedule,
+                            weeklyday: e.target.value,
+                          })
+                        }
+                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-100 shadow"
+                      >
+                        <option value="" disabled>
+                          Select a day
+                        </option>
+                        {[
+                          "Monday",
+                          "Tuesday",
+                          "Wednesday",
+                          "Thursday",
+                          "Friday",
+                          "Saturday",
+                          "Sunday",
+                        ].map((day) => (
+                          <option key={day} value={day}>
+                            {day}
+                          </option>
+                        ))}
+                      </select>
+
+                      {/* Time Input */}
+                      <label className="block text-gray-800 font-medium mb-1">
+                        Time
+                      </label>
+                      <input
+                        type="time"
+                        value={selectedSchedule.weeklytime}
+                        onChange={(e) =>
+                          setSelectedSchedule({
+                            ...selectedSchedule,
+                            weeklytime: e.target.value,
+                          })
+                        }
+                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-100 shadow"
+                      />
+                    </div>
+                  ) : (
+                    ` on ${courseDetails?.weeklyday || "Day not set"} at ${
+                      courseDetails?.weeklytime || "Time not set"
+                    }`
+                  )}
+                </div>
+              </div>
+
+              {/* Description Section */}
+              <div>
+                <h2 className="text-lg font-semibold text-gray-800 mb-2">
+                  Description
+                </h2>
+                <div className="text-base text-gray-700 bg-gray-100 p-4 rounded-lg shadow">
+                  {isEditing ? (
+                    <textarea
+                      onChange={(e) => setSelectedDescription(e.target.value)}
+                      value={selectedDescription}
+                      placeholder="Enter description"
                       className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-100 shadow"
                     />
-                  </div>
-                ) : (
-                  `${courseDetails?.weeklyday || "Weekday not set"} at ${
-                    courseDetails?.weeklytime || "Time not set"
-                  }`
-                )}
+                  ) : (
+                    courseDetails?.description || "No description available"
+                  )}
+                </div>
               </div>
-            </div>
 
-            {/* Description Section */}
-            <div>
-              <h2 className="text-lg font-semibold text-gray-800 mb-2">
-                Description
-              </h2>
-              <div className="text-base text-gray-700 bg-gray-100 p-4 rounded-lg shadow">
+              {/* Buttons */}
+              <div className="flex justify-center space-x-4 mt-4">
+                <button
+                  onClick={
+                    isEditing ? () => setIsEditing(false) : handleEditMode
+                  }
+                  className="bg-indigo-700 hover:bg-indigo-800 text-white font-bold py-2 px-4 rounded-sm shadow transition-all duration-300"
+                >
+                  {isEditing ? "Cancel" : "Edit Course Details"}
+                </button>
+
                 {isEditing ? (
-                  <textarea
-                    onChange={(e) => setSelectedDescription(e.target.value)}
-                    value={
-                      selectedDescription || courseDetails?.description || ""
+                  <button
+                    onClick={() =>
+                      handleSaveCourseDetails({
+                        name: newCourseName,
+                        weeklyday: selectedSchedule.weeklyday,
+                        weeklytime: selectedSchedule.weeklytime,
+                        description: selectedDescription,
+                      })
                     }
-                    placeholder="Enter description"
-                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-100 shadow"
-                  />
+                    disabled={
+                      !newCourseName ||
+                      !selectedSchedule.weeklyday ||
+                      !selectedSchedule.weeklytime
+                    }
+                    className="ml-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-sm shadow transition-all duration-300"
+                  >
+                    Save Changes
+                  </button>
                 ) : (
-                  courseDetails?.description || "No description available"
+                  <button
+                    onClick={() => {
+                      handleDeleteCourse();
+                      setActiveSection("courses");
+                    }}
+                    className="ml-4 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 px-4 rounded-sm shadow transition-all duration-300"
+                  >
+                    Delete Course
+                  </button>
                 )}
               </div>
             </div>
-
-            {/* Buttons */}
-            <button
-              onClick={() => setIsEditing(!isEditing)}
-              className="bg-indigo-900 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow transition-all duration-300"
-            >
-              {isEditing ? "Cancel" : "Edit Course Details"}
-            </button>
-
-            <button
-              onClick={(handleDeleteCourse, () => setActiveSection("courses"))}
-              className="ml-4 bg-pink-700 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg shadow transition-all duration-300"
-            >
-              Delete Course
-            </button>
-
-            {isEditing && (
-              <button
-                onClick={handleSaveCourseDetails}
-                disabled={
-                  !newTeacherFirstName ||
-                  !selectedSchedule?.weekday ||
-                  !selectedSchedule?.time
-                }
-                className="ml-4 bg-indigo-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow transition-all duration-300"
-              >
-                Save Changes
-              </button>
-            )}
           </div>
         )}
+
         {activeSection === "scores" && (
           <div>
             <h2 className="text-lg font-semibold text-gray-800 mb-4">
@@ -452,11 +558,16 @@ export function CourseDetails() {
                 <option value="" disabled>
                   Select a student
                 </option>
-                {courseStudents.map((student) => (
-                  <option key={student.id} value={student.id}>
-                    {student.firstname} {student.lastname}
-                  </option>
-                ))}
+                {students.map(
+                  (student) => (
+                    console.log("Student:", student) || "Student not found",
+                    (
+                      <option key={student.id} value={student.id}>
+                        {student.firstname} {student.lastname}
+                      </option>
+                    )
+                  )
+                )}
               </select>
             )}
             <button

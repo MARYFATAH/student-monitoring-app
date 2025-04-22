@@ -70,49 +70,6 @@ export function AddStudent({
     }
   }
 
-  //   const save = async () => {
-  //     try {
-  //       const newStudent = {
-  //         first_name: newStudentFirstName,
-  //         last_name: newStudentLastName,
-  //         email: newStudentEmail,
-  //         phone_number: newStudentPhone,
-  //         course_id: selectedCourseId,
-  //         dob: newDateOfBirth ? newDateOfBirth.toISOString() : null,
-  //       };
-
-  //       console.log("New Student:", newStudent); // Log the new student data
-
-  //       const response = await fetch("http://localhost:3000/users", {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify(newStudent),
-  //       });
-
-  //       if (!response.ok) {
-  //         const errorMessage = await response.json();
-  //         console.error(
-  //           "Failed to add student:",
-  //           errorMessage.error || response.statusText
-  //         );
-  //         console.log("Response:", response); // Log the response for debugging
-  //         throw new Error(errorMessage.error || "Failed to add student");
-  //       }
-  //       const createdStudent = await response.json();
-  //       setStudents((prevStudents) => [...prevStudents, createdStudent]); // Update state with the new student
-  //       console.log("New Student:", createdStudent); // Log the new student data
-
-  //       alert("Student added successfully!");
-  //       resetModal(); // Reset modal state after successful submission
-  //     } catch (error) {
-  //       console.error("Error adding student:", error);
-  //       alert(`There was an error adding the student: ${error.message}`);
-  //     }
-  //   };
-  // Add Event
-
   // Reset Modal Inputs
   const resetModal = () => {
     setShowStudentModal(false); // Close modal

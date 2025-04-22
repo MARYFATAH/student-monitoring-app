@@ -9,6 +9,7 @@ import { AddCourse } from "./AddCourse";
 import { AddStudent } from "./AddStudent";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { SignOutButton } from "@clerk/clerk-react";
 
 export function TeacherDashboard() {
   const { getToken } = useAuth(); // Clerk for authentication

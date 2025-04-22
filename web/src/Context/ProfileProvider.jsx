@@ -15,14 +15,19 @@ export function ProfileProvider({ children }) {
 
       try {
         const token = await getToken();
-        const response = await fetch(`http://localhost:3000/users/my-profile`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
+        console.log("Token:", token); // Debugging line to check the token
+        const response = await fetch(
+          `http://localhost:3000/users/x/my-profile`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
         const data = await response.json();
+        console.log("Profile data:", data);
         setProfile(data);
       } catch (err) {
         console.error("Error fetching profile:", err);

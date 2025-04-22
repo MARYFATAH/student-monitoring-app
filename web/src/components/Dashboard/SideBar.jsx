@@ -1,8 +1,10 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { SignOutButton } from "@clerk/clerk-react"; // Clerk for authentication
 import {
   faEnvelope,
   faCalendar,
   faUserGraduate,
+  faSignOutAlt, // FontAwesome icon for Sign Out
 } from "@fortawesome/free-solid-svg-icons";
 import { faBookOpen } from "@fortawesome/free-solid-svg-icons";
 
@@ -55,6 +57,14 @@ export function SideBar({ activeSection, setActiveSection }) {
         >
           <FontAwesomeIcon icon={faEnvelope} className="mr-3" />
           <span>Messages</span>
+        </li>
+        <li>
+          <SignOutButton>
+            <div className="flex items-center px-4 py-3 mb-2 cursor-pointer text-base rounded-md transition-all text-gray-800 hover:bg-purple-500 hover:text-white">
+              <FontAwesomeIcon icon={faSignOutAlt} className="mr-3" />
+              <span>Sign Out</span>
+            </div>
+          </SignOutButton>
         </li>
       </ul>
     </div>

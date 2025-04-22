@@ -17,19 +17,29 @@ export async function getCourses(req, res) {
 
 export async function getCourseById(req, res) {
   const { id } = req.params;
+
   try {
+    // Query database for course details along with teacher's name
     const result = await db("courses")
       .where({ course_id: id })
       .select("courses.*", "users.first_name", "users.last_name")
       .leftJoin("users", "users.user_id", "courses.teacher_id")
       .first();
+
+    // Check if the course exists
     if (!result) {
-      return res.status(404).json({ error: `Course not found` });
+      return res.status(404).json({ error: "Course not found" });
     }
+
+    // Respond with the fetched course data
     return res.json(result);
   } catch (err) {
-    console.log("Error fetching trip:", err);
-    return res.status(500).json({ error: "Internal server error" });
+    console.error("Error fetching course:", err); // Improved error message
+
+    // Return internal server error with additional context
+    return res
+      .status(500)
+      .json({ error: "Internal server error. Please try again later." });
   }
 }
 
@@ -77,50 +87,98 @@ export async function deleteCourse(req, res) {
 export async function updateCourse(req, res) {
   const { id } = req.params;
   const { userId } = req.auth;
-  const updateFields = req.body;
 
-  delete updateFields.teacher_id;
-  delete updateFields.course_id;
+  // Validate inputs
+  if (!id || !req.body || !Object.keys(req.body).length) {
+    return res.status(400).json({ error: "Invalid course ID or update data." });
+  }
+
+  // Sanitize update fields
+  const sanitizedFields = { ...req.body };
+  delete sanitizedFields.teacher_id;
+  delete sanitizedFields.course_id;
 
   try {
+    console.log("Update request received:", {
+      courseId: id,
+      userId,
+      fields: sanitizedFields,
+    });
+
     const [updatedCourse] = await db("courses")
       .where({ course_id: id, teacher_id: userId })
-      .update(updateFields)
+      .update(sanitizedFields)
       .returning("*");
+
     if (!updatedCourse) {
-      return res
-        .status(404)
-        .json({ error: `Course not found for user ${userId}` });
+      return res.status(404).json({
+        error: `Course with ID ${id} not found for user ${userId}.`,
+      });
     }
-    return res.status(200).json(updatedCourse);
+
+    console.log("Updated course successfully:", updatedCourse);
+    return res.status(200).json({
+      message: "Course updated successfully.",
+      data: updatedCourse,
+    });
   } catch (err) {
-    console.log("Error updating course:", err);
-    return res.status(500).json({ error: "Internal server error" });
+    console.error("Error updating course:", err.message); // Log error message for debugging
+    return res
+      .status(500)
+      .json({ error: "Failed to update course due to a server error." });
   }
 }
 
 export async function postCourse(req, res) {
-  const { name, description } = req.body;
+  const {
+    name,
+    description,
+    first_name,
+    last_name,
+    course_id,
+    weeklyday,
+    weeklytime,
+  } = req.body;
   const { userId } = req.auth;
-  console.log("userId", userId);
+
+  // Log the authenticated user ID for debugging
+  console.log("userId:", userId);
+
+  // Validate required fields
+  if (
+    !name ||
+    !description ||
+    !first_name ||
+    !last_name ||
+    !weeklyday ||
+    !weeklytime
+  ) {
+    return res.status(400).json({ error: "Missing required fields." });
+  }
+
   try {
+    // Insert course into the database
     const [newCourse] = await db("courses")
       .insert({
-        teacher_id: userId,
+        teacher_id: userId, // Authenticated user's ID
+
+        course_id, // Ensure this is unique or auto-generated
         name,
         description,
-        weeklyDays,
-        weeklyHours,
-        created_at: new Date(),
+        weeklyday,
+        weeklytime,
+        created_at: new Date(), // Current timestamp
       })
-      .returning("*");
+      .returning("*"); // Return the created course details
+
+    // Respond with the newly created course
     return res.status(201).json(newCourse);
   } catch (err) {
-    console.log("Error creating course:", err);
-    return res.status(500).json({ error: "Internal server error" });
+    // Log detailed error for debugging
+    console.error("Error creating course:", err.message);
+    return res.status(500).json({ error: "Internal server error." });
   }
 }
-
 export async function getStudentsInCourse(req, res) {
   const { id } = req.params;
   try {

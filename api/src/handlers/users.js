@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 
 // Fetch all users with an optional role filter
 export async function getUsers(req, res) {
+  console.log("Fetching all users with optional role filter");
   const { role } = req.query;
   try {
     const query = db("users").select("*");
@@ -19,7 +20,10 @@ export async function getUsers(req, res) {
 
 // Fetch a single user based on the authenticated user ID
 export async function getUser(req, res) {
+  console.log("Fetching user based on authenticated user ID");
   const { userId } = req.auth;
+  console.log("Authenticated user ID:", userId);
+  console.log("Request parameters:", req);
   try {
     const result = await db("users")
       .select("*")
@@ -40,6 +44,7 @@ export async function updateUser(req, res) {
   const { id } = req.params;
   const updateFields = req.body;
 
+  console.log("Updating user with ID:", id);
   try {
     const [updatedUser] = await db("users")
       .where({ user_id: id })
@@ -57,7 +62,10 @@ export async function updateUser(req, res) {
 
 // Fetch user by ID from URL parameters
 export const getUserById = async (req, res) => {
+  console.log("Fetching user by ID from URL parameters");
   const { userId } = req.params;
+  console.log("User ID from URL parameters:", userId);
+  console.log("Request parameters:", req.params);
   try {
     const user = await db("users")
       .select("*")
@@ -86,6 +94,7 @@ export const getUserById = async (req, res) => {
 
 // Create a new user (e.g., student or teacher)
 export async function createStudent(req, res) {
+  console.log("Creating a new student user");
   const { first_name, last_name, email, dob, phone_number } = req.body;
   const user_id = uuidv4();
   try {
