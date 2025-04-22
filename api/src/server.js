@@ -38,8 +38,8 @@ app.use((req, _, next) => {
   next();
 });
 
-app.get("/users", getUsers); // Handles ?role=student query
-app.get("/users/:userId", getUserById); // Handles /clerkId4 path parameter
+// app.get("/users", getUsers); // Handles ?role=student query
+// app.get("/users/:userId", getUserById); // Handles /clerkId4 path parameter
 
 // Existing routes
 app.use("/users", users);
@@ -49,23 +49,26 @@ app.listen(PORT, () => {
   console.log(`Student Monitoring API listening on port ${PORT}`);
 });
 
-app.patch("/users/:userId", async (req, res) => {
-  const { userId } = req.params;
-  const updatedData = req.body;
+// app.patch("/users/:userId", async (req, res) => {
+//   const { userId } = req.params;
+//   const updatedData = req.body;
 
-  try {
-    const updatedStudent = await db("users")
-      .where({ user_id: userId })
-      .update(updatedData)
-      .returning("*");
+//   console.log("PATCH request received for userId:", userId);
+//   console.log("Payload received:", updatedData);
 
-    if (!updatedStudent.length) {
-      return res.status(404).json({ error: "User not found" });
-    }
+//   try {
+//     const updatedStudent = await db("users")
+//       .where({ user_id: userId })
+//       .update(updatedData)
+//       .returning("*");
 
-    res.json(updatedStudent[0]);
-  } catch (error) {
-    console.error("Error updating user:", error); // Log error details
-    res.status(500).send("Internal server error");
-  }
-});
+//     if (!updatedStudent.length) {
+//       return res.status(404).json({ error: "User not found" });
+//     }
+
+//     res.json(updatedStudent[0]);
+//   } catch (error) {
+//     console.error("Error updating user:", error); // Log error details
+//     res.status(500).send("Internal server error");
+//   }
+// });

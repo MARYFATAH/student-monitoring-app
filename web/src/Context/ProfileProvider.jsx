@@ -15,8 +15,8 @@ export function ProfileProvider({ children }) {
 
       try {
         const token = await getToken();
-
-        const response = await fetch(`http:///x/my-profile`, {
+        console.log("Token:", token); // Debugging line to check the token
+        const response = await fetch(`http://localhost:3000/users/my-profile`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
