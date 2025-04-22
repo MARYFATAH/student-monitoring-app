@@ -38,8 +38,8 @@ app.use((req, _, next) => {
   next();
 });
 
-app.get("/users", getUsers); // Handles ?role=student query
-app.get("/users/:userId", getUserById); // Handles /clerkId4 path parameter
+// app.get("/users", getUsers); // Handles ?role=student query
+// app.get("/users/:userId", getUserById); // Handles /clerkId4 path parameter
 
 // Existing routes
 app.use("/users", users);
