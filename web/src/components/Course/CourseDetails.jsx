@@ -133,9 +133,11 @@ export function CourseDetails() {
       return;
     }
 
-    if (!addedStudents.some((s) => s.id === newStudent.id)) {
+    if (!addedStudents.some((s) => s.id === newStudent.user_id)) {
       setAddedStudents([...addedStudents, newStudent]);
-      setStudents(students.filter((student) => student.id !== newStudent.id));
+      setStudents(
+        students.filter((student) => student.user_id !== newStudent.user_id)
+      );
       setSelectAll(false);
 
       // Initialize student scores
@@ -175,12 +177,15 @@ export function CourseDetails() {
 
     const updatedStudentScores = { ...studentScores };
     courseStudents.forEach((student) => {
-      if (!updatedStudentScores[student.id]) {
-        updatedStudentScores[student.id] = {};
+      const studentKey = student.user_id || student.id; // Ensure correct ID reference
+
+      if (!updatedStudentScores[studentKey]) {
+        updatedStudentScores[studentKey] = {};
       }
-      updatedStudentScores[student.id][newTest.id] = 0;
+      updatedStudentScores[studentKey][newTest.id] = 0;
     });
 
+    console.log("Updated student scores for new test:", updatedStudentScores);
     setStudentScores(updatedStudentScores);
   };
 
@@ -551,7 +556,7 @@ export function CourseDetails() {
             </h2>
             <ul className="list-disc list-inside mb-4">
               {tests.length > 0
-                ? tests.map((test) => <li key={test.id}>{test.name}</li>)
+                ? tests.map((test) => <li key={test.user_id}>{test.name}</li>)
                 : "No tests added yet..."}
             </ul>
             <input
@@ -635,7 +640,7 @@ export function CourseDetails() {
               </thead>
               <tbody>
                 {addedStudents.map((student) => (
-                  <tr key={student.id}>
+                  <tr key={student.user_id}>
                     <td className="border border-gray-400 px-4 py-2">
                       {student.first_name} {student.last_name}
                     </td>
@@ -648,10 +653,10 @@ export function CourseDetails() {
                           type="number"
                           min="1"
                           max="6"
-                          value={studentScores[student.id]?.[test.id] || 0}
+                          value={studentScores[student.user_id]?.[test.id] || 0}
                           onChange={(e) =>
                             handleUpdateScore(
-                              student.id,
+                              student.user_id,
                               test.id,
                               parseInt(e.target.value, 10)
                             )
