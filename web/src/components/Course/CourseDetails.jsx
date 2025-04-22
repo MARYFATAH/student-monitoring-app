@@ -119,10 +119,9 @@ export function CourseDetails() {
       return;
     }
 
+    console.debug({ courseStudents, selectedStudentId });
     const newStudent = courseStudents.find(
-      (student) =>
-        Number(student.id) === Number(selectedStudentId) ||
-        Number(student.user_id) === Number(selectedStudentId)
+      (student) => student.user_id === selectedStudentId
     );
 
     console.log("Selected student ID:", selectedStudentId);
@@ -530,7 +529,7 @@ export function CourseDetails() {
                   Select a student
                 </option>
                 {courseStudents.map((student) => (
-                  <option key={student.id} value={student.id}>
+                  <option key={student.user_id} value={student.user_id}>
                     {student.first_name} {student.last_name}
                   </option>
                 ))}
