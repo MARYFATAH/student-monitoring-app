@@ -49,26 +49,26 @@ app.listen(PORT, () => {
   console.log(`Student Monitoring API listening on port ${PORT}`);
 });
 
-app.patch("/users/:userId", async (req, res) => {
-  const { userId } = req.params;
-  const updatedData = req.body;
+// app.patch("/users/:userId", async (req, res) => {
+//   const { userId } = req.params;
+//   const updatedData = req.body;
 
-  console.log("PATCH request received for userId:", userId);
-  console.log("Payload received:", updatedData);
+//   console.log("PATCH request received for userId:", userId);
+//   console.log("Payload received:", updatedData);
 
-  try {
-    const updatedStudent = await db("users")
-      .where({ user_id: userId })
-      .update(updatedData)
-      .returning("*");
+//   try {
+//     const updatedStudent = await db("users")
+//       .where({ user_id: userId })
+//       .update(updatedData)
+//       .returning("*");
 
-    if (!updatedStudent.length) {
-      return res.status(404).json({ error: "User not found" });
-    }
+//     if (!updatedStudent.length) {
+//       return res.status(404).json({ error: "User not found" });
+//     }
 
-    res.json(updatedStudent[0]);
-  } catch (error) {
-    console.error("Error updating user:", error); // Log error details
-    res.status(500).send("Internal server error");
-  }
-});
+//     res.json(updatedStudent[0]);
+//   } catch (error) {
+//     console.error("Error updating user:", error); // Log error details
+//     res.status(500).send("Internal server error");
+//   }
+// });
