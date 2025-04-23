@@ -120,9 +120,7 @@ export function CourseDetails() {
     }
 
     const newStudent = courseStudents.find(
-      (student) =>
-        Number(student.id) === Number(selectedStudentId) ||
-        Number(student.user_id) === Number(selectedStudentId)
+      (student) => student.user_id === selectedStudentId
     );
 
     console.log("Selected student ID:", selectedStudentId);
@@ -134,9 +132,11 @@ export function CourseDetails() {
       return;
     }
 
-    if (!addedStudents.some((s) => s.id === newStudent.id)) {
+    if (!addedStudents.some((s) => s.id === newStudent.user_id)) {
       setAddedStudents([...addedStudents, newStudent]);
-      setStudents(students.filter((student) => student.id !== newStudent.id));
+      setStudents(
+        students.filter((student) => student.user_id !== newStudent.user_id)
+      );
       setSelectAll(false);
 
       // Initialize student scores
@@ -176,10 +176,10 @@ export function CourseDetails() {
 
     const updatedStudentScores = { ...studentScores };
     courseStudents.forEach((student) => {
-      if (!updatedStudentScores[student.id]) {
-        updatedStudentScores[student.id] = {};
+      if (!updatedStudentScores[student.user_id]) {
+        updatedStudentScores[student.user_id] = {};
       }
-      updatedStudentScores[student.id][newTest.id] = 0;
+      updatedStudentScores[student.user_id][newTest.id] = 0;
     });
 
     setStudentScores(updatedStudentScores);
@@ -530,7 +530,7 @@ export function CourseDetails() {
                   Select a student
                 </option>
                 {courseStudents.map((student) => (
-                  <option key={student.id} value={student.id}>
+                  <option key={student.user_id} value={student.user_id}>
                     {student.first_name} {student.last_name}
                   </option>
                 ))}
@@ -636,7 +636,7 @@ export function CourseDetails() {
               </thead>
               <tbody>
                 {addedStudents.map((student) => (
-                  <tr key={student.id}>
+                  <tr key={student.user_id}>
                     <td className="border border-gray-400 px-4 py-2">
                       {student.first_name} {student.last_name}
                     </td>
@@ -649,10 +649,10 @@ export function CourseDetails() {
                           type="number"
                           min="1"
                           max="6"
-                          value={studentScores[student.id]?.[test.id] || 0}
+                          value={studentScores[student.user_id]?.[test.id] || 0}
                           onChange={(e) =>
                             handleUpdateScore(
-                              student.id,
+                              student.user_id,
                               test.id,
                               parseInt(e.target.value, 10)
                             )
