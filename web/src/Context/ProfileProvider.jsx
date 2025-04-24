@@ -15,7 +15,7 @@ export function ProfileProvider({ children }) {
 
       try {
         const token = await getToken();
-        console.log("Token:", token); // Debugging line to check the token
+
         const response = await fetch(`http://localhost:3000/users/my-profile`, {
           method: "GET",
           headers: {
