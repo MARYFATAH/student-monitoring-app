@@ -19,8 +19,6 @@ export function StudentProfile() {
 
   const { getToken } = useAuth();
 
-  console.log("studentId from useParams:", studentId);
-
   // Fetch student profile and test data
   useEffect(() => {
     const fetchStudentProfile = async () => {
@@ -93,7 +91,7 @@ export function StudentProfile() {
   const saveChanges = async () => {
     try {
       const token = await getToken();
-      console.log("Saving changes:", editedStudent);
+
       const response = await fetch(`http://localhost:3000/users/${studentId}`, {
         method: "PATCH",
         headers: {
