@@ -1,5 +1,4 @@
 export function decodeAuthHeader(req, res, next) {
-  console.debug("req:", req);
   console.log(req.headers.authorization);
   req.auth = { userId: req.headers.authorization };
   return next();

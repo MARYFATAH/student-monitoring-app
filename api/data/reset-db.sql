@@ -173,17 +173,13 @@ VALUES
     (3, 'homework', 'Science Homework 1', 'Complete the lab report', '2025-05-10'),
     (3, 'test', 'Science Test 1', 'Test on chapter 3', '2025-05-25');
 
--- INSERT INTO studentapp.scores (student_id, assignment_id, score)
--- VALUES
---     ('clerkId4', 1, 85),
---     ('clerkId5', 1, 90),
---     ('clerkId6', 1, -1),
---     ('clerkId4', 2, 78),
---     ('clerkId5', 2, 88),
---     ('user_2vTtGULPmuR6g4tCGOodztViTjk', 3, 92),
---     ('user_2vlZdvA4w0gbX9w4oFdRkTaGghC', 4, -1),
---     ('user_2vlZdvA4w0gbX9w4oFdRkTaGghC', 5, 95),
---     ('user_2vTtGULPmuR6g4tCGOodztViTjk', 6, 80);
+INSERT INTO studentapp.scores (student_id, assignment_id, score)
+VALUES
+    ('clerkId4', 1, 1),
+    ('clerkId5', 1, 3),
+    ('clerkId6', 1, 2),
+    ('clerkId4', 2, 5),
+    ('clerkId5', 2, -1);
 
 -- INSERT INTO studentapp.events (course_id, related_assignment_id, name, description, event_date, start_time, end_time)
 -- VALUES
