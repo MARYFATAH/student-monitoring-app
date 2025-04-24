@@ -25,11 +25,14 @@ export function StudentProfile() {
       const token = await getToken();
 
       try {
-        const response = await fetch(`http:///${studentId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          `http://localhost:3000/users/${studentId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         if (!response.ok) {
           throw new Error("Failed to fetch student data");
         }
@@ -89,7 +92,7 @@ export function StudentProfile() {
     try {
       const token = await getToken();
 
-      const response = await fetch(`http:///${studentId}`, {
+      const response = await fetch(`http://localhost:3000/users/${studentId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -113,6 +116,7 @@ export function StudentProfile() {
       }
 
       const updatedStudent = await response.json();
+      console.log("Updated student data:", updatedStudent);
 
       // Update state and exit edit mode
       setSelectedStudent(updatedStudent);
@@ -134,9 +138,12 @@ export function StudentProfile() {
   const deleteStudent = async () => {
     if (window.confirm("Are you sure you want to delete this student?")) {
       try {
-        const response = await fetch(`http:///${studentId}`, {
-          method: "DELETE",
-        });
+        const response = await fetch(
+          `http://localhost:3000/users/${studentId}`,
+          {
+            method: "DELETE",
+          }
+        );
 
         if (!response.ok) {
           throw new Error("Failed to delete student");
