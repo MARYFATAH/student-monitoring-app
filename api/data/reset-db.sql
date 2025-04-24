@@ -166,12 +166,12 @@ VALUES
 
 INSERT INTO studentapp.assignments (course_id, assignment_type, name, description, due_date)
 VALUES
-    (1, 'homework', 'Math Homework 1', 'Solve the problems in chapter 1', '2023-10-01'),
-    (1, 'test', 'Math Test 1', 'Test on chapter 1', '2023-10-15'),
-    (2, 'homework', 'History Homework 1', 'Read chapter 2 and answer questions', '2023-10-05'),
-    (2, 'test', 'History Test 1', 'Test on chapter 2', '2023-10-20'),
-    (3, 'homework', 'Science Homework 1', 'Complete the lab report', '2023-10-10'),
-    (3, 'test', 'Science Test 1', 'Test on chapter 3', '2023-10-25');
+    (1, 'homework', 'Math Homework 1', 'Solve the problems in chapter 1', '2025-05-01'),
+    (1, 'test', 'Math Test 1', 'Test on chapter 1', '2025-05-15'),
+    (2, 'homework', 'History Homework 1', 'Read chapter 2 and answer questions', '2025-05-05'),
+    (2, 'test', 'History Test 1', 'Test on chapter 2', '2025-05-20'),
+    (3, 'homework', 'Science Homework 1', 'Complete the lab report', '2025-05-10'),
+    (3, 'test', 'Science Test 1', 'Test on chapter 3', '2025-05-25');
 
 -- INSERT INTO studentapp.scores (student_id, assignment_id, score)
 -- VALUES

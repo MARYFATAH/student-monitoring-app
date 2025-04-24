@@ -1,13 +1,11 @@
 import { db } from "../util/db.js";
 
 export async function getAssignments(req, res) {
-  const { userId } = req.auth;
   const { course_id } = req.query;
-  console.log("userId", userId);
   try {
     const query = db("assignments");
     if (course_id) {
-      query.where({ course_id });
+      query.where({ "assignments.course_id": course_id });
     }
     query
       .select("assignments.*", "courses.name AS course_name")
@@ -15,7 +13,7 @@ export async function getAssignments(req, res) {
     const result = await query;
     return res.json(result);
   } catch (err) {
-    console.log("Error fetching users:", err);
+    console.log("Error fetching assignments:", err);
     return res.status(500).json({ error: "Internal server error" });
   }
 }
@@ -26,8 +24,8 @@ export async function getAssignmentById(req, res) {
   try {
     const result = await db("assignments")
       .where({ assignment_id: id })
-      .select("assignments.*", "users.first_name", "users.last_name")
-      .leftJoin("users", "users.user_id", "assignments.teacher_id")
+      .select("assignments.*", "courses.name AS course_name")
+      .leftJoin("courses", "courses.course_id", "assignments.course_id")
       .first();
 
     if (!result) {
@@ -45,17 +43,15 @@ export async function getAssignmentById(req, res) {
 }
 
 export async function createAssignment(req, res) {
-  const { name, description, course_id } = req.body;
-  const { userId } = req.auth;
-  console.log("userId", userId);
+  const { name, assignment_type, description, course_id, due_date } = req.body;
   try {
     const [newAssignment] = await db("assignments")
       .insert({
-        teacher_id: userId,
         name,
+        assignment_type,
         description,
         course_id,
-        created_at: new Date(),
+        due_date,
       })
       .returning("*");
     return res.status(201).json(newAssignment);
@@ -66,7 +62,7 @@ export async function createAssignment(req, res) {
 }
 export async function updateAssignment(req, res) {
   const { id } = req.params;
-  const { name, description, course_id } = req.body;
+  const { name, description, course_id, due_date, assignment_type } = req.body;
 
   try {
     const [updatedAssignment] = await db("assignments")
@@ -76,7 +72,8 @@ export async function updateAssignment(req, res) {
           name,
           description,
           course_id,
-          updated_at: new Date(),
+          due_date,
+          assignment_type,
         },
         ["*"]
       );
@@ -93,17 +90,14 @@ export async function updateAssignment(req, res) {
 }
 export async function deleteAssignment(req, res) {
   const { id } = req.params;
-  const { userId } = req.auth;
 
   try {
     const deletedAssignment = await db("assignments")
-      .where({ assignment_id: id, teacher_id: userId })
+      .where({ assignment_id: id })
       .del();
 
     if (!deletedAssignment) {
-      return res
-        .status(404)
-        .json({ error: `Assignment not found for user ${userId}` });
+      return res.status(404).json({ error: `Assignment not found` });
     }
 
     return res.status(204).send();
