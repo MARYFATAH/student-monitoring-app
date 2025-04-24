@@ -50,6 +50,58 @@ CREATE TABLE studentapp.students2courses
     FOREIGN KEY (course_id) REFERENCES studentapp.courses(course_id) ON DELETE CASCADE
 );
 
+-- CREATE, UPDATE, DELETE, GET per course and per student
+-- /assignmets
+
+-- assignments
+-- type "homework", "test"
+DROP TABLE IF EXISTS studentapp.assignments CASCADE;
+CREATE TABLE studentapp.assignments(
+    assignment_id SERIAL PRIMARY KEY,
+    course_id INT NOT NULL,
+    assignment_type VARCHAR(255) NOT NULL,
+    name VARCHAR(255),
+    description TEXT,
+    due_date DATE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (course_id) REFERENCES studentapp.courses(course_id) ON DELETE CASCADE
+);
+
+-- CREATE, UPDATE, DELETE, GET per assignment, per student
+-- /scores
+
+-- scores
+-- score -1 means absent
+DROP TABLE IF EXISTS studentapp.scores CASCADE;
+CREATE TABLE studentapp.scores(
+    student_id VARCHAR(255) NOT NULL,
+    assignment_id INT NOT NULL,
+    score INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (student_id) REFERENCES studentapp.users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (assignment_id) REFERENCES studentapp.assignments(assignment_id) ON DELETE CASCADE,
+    PRIMARY KEY (student_id, assignment_id)
+);
+
+-- CREATE, UPDATE, DELETE, GET all
+-- /events
+
+-- events
+DROP TABLE IF EXISTS studentapp.events CASCADE;
+CREATE TABLE studentapp.events(
+    event_id SERIAL PRIMARY KEY,
+    course_id INT NOT NULL,
+    related_assignment_id INT,
+    name VARCHAR(255),
+    description TEXT,
+    event_date DATE NOT NULL,
+    start_time TIME,
+    end_time TIME,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (course_id) REFERENCES studentapp.courses(course_id) ON DELETE CASCADE,
+    FOREIGN KEY (related_assignment_id) REFERENCES studentapp.assignments(assignment_id) ON DELETE CASCADE
+);
+
 INSERT INTO studentapp.users (user_id, first_name, last_name, role)
 VALUES
     ('clerkId1', 'Joe','Admin','admin'),
@@ -111,3 +163,30 @@ VALUES
     ('user_2vlZdvA4w0gbX9w4oFdRkTaGghC', 3),
     ('user_2vTtGULPmuR6g4tCGOodztViTjk', 4),
     ('user_2vTtGULPmuR6g4tCGOodztViTjk', 5);
+
+INSERT INTO studentapp.assignments (course_id, assignment_type, name, description, due_date)
+VALUES
+    (1, 'homework', 'Math Homework 1', 'Solve the problems in chapter 1', '2025-05-01'),
+    (1, 'test', 'Math Test 1', 'Test on chapter 1', '2025-05-15'),
+    (2, 'homework', 'History Homework 1', 'Read chapter 2 and answer questions', '2025-05-05'),
+    (2, 'test', 'History Test 1', 'Test on chapter 2', '2025-05-20'),
+    (3, 'homework', 'Science Homework 1', 'Complete the lab report', '2025-05-10'),
+    (3, 'test', 'Science Test 1', 'Test on chapter 3', '2025-05-25');
+
+-- INSERT INTO studentapp.scores (student_id, assignment_id, score)
+-- VALUES
+--     ('clerkId4', 1, 85),
+--     ('clerkId5', 1, 90),
+--     ('clerkId6', 1, -1),
+--     ('clerkId4', 2, 78),
+--     ('clerkId5', 2, 88),
+--     ('user_2vTtGULPmuR6g4tCGOodztViTjk', 3, 92),
+--     ('user_2vlZdvA4w0gbX9w4oFdRkTaGghC', 4, -1),
+--     ('user_2vlZdvA4w0gbX9w4oFdRkTaGghC', 5, 95),
+--     ('user_2vTtGULPmuR6g4tCGOodztViTjk', 6, 80);
+
+-- INSERT INTO studentapp.events (course_id, related_assignment_id, name, description, event_date, start_time, end_time)
+-- VALUES
+--     (1, 1, 'Math Test 1', 'Math Test 1', '2023-10-15', NULL, NULL),
+--     (2, 3, 'History Class', 'History class for chapter 1', '2023-10-05', '11:00:00', '12:30:00'),
+--     (3, 5, 'Science Class', 'Science class for chapter 1', '2023-10-10', '13:00:00', '14:30:00');

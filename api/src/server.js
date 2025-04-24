@@ -4,9 +4,8 @@ import cors from "cors";
 import { decodeAuthHeader } from "./middleware/decodeAuthHeader.js";
 import users from "./routes/users.js";
 import courses from "./routes/courses.js";
+import assignments from "./routes/assignments.js";
 import { clerkMiddleware, createClerkClient, getAuth } from "@clerk/express";
-// Adding these additional routes for enhanced functionality
-import { getUsers, getUserById } from "./handlers/users.js";
 
 const PORT = process.env.PORT || 3000;
 
@@ -24,6 +23,7 @@ app.get("/", (_, res) => {
 });
 
 app.use(clerkMiddleware());
+// app.use(decodeAuthHeader);
 
 app.use((req, res, next) => {
   req.auth = getAuth(req);
@@ -44,6 +44,7 @@ app.use((req, _, next) => {
 // Existing routes
 app.use("/users", users);
 app.use("/courses", courses);
+app.use("/assignments", assignments);
 
 app.listen(PORT, () => {
   console.log(`Student Monitoring API listening on port ${PORT}`);
