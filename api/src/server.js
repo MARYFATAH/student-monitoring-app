@@ -22,8 +22,8 @@ app.get("/", (_, res) => {
   return res.json({ msg: "Welcome to the Student Monitoring APP" });
 });
 
-// app.use(clerkMiddleware());
-app.use(decodeAuthHeader);
+app.use(clerkMiddleware());
+// app.use(decodeAuthHeader);
 
 app.use((req, res, next) => {
   req.auth = getAuth(req);
