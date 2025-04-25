@@ -7,12 +7,13 @@ import {
   updateScore,
 } from "../handlers/scores.js";
 import { requireAuth } from "../middleware/decodeAuthHeader.js";
+import { allowForRoles } from "../middleware/allowForRoles.js";
 
 router.use(requireAuth);
 
-router.get("/", getScores);
-router.post("/", createScore);
-router.patch("/:id", updateScore);
-router.delete("/:id", deleteScore);
+router.get("/", allowForRoles(["teacher", "student"]), getScores);
+router.post("/", allowForRoles(["teacher"]), createScore);
+router.patch("/:id", allowForRoles(["teacher"]), updateScore);
+router.delete("/:id", allowForRoles(["teacher"]), deleteScore);
 
 export default router;

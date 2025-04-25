@@ -181,8 +181,8 @@ VALUES
     ('clerkId4', 2, 5),
     ('clerkId5', 2, -1);
 
--- INSERT INTO studentapp.events (course_id, related_assignment_id, name, description, event_date, start_time, end_time)
--- VALUES
---     (1, 1, 'Math Test 1', 'Math Test 1', '2023-10-15', NULL, NULL),
---     (2, 3, 'History Class', 'History class for chapter 1', '2023-10-05', '11:00:00', '12:30:00'),
---     (3, 5, 'Science Class', 'Science class for chapter 1', '2023-10-10', '13:00:00', '14:30:00');
+INSERT INTO studentapp.events (course_id, related_assignment_id, name, description, event_date, start_time, end_time)
+VALUES
+    (1, 2, 'Math Test 1', 'Test on chapter 1', '2025-05-15', NULL, NULL),
+    (2, 4, 'History Test', 'Test on chapter 2', '2025-05-20', NULL, NULL),
+    (3, NULL, 'Party', 'Free cocktails!', '2025-05-12', '20:00:00', '23:00:00');

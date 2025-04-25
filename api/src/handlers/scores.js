@@ -2,8 +2,13 @@ import { db } from "../util/db.js";
 
 export async function getScores(req, res) {
   const { course_id, student_id } = req.query;
-  const { userId: loggedInUserId } = req.auth;
-  //TODO check if the loggedInUserId is a teacher OR the student whose scores are requested
+  const { userId, role } = req.auth;
+  //check if the loggedInUserId is a teacher OR the student whose scores are requested
+
+  if (role !== "teacher" && userId !== student_id) {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+
   try {
     const query = db("scores");
 
@@ -36,8 +41,7 @@ export async function getScores(req, res) {
 
 export async function createScore(req, res) {
   const { assignment_id, student_id, score } = req.body;
-  const { userId: loggedInUserId } = req.auth;
-  //TODO check if the loggedInUserId is a teacher
+
   try {
     const [newScore] = await db("scores")
       .insert({
@@ -57,7 +61,6 @@ export async function updateScore(req, res) {
   const { id } = req.params;
   const { assignment_id, student_id, score } = req.body;
   const { userId: loggedInUserId } = req.auth;
-  //TODO check if the loggedInUserId is a teacher
   try {
     const updatedScore = await db("scores").where({ score_id: id }).update({
       assignment_id,
@@ -74,7 +77,6 @@ export async function updateScore(req, res) {
 export async function deleteScore(req, res) {
   const { id } = req.params;
   const { userId: loggedInUserId } = req.auth;
-  //TODO check if the loggedInUserId is a teacher
   try {
     await db("scores").where({ score_id: id }).del();
     return res.status(204).send();

@@ -6,6 +6,7 @@ import users from "./routes/users.js";
 import courses from "./routes/courses.js";
 import assignments from "./routes/assignments.js";
 import scores from "./routes/scores.js";
+import events from "./routes/events.js";
 import { clerkMiddleware, createClerkClient, getAuth } from "@clerk/express";
 
 const PORT = process.env.PORT || 3000;
@@ -51,6 +52,7 @@ app.use("/users", users);
 app.use("/courses", courses);
 app.use("/assignments", assignments);
 app.use("/scores", scores);
+app.use("/events", events);
 
 app.listen(PORT, () => {
   console.log(`Student Monitoring API listening on port ${PORT}`);
