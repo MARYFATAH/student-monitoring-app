@@ -8,7 +8,7 @@ export function allowForRoles(allowedRoles) {
     const { role } = req.auth;
 
     if (role === "admin" || allowedRoles.includes(role)) {
-      next();
+      return next();
     }
     return res.status(403).json({ error: "Forbidden" });
   };

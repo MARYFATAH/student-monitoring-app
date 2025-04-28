@@ -14,6 +14,7 @@ export async function verifyUser(req, _, next) {
       })
       .first();
     req.auth.role = user?.role || "user";
+    console.log("User role set to:", req.auth.role);
     if (!user) {
       console.log("User not found, creating new user entry");
       await db("users").insert({
