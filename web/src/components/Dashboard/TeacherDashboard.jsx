@@ -113,78 +113,71 @@ export function TeacherDashboard() {
   };
 
   return (
-    <div className="h-screen flex bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg shadow-lg">
+    <div className="h-[90vh] flex bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg shadow-lg overflow-hidden">
       {/* Sidebar */}
       <SideBar
         activeSection={activeSection}
         setActiveSection={setActiveSection}
-        className="w-full lg:w-1/4 bg-blue-600 text-white shadow-md hidden lg:block"
+        className="w-full lg:w-1/4 bg-violet-600 text-white shadow-md hidden lg:block"
       />
 
       {/* Main Content */}
-      <div className="flex-grow p-4 lg:p-6">
-        <div className="p-4 lg:p-6">
-          {/* Courses Section */}
-          {activeSection === "courses" && (
-            <div className="space-y-4">
-              <h1 className="text-xl lg:text-2xl font-semibold text-white">
-                Courses
-              </h1>
-              <CourseList
-                courses={courses}
-                setCourses={setCourses}
-                error={error}
-                loading={loading}
-              />
-              <div className="flex justify-end">
-                <button
-                  className="bg-indigo-700 text-white py-2 px-4 rounded hover:bg-indigo-900 lg:px-6"
-                  onClick={() => setShowCourseModal(true)}
-                >
-                  Add Course
-                </button>
-              </div>
+      <div className="flex-grow p-6 lg:p-8 overflow-y-auto">
+        {/* Courses Section */}
+        {activeSection === "courses" && (
+          <div className="space-y-6">
+            <h1 className="text-2xl font-semibold text-white">Courses</h1>
+            <CourseList
+              courses={courses}
+              setCourses={setCourses}
+              error={error}
+              loading={loading}
+            />
+            <div className="flex justify-end">
+              <button
+                className="bg-violet-700 hover:bg-violet-900 text-white font-bold py-2 px-6 rounded shadow-lg transition duration-300"
+                onClick={() => setShowCourseModal(true)}
+              >
+                Add Course
+              </button>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Students Section */}
-          {activeSection === "students" && (
-            <div className="space-y-4">
-              <h1 className="text-xl lg:text-2xl font-semibold text-white">
-                Students
-              </h1>
-              <StudentList />
-              <div className="flex justify-end">
-                <button
-                  className="bg-indigo-700 text-white py-2 px-4 rounded hover:bg-indigo-900 lg:px-6"
-                  onClick={() => setShowStudentModal(true)}
-                >
-                  Add Student
-                </button>
-              </div>
+        {/* Students Section */}
+        {activeSection === "students" && (
+          <div className="space-y-6">
+            <h1 className="text-2xl font-semibold text-white">Students</h1>
+            <StudentList />
+            <div className="flex justify-end">
+              <button
+                className="bg-violet-700 hover:bg-violet-900 text-white font-bold py-2 px-6 rounded shadow-lg transition duration-300"
+                onClick={() => setShowStudentModal(true)}
+              >
+                Add Student
+              </button>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Events Section */}
-          {activeSection === "events" && (
-            <div className="space-y-4">
-              <h1 className="text-xl lg:text-2xl font-semibold text-gray-800">
-                Events
-              </h1>
-              <EventList events={events} />
-              <div className="flex justify-end">
-                <button
-                  className="bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-900 lg:px-6"
-                  onClick={() => setShowEventModal(true)}
-                >
-                  Add Event
-                </button>
-              </div>
+        {/* Events Section */}
+        {activeSection === "events" && (
+          <div className="space-y-6">
+            <h1 className="text-2xl font-semibold text-white">Events</h1>
+            <EventList events={events} />
+            <div className="flex justify-end">
+              <button
+                className="bg-violet-700 hover:bg-violet-900 text-white font-bold py-2 px-6 rounded shadow-lg transition duration-300"
+                onClick={() => setShowEventModal(true)}
+              >
+                Add Event
+              </button>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
+      {/* Modals */}
       {/* Course Modal */}
       {showCourseModal && (
         <AddCourse
@@ -193,6 +186,7 @@ export function TeacherDashboard() {
           setShowCourseModal={setShowCourseModal}
         />
       )}
+
       {/* Student Modal */}
       {showStudentModal && (
         <AddStudent
@@ -209,36 +203,64 @@ export function TeacherDashboard() {
           title="Add New Event"
           onCancel={resetModal}
           onSubmit={handleAddEvent}
-          submitText="Add Event"
-          className="max-w-full lg:max-w-lg p-4 lg:p-6 mx-auto"
+          submitText={"Add Event"}
+          className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg shadow-lg"
         >
-          <input
-            type="text"
-            placeholder="Event Name"
-            className="w-full p-2 lg:p-3 border rounded mb-4"
-            value={newEventName}
-            onChange={(e) => setNewEventName(e.target.value)}
-          />
-          <DatePicker
-            selected={newEventDate}
-            onChange={(date) => setNewEventDate(date)}
-            dateFormat="dd/MM/yyyy"
-            className="w-full p-2 lg:p-3 border rounded mb-4"
-          />
-          <input
-            type="text"
-            placeholder="Event Location"
-            className="w-full p-2 lg:p-3 border rounded mb-4"
-            value={newEventLocation}
-            onChange={(e) => setNewEventLocation(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Event Description"
-            className="w-full p-2 lg:p-3 border rounded mb-4"
-            value={newEventDescription}
-            onChange={(e) => setNewEventDescription(e.target.value)}
-          />
+          <div className="space-y-6">
+            {/* Event Name */}
+            <div>
+              <label className="block text-lg font-semibold text-violet-800 mb-1">
+                Event Name
+              </label>
+              <input
+                type="text"
+                placeholder="Enter Event Name"
+                className="w-full px-4 py-2 border border-violet-300 rounded-lg focus:ring-2 focus:ring-violet-500 bg-violet-50 shadow"
+                value={newEventName}
+                onChange={(e) => setNewEventName(e.target.value)}
+              />
+            </div>
+
+            {/* Event Date */}
+            <div>
+              <label className="block text-lg font-semibold text-violet-800 mb-1">
+                Event Date
+              </label>
+              <DatePicker
+                selected={newEventDate}
+                onChange={(date) => setNewEventDate(date)}
+                dateFormat="dd/MM/yyyy"
+                className="w-full px-4 py-2 border border-violet-300 rounded-lg focus:ring-2 focus:ring-violet-500 bg-violet-50 shadow"
+              />
+            </div>
+
+            {/* Event Location */}
+            <div>
+              <label className="block text-lg font-semibold text-violet-800 mb-1">
+                Event Location
+              </label>
+              <input
+                type="text"
+                placeholder="Enter Location"
+                className="w-full px-4 py-2 border border-violet-300 rounded-lg focus:ring-2 focus:ring-violet-500 bg-violet-50 shadow"
+                value={newEventLocation}
+                onChange={(e) => setNewEventLocation(e.target.value)}
+              />
+            </div>
+
+            {/* Event Description */}
+            <div>
+              <label className="block text-lg font-semibold text-violet-800 mb-1">
+                Event Description
+              </label>
+              <textarea
+                placeholder="Enter Description"
+                className="w-full px-4 py-2 border border-violet-300 rounded-lg focus:ring-2 focus:ring-violet-500 bg-violet-50 shadow"
+                value={newEventDescription}
+                onChange={(e) => setNewEventDescription(e.target.value)}
+              />
+            </div>
+          </div>
         </Modal>
       )}
     </div>

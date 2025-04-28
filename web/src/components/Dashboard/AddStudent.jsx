@@ -82,56 +82,99 @@ export function AddStudent({
       onSubmit={save}
       isSaving={isSaving}
       submitText="Add Student"
+      className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg shadow-lg"
     >
-      <input
-        type="text"
-        placeholder="Student First Name"
-        className="w-full p-2 border rounded mb-4"
-        value={newStudentFirstName}
-        onChange={(e) => setNewStudentFirstName(e.target.value)}
-      />
-      <input
-        type="text"
-        placeholder="Student Last Name"
-        className="w-full p-2 border rounded mb-4"
-        value={newStudentLastName}
-        onChange={(e) => setNewStudentLastName(e.target.value)}
-      />
-      <input
-        type="text"
-        placeholder="Email"
-        className="w-full p-2 border rounded mb-4"
-        value={newStudentEmail}
-        onChange={(e) => setNewStudentEmail(e.target.value)}
-      />
-      <input
-        type="text"
-        placeholder="Phone"
-        className="w-full p-2 border rounded mb-4"
-        value={newStudentPhone}
-        onChange={(e) => setNewStudentPhone(e.target.value)}
-      />
-      <select
-        className="w-full p-2 border rounded mb-4"
-        value={selectedCourseId}
-        onChange={(e) => setSelectedCourseId(e.target.value)}
-      >
-        <option value="" disabled>
-          Select Course
-        </option>
-        {courses?.map((course) => (
-          <option key={course.course_id} value={course.course_id}>
-            {course.name}
-          </option>
-        ))}
-      </select>
-      <input
-        type="date"
-        placeholder="Date of Birth"
-        className="w-full p-2 border rounded mb-4"
-        value={newDateOfBirth?.toISOString().split("T")[0] || ""}
-        onChange={(e) => setNewDateOfBirth(new Date(e.target.value))}
-      />
+      <div className="space-y-6">
+        {/* Student First Name */}
+        <div>
+          <label className="block text-lg font-semibold text-violet-800 mb-1">
+            Student First Name
+          </label>
+          <input
+            type="text"
+            placeholder="Enter First Name"
+            className="w-full px-4 py-2 border border-violet-300 rounded-lg focus:ring-2 focus:ring-violet-500 bg-violet-50 shadow"
+            value={newStudentFirstName}
+            onChange={(e) => setNewStudentFirstName(e.target.value)}
+          />
+        </div>
+
+        {/* Student Last Name */}
+        <div>
+          <label className="block text-lg font-semibold text-violet-800 mb-1">
+            Student Last Name
+          </label>
+          <input
+            type="text"
+            placeholder="Enter Last Name"
+            className="w-full px-4 py-2 border border-violet-300 rounded-lg focus:ring-2 focus:ring-violet-500 bg-violet-50 shadow"
+            value={newStudentLastName}
+            onChange={(e) => setNewStudentLastName(e.target.value)}
+          />
+        </div>
+
+        {/* Email */}
+        <div>
+          <label className="block text-lg font-semibold text-violet-800 mb-1">
+            Email
+          </label>
+          <input
+            type="text"
+            placeholder="Enter Email Address"
+            className="w-full px-4 py-2 border border-violet-300 rounded-lg focus:ring-2 focus:ring-violet-500 bg-violet-50 shadow"
+            value={newStudentEmail}
+            onChange={(e) => setNewStudentEmail(e.target.value)}
+          />
+        </div>
+
+        {/* Phone */}
+        <div>
+          <label className="block text-lg font-semibold text-violet-800 mb-1">
+            Phone
+          </label>
+          <input
+            type="text"
+            placeholder="Enter Phone Number"
+            className="w-full px-4 py-2 border border-violet-300 rounded-lg focus:ring-2 focus:ring-violet-500 bg-violet-50 shadow"
+            value={newStudentPhone}
+            onChange={(e) => setNewStudentPhone(e.target.value)}
+          />
+        </div>
+
+        {/* Course Selection */}
+        <div>
+          <label className="block text-lg font-semibold text-violet-800 mb-1">
+            Select Course
+          </label>
+          <select
+            className="w-full px-4 py-2 border border-violet-300 rounded-lg focus:ring-2 focus:ring-violet-500 bg-violet-50 shadow"
+            value={selectedCourseId}
+            onChange={(e) => setSelectedCourseId(e.target.value)}
+          >
+            <option value="" disabled>
+              Choose a Course
+            </option>
+            {courses?.map((course) => (
+              <option key={course.course_id} value={course.course_id}>
+                {course.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Date of Birth */}
+        <div>
+          <label className="block text-lg font-semibold text-violet-800 mb-1">
+            Date of Birth
+          </label>
+          <input
+            type="date"
+            className="w-full px-4 py-2 border border-violet-300 rounded-lg focus:ring-2 focus:ring-violet-500 bg-violet-50 shadow"
+            value={newDateOfBirth?.toISOString().split("T")[0] || ""}
+            onChange={(e) => setNewDateOfBirth(new Date(e.target.value))}
+          />
+        </div>
+      </div>
     </Modal>
   );
 }
