@@ -1,7 +1,7 @@
 import { db } from "../util/db.js";
 
 export async function getAssignments(req, res) {
-  const { assignment_type } = req.query;
+  const { assignment_type, course_id } = req.query;
 
   try {
     const query = db("assignments")
@@ -11,6 +11,9 @@ export async function getAssignments(req, res) {
     // Apply filter for assignment_type
     if (assignment_type) {
       query.where("assignment_type", assignment_type);
+    }
+    if (course_id) {
+      query.where({ "assignments.course_id": course_id });
     }
 
     const result = await query;
