@@ -176,20 +176,16 @@ VALUES
     (6,'homework', 'History homework 15', 'Test on chapter 3', '2025-05-25'),
     (6,'homework', 'History homework 15', 'Test on chapter 3', '2025-05-25');
 
--- INSERT INTO studentapp.scores (student_id, assignment_id, score)
--- VALUES
---     ('clerkId4', 1, 85),
---     ('clerkId5', 1, 90),
---     ('clerkId6', 1, -1),
---     ('clerkId4', 2, 78),
---     ('clerkId5', 2, 88),
---     ('user_2vTtGULPmuR6g4tCGOodztViTjk', 3, 92),
---     ('user_2vlZdvA4w0gbX9w4oFdRkTaGghC', 4, -1),
---     ('user_2vlZdvA4w0gbX9w4oFdRkTaGghC', 5, 95),
---     ('user_2vTtGULPmuR6g4tCGOodztViTjk', 6, 80);
+INSERT INTO studentapp.scores (student_id, assignment_id, score)
+VALUES
+    ('clerkId4', 1, 1),
+    ('clerkId5', 1, 3),
+    ('clerkId6', 1, 2),
+    ('clerkId4', 2, 5),
+    ('clerkId5', 2, -1);
 
--- INSERT INTO studentapp.events (course_id, related_assignment_id, name, description, event_date, start_time, end_time)
--- VALUES
---     (1, 1, 'Math Test 1', 'Math Test 1', '2023-10-15', NULL, NULL),
---     (2, 3, 'History Class', 'History class for chapter 1', '2023-10-05', '11:00:00', '12:30:00'),
---     (3, 5, 'Science Class', 'Science class for chapter 1', '2023-10-10', '13:00:00', '14:30:00');
+INSERT INTO studentapp.events (course_id, related_assignment_id, name, description, event_date, start_time, end_time)
+VALUES
+    (1, 2, 'Math Test 1', 'Test on chapter 1', '2025-05-15', NULL, NULL),
+    (2, 4, 'History Test', 'Test on chapter 2', '2025-05-20', NULL, NULL),
+    (3, NULL, 'Party', 'Free cocktails!', '2025-05-12', '20:00:00', '23:00:00');

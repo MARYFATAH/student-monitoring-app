@@ -1,7 +1,7 @@
 import { db } from "../util/db.js";
 
 export async function getAssignments(req, res) {
-  const { assignment_type } = req.query;
+  const { assignment_type, course_id } = req.query;
 
   try {
     const query = db("assignments")
@@ -11,6 +11,9 @@ export async function getAssignments(req, res) {
     // Apply filter for assignment_type
     if (assignment_type) {
       query.where("assignment_type", assignment_type);
+    }
+    if (course_id) {
+      query.where({ "assignments.course_id": course_id });
     }
 
     const result = await query;
@@ -45,8 +48,17 @@ export async function getAssignmentById(req, res) {
 }
 
 export async function createAssignment(req, res) {
+  const { userId } = req.auth;
   const { name, assignment_type, description, course_id, due_date } = req.body;
   try {
+    // Check if the user is a teacher
+    const user = await db("users").where({ user_id: userId }).first();
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    if (user.role !== "teacher") {
+      return res.status(403).json({ error: "Forbidden" });
+    }
     const [newAssignment] = await db("assignments")
       .insert({
         name,
@@ -56,6 +68,20 @@ export async function createAssignment(req, res) {
         due_date,
       })
       .returning("*");
+    // create a corresponding event in the events table
+    try {
+      await db("events").insert({
+        event_type: "assignment",
+        related_assignment_id: newAssignment.assignment_id,
+        event_date: newAssignment.due_date,
+        name,
+        description,
+        course_id,
+      });
+    } catch (err) {
+      console.error("Error creating event:", err);
+    }
+
     return res.status(201).json(newAssignment);
   } catch (err) {
     console.error("Error creating assignment:", err);
@@ -84,6 +110,18 @@ export async function updateAssignment(req, res) {
       return res.status(404).json({ error: "Assignment not found" });
     }
 
+    // Update the corresponding event in the events table
+    try {
+      await db("events").where({ related_assignment_id: id }).update({
+        event_date: due_date,
+        name,
+        description,
+        course_id,
+      });
+    } catch (err) {
+      console.error("Error updating event:", err);
+    }
+
     return res.json(updatedAssignment);
   } catch (err) {
     console.error("Error updating assignment:", err);
@@ -100,6 +138,12 @@ export async function deleteAssignment(req, res) {
 
     if (!deletedAssignment) {
       return res.status(404).json({ error: `Assignment not found` });
+    }
+    // Delete the corresponding event in the events table
+    try {
+      await db("events").where({ related_assignment_id: id }).del();
+    } catch (err) {
+      console.error("Error deleting event:", err);
     }
 
     return res.status(204).send();

@@ -5,6 +5,8 @@ import { decodeAuthHeader } from "./middleware/decodeAuthHeader.js";
 import users from "./routes/users.js";
 import courses from "./routes/courses.js";
 import assignments from "./routes/assignments.js";
+import scores from "./routes/scores.js";
+import events from "./routes/events.js";
 import { clerkMiddleware, createClerkClient, getAuth } from "@clerk/express";
 
 const PORT = process.env.PORT || 3000;
@@ -22,8 +24,12 @@ app.get("/", (_, res) => {
   return res.json({ msg: "Welcome to the Student Monitoring APP" });
 });
 
-app.use(clerkMiddleware());
-// app.use(decodeAuthHeader);
+if (process.env.FAKE_AUTH === "true") {
+  console.log("FAKE_AUTH is enabled. Using fake authentication.");
+  app.use(decodeAuthHeader);
+} else {
+  app.use(clerkMiddleware());
+}
 
 app.use((req, res, next) => {
   req.auth = getAuth(req);
@@ -45,6 +51,8 @@ app.use((req, _, next) => {
 app.use("/users", users);
 app.use("/courses", courses);
 app.use("/assignments", assignments);
+app.use("/scores", scores);
+app.use("/events", events);
 
 app.listen(PORT, () => {
   console.log(`Student Monitoring API listening on port ${PORT}`);
