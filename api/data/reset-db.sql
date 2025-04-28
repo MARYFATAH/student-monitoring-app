@@ -124,7 +124,7 @@ VALUES
     ('clerkId18', 'Harper', 'Student','student'),
     ('clerkId19', 'Evelyn', 'Student','student'),
     ('user_2vOdwaPvnq4CRVTX4fBaRcpZRjG', 'Maryam', 'Teacher', 'teacher' ),
-    ('user_2vTtGULPmuR6g4tCGOodztViTjk', 'Maryam Fattah', 'Student', 'student' ),
+    ('user_2vTtGULPmuR6g4tCGOodztViTjk', 'Maryam', 'Fattah', 'student' ),
     ('user_2vTuPIO9KgsP7fMA5nZ8UHy7erx', 'John', 'Teacher', 'teacher'),
     ('user_2vOyBjnxrbBBEjNb3VkO8FdzZzB', 'Ralf', 'Teacher', 'teacher'),
     ('user_2vlZdvA4w0gbX9w4oFdRkTaGghC', 'Sascha', 'Teacher', 'teacher');

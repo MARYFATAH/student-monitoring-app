@@ -6,10 +6,12 @@ export function allowForRoles(allowedRoles) {
     }
 
     const { role } = req.auth;
+    console.log("User role:", role);
 
     if (role === "admin" || allowedRoles.includes(role)) {
       next();
     }
+    console.log("User role:", role);
     return res.status(403).json({ error: "Forbidden" });
   };
 }
