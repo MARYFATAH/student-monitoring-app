@@ -3,10 +3,6 @@ import { db } from "../util/db.js";
 export async function getAssignments(req, res) {
   const { assignment_type } = req.query;
 
-  if (!assignment_type) {
-    return res.status(400).json({ error: "Assignment type is required." });
-  }
-
   try {
     const query = db("assignments")
       .select("assignments.*", "courses.name AS course_name")

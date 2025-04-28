@@ -129,56 +129,6 @@ export async function updateCourse(req, res) {
   }
 }
 
-export async function postCourse(req, res) {
-  const {
-    name,
-    description,
-    first_name,
-    last_name,
-    course_id,
-    weeklyday,
-    weeklytime,
-  } = req.body;
-  const { userId } = req.auth;
-
-  // Log the authenticated user ID for debugging
-  console.log("userId:", userId);
-
-  // Validate required fields
-  if (
-    !name ||
-    !description ||
-    !first_name ||
-    !last_name ||
-    !weeklyday ||
-    !weeklytime
-  ) {
-    return res.status(400).json({ error: "Missing required fields." });
-  }
-
-  try {
-    // Insert course into the database
-    const [newCourse] = await db("courses")
-      .insert({
-        teacher_id: userId, // Authenticated user's ID
-
-        course_id, // Ensure this is unique or auto-generated
-        name,
-        description,
-        weeklyday,
-        weeklytime,
-        created_at: new Date(), // Current timestamp
-      })
-      .returning("*"); // Return the created course details
-
-    // Respond with the newly created course
-    return res.status(201).json(newCourse);
-  } catch (err) {
-    // Log detailed error for debugging
-    console.error("Error creating course:", err.message);
-    return res.status(500).json({ error: "Internal server error." });
-  }
-}
 export async function getStudentsInCourse(req, res) {
   const { id } = req.params;
   try {
@@ -227,18 +177,6 @@ export async function removeStudentFromCourse(req, res) {
     return res.status(200).json(result);
   } catch (err) {
     console.log("Error removing student from course:", err);
-    return res.status(500).json({ error: "Internal server error" });
-  }
-}
-
-export async function createAssignments(req, res) {
-  const { id } = req.params;
-  const { assignments } = req.body;
-  try {
-    const result = await db("assignments").insert(assignments).returning("*");
-    return res.status(201).json(result);
-  } catch (err) {
-    console.log("Error creating assignments:", err);
     return res.status(500).json({ error: "Internal server error" });
   }
 }
