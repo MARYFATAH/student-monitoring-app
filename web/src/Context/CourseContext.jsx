@@ -35,6 +35,9 @@ export const CourseProvider = ({ children }) => {
   const [selectedStudentId, setSelectedStudentId] = useState(null); // Added for selected student ID
   const [selectAll, setSelectAll] = useState(false); // Added for select all functionality
   const [students, setStudents] = useState([]); // Added for students list
+  const [descriptionTest, setDescriptionTest] = useState(""); // Added for test description
+  const [newHomeworkDescription, setNewHomeworkDescription] = useState(""); // Added for homework description
+  const [newHomeworkDueDate, setNewHomeworkDueDate] = useState(""); // Added for homework due date
 
   // Consolidate context values
   const contextValue = {
@@ -74,6 +77,12 @@ export const CourseProvider = ({ children }) => {
     setSelectAll, // Added for select all functionality updates
     students, // Added for students list
     setStudents, // Added for students list updates
+    descriptionTest, // Added for test description
+    setDescriptionTest,
+    newHomeworkDescription, // Added for homework description
+    setNewHomeworkDescription, // Added for homework description updates
+    newHomeworkDueDate, // Added for homework due date
+    setNewHomeworkDueDate, // Added for homework due date updates
   };
 
   return (

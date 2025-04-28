@@ -230,3 +230,15 @@ export async function removeStudentFromCourse(req, res) {
     return res.status(500).json({ error: "Internal server error" });
   }
 }
+
+export async function createAssignments(req, res) {
+  const { id } = req.params;
+  const { assignments } = req.body;
+  try {
+    const result = await db("assignments").insert(assignments).returning("*");
+    return res.status(201).json(result);
+  } catch (err) {
+    console.log("Error creating assignments:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
