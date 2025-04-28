@@ -124,7 +124,7 @@ VALUES
     ('clerkId18', 'Harper', 'Student','student'),
     ('clerkId19', 'Evelyn', 'Student','student'),
     ('user_2vOdwaPvnq4CRVTX4fBaRcpZRjG', 'Maryam', 'Teacher', 'teacher' ),
-    ('user_2vTtGULPmuR6g4tCGOodztViTjk', 'Maryam Fattah', 'Student', 'parent' ),
+    ('user_2vTtGULPmuR6g4tCGOodztViTjk', 'Maryam Fattah', 'Student', 'student' ),
     ('user_2vTuPIO9KgsP7fMA5nZ8UHy7erx', 'John', 'Teacher', 'teacher'),
     ('user_2vOyBjnxrbBBEjNb3VkO8FdzZzB', 'Ralf', 'Teacher', 'teacher'),
     ('user_2vlZdvA4w0gbX9w4oFdRkTaGghC', 'Sascha', 'Teacher', 'teacher');
@@ -171,7 +171,10 @@ VALUES
     (2, 'homework', 'History Homework 1', 'Read chapter 2 and answer questions', '2025-05-05'),
     (2, 'test', 'History Test 1', 'Test on chapter 2', '2025-05-20'),
     (3, 'homework', 'Science Homework 1', 'Complete the lab report', '2025-05-10'),
-    (3, 'test', 'Science Test 1', 'Test on chapter 3', '2025-05-25');
+    (3, 'test', 'Science Test 1', 'Test on chapter 3', '2025-05-25'),
+    (7,'homework', 'History Homework 15', 'Complete the lab report', '2025-05-10'),
+    (6,'homework', 'History homework 15', 'Test on chapter 3', '2025-05-25'),
+    (6,'homework', 'History homework 15', 'Test on chapter 3', '2025-05-25');
 
 INSERT INTO studentapp.scores (student_id, assignment_id, score)
 VALUES

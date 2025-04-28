@@ -19,8 +19,6 @@ export function StudentProfile() {
 
   const { getToken } = useAuth();
 
-  console.log("studentId from useParams:", studentId);
-
   // Fetch student profile and test data
   useEffect(() => {
     const fetchStudentProfile = async () => {
@@ -93,7 +91,7 @@ export function StudentProfile() {
   const saveChanges = async () => {
     try {
       const token = await getToken();
-      console.log("Saving changes:", editedStudent);
+
       const response = await fetch(`http://localhost:3000/users/${studentId}`, {
         method: "PATCH",
         headers: {
@@ -176,165 +174,160 @@ export function StudentProfile() {
   }
 
   return (
-    <div className="bg-gradient-to-r from-purple-500 to-blue-500 min-h-screen flex flex-col items-center py-10">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl">
-        <h1 className="text-4xl font-bold text-purple-700 text-center mb-6">
-          {isEditing ? (
-            <>
-              <input
-                type="text"
-                name="first_name"
-                value={editedStudent.first_name}
-                onChange={handleInputChange}
-                className="text-xl font-semibold text-gray-800 bg-gray-100 p-2 rounded focus:ring-2 focus:ring-purple-400 w-full mb-3"
-                placeholder="First Name"
-              />
-              <input
-                type="text"
-                name="last_name"
-                value={editedStudent.last_name}
-                onChange={handleInputChange}
-                className="text-xl font-semibold text-gray-800 bg-gray-100 p-2 rounded focus:ring-2 focus:ring-purple-400 w-full"
-                placeholder="Last Name"
-              />
-            </>
-          ) : (
-            `${selectedStudent.first_name} ${selectedStudent.last_name} `
-          )}
-        </h1>
+    <div className="flex">
+      {/* Main Content Area */}
+      <div className="flex-1 p-6 space-y-6 sm:px-4 md:px-6 lg:px-8">
+        {/* Student Profile Section */}
+        <div className="space-y-6">
+          {/* Student Name */}
+          <div>
+            <h2 className="text-lg font-semibold text-violet-800 mb-2">
+              Student Name
+            </h2>
+            <div className="text-base text-violet-700 bg-violet-50 p-4 rounded-lg shadow">
+              {isEditing ? (
+                <>
+                  <input
+                    type="text"
+                    name="first_name"
+                    value={editedStudent.first_name}
+                    onChange={handleInputChange}
+                    placeholder="First Name"
+                    className="w-full px-4 py-2 border border-violet-300 rounded-lg focus:ring-2 focus:ring-violet-500 mb-3"
+                  />
+                  <input
+                    type="text"
+                    name="last_name"
+                    value={editedStudent.last_name}
+                    onChange={handleInputChange}
+                    placeholder="Last Name"
+                    className="w-full px-4 py-2 border border-violet-300 rounded-lg focus:ring-2 focus:ring-violet-500"
+                  />
+                </>
+              ) : (
+                `${selectedStudent.first_name} ${selectedStudent.last_name}` ||
+                "Name not available"
+              )}
+            </div>
+          </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {/* Date of Birth */}
           <div>
-            <h2 className="text-lg font-semibold text-gray-800 mb-2">
+            <h2 className="text-lg font-semibold text-violet-800 mb-2">
               Date of Birth
             </h2>
-            {isEditing ? (
-              <DatePicker
-                selected={selectedDate}
-                onChange={handleDateChange}
-                dateFormat="dd/MM/yyyy"
-                className="w-full bg-gray-100 p-2 rounded shadow focus:ring-2 focus:ring-purple-400"
-                placeholderText="Select Date"
-              />
-            ) : (
-              <p className="text-base text-gray-700 bg-gray-100 p-2 rounded shadow">
-                {selectedStudent.dob
-                  ? new Date(selectedStudent.dob).toLocaleDateString()
-                  : "N/A"}
-              </p>
-            )}
+            <div className="text-base text-violet-700 bg-violet-50 p-4 rounded-lg shadow">
+              {isEditing ? (
+                <DatePicker
+                  selected={selectedDate}
+                  onChange={handleDateChange}
+                  dateFormat="dd/MM/yyyy"
+                  className="w-full bg-violet-50 p-2 rounded shadow focus:ring-2 focus:ring-violet-500"
+                  placeholderText="Select Date"
+                />
+              ) : selectedStudent.dob ? (
+                new Date(selectedStudent.dob).toLocaleDateString()
+              ) : (
+                "N/A"
+              )}
+            </div>
           </div>
 
-          {/* Email */}
+          {/* Contact Info */}
           <div>
-            <h2 className="text-lg font-semibold text-gray-800 mb-2">Email</h2>
-            {isEditing ? (
-              <input
-                type="email"
-                name="email"
-                value={editedStudent.email}
-                onChange={handleInputChange}
-                className="w-full text-base text-gray-700 bg-gray-100 p-2 rounded shadow focus:ring-2 focus:ring-purple-400"
-              />
-            ) : (
-              <p className="text-base text-gray-700 bg-gray-100 p-2 rounded shadow">
-                {selectedStudent.email}
-              </p>
-            )}
-          </div>
+            <h2 className="text-lg font-semibold text-violet-800 mb-2">
+              Contact Information
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {/* Email */}
+              <div>
+                <h3 className="text-sm font-medium text-violet-800 mb-1">
+                  Email
+                </h3>
+                <div className="text-base text-violet-700 bg-violet-50 p-4 rounded-lg shadow">
+                  {isEditing ? (
+                    <input
+                      type="email"
+                      name="email"
+                      value={editedStudent.email}
+                      onChange={handleInputChange}
+                      placeholder="Email Address"
+                      className="w-full px-4 py-2 border border-violet-300 rounded-lg focus:ring-2 focus:ring-violet-500"
+                    />
+                  ) : (
+                    selectedStudent.email || "Email not available"
+                  )}
+                </div>
+              </div>
 
-          {/* Phone */}
-          <div>
-            <h2 className="text-lg font-semibold text-gray-800 mb-2">Phone</h2>
-            {isEditing ? (
-              <input
-                type="tel"
-                name="phone_number"
-                value={editedStudent.phone_number}
-                onChange={handleInputChange}
-                className="w-full text-base text-gray-700 bg-gray-100 p-2 rounded shadow focus:ring-2 focus:ring-purple-400"
-              />
-            ) : (
-              <p className="text-base text-gray-700 bg-gray-100 p-2 rounded shadow">
-                {selectedStudent.phone_number}
-              </p>
-            )}
+              {/* Phone */}
+              <div>
+                <h3 className="text-sm font-medium text-violet-800 mb-1">
+                  Phone
+                </h3>
+                <div className="text-base text-violet-700 bg-violet-50 p-4 rounded-lg shadow">
+                  {isEditing ? (
+                    <input
+                      type="tel"
+                      name="phone_number"
+                      value={editedStudent.phone_number}
+                      onChange={handleInputChange}
+                      placeholder="Phone Number"
+                      className="w-full px-4 py-2 border border-violet-300 rounded-lg focus:ring-2 focus:ring-violet-500"
+                    />
+                  ) : (
+                    selectedStudent.phone_number || "Phone not available"
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Address */}
           <div>
-            <h2 className="text-lg font-semibold text-gray-800 mb-2">
+            <h2 className="text-lg font-semibold text-violet-800 mb-2">
               Address
             </h2>
+            <div className="text-base text-violet-700 bg-violet-50 p-4 rounded-lg shadow">
+              {isEditing ? (
+                <input
+                  type="text"
+                  name="address"
+                  value={editedStudent.address}
+                  onChange={handleInputChange}
+                  placeholder="Student Address"
+                  className="w-full px-4 py-2 border border-violet-300 rounded-lg focus:ring-2 focus:ring-violet-500"
+                />
+              ) : (
+                selectedStudent.address || "Address not available"
+              )}
+            </div>
+          </div>
+
+          {/* Buttons */}
+          <div className="flex justify-center mt-4 gap-4">
+            <button
+              onClick={isEditing ? () => setIsEditing(false) : handleEditToggle}
+              className="py-1 px-3 border border-violet-600 text-violet-600 rounded hover:bg-violet-200 shadow transition-all"
+            >
+              {isEditing ? "Cancel" : "Edit Profile"}
+            </button>
             {isEditing ? (
-              <input
-                type="text"
-                name="address"
-                value={editedStudent.address}
-                onChange={handleInputChange}
-                className="w-full text-base text-gray-700 bg-gray-100 p-2 rounded shadow focus:ring-2 focus:ring-purple-400"
-              />
+              <button
+                onClick={saveChanges}
+                className="py-1 px-3 border border-emerald-600 text-emerald-600 rounded hover:bg-emerald-100 shadow transition-all"
+              >
+                Save Changes
+              </button>
             ) : (
-              <p className="text-base text-gray-700 bg-gray-100 p-2 rounded shadow">
-                {selectedStudent.address}
-              </p>
+              <button
+                onClick={deleteStudent}
+                className="py-1 px-3 border border-red-600 text-red-600 rounded hover:bg-red-100 shadow transition-all"
+              >
+                Delete Profile
+              </button>
             )}
           </div>
-        </div>
-
-        {/* Tests and Scores */}
-        <div className="mt-8">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">
-            Tests and Scores
-          </h2>
-          {tests.length > 0 ? (
-            <div className="space-y-4">
-              {tests.map((test) => (
-                <div
-                  key={test.id}
-                  className="bg-gray-100 p-4 rounded-lg shadow"
-                >
-                  <p className="text-base font-semibold text-gray-700">
-                    Test: {test.name}
-                  </p>
-                  <p className="text-base text-gray-700">Score: {test.score}</p>
-                  <p className="text-base text-gray-700">
-                    Date: {new Date(test.date).toLocaleDateString()}
-                  </p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-600">No tests available...</p>
-          )}
-        </div>
-
-        <div className="flex justify-center mt-8 gap-4">
-          {/* Save/Cancel or Edit Button */}
-          {isEditing ? (
-            <button
-              onClick={saveChanges}
-              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded shadow transition duration-300"
-            >
-              Save
-            </button>
-          ) : (
-            <button
-              onClick={handleEditToggle}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded shadow transition duration-300"
-            >
-              Edit Profile
-            </button>
-          )}
-
-          {/* Delete Button */}
-          <button
-            onClick={deleteStudent}
-            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-6 rounded shadow transition duration-300"
-          >
-            Delete Profile
-          </button>
         </div>
       </div>
     </div>

@@ -70,17 +70,18 @@ export function AddCourse({ courses, setCourses, setShowCourseModal }) {
       onCancel={resetModal}
       onSubmit={save}
       submitText={isSaving ? "Saving..." : "Add Course"}
+      className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg shadow-lg"
     >
       <div className="space-y-6">
         {/* Teacher Section */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-800 mb-2">
+          <h2 className="text-lg font-semibold text-violet-800 mb-2">
             Course Creation
           </h2>
           <input
             type="text"
             placeholder="Enter Course Name"
-            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-100 shadow"
+            className="w-full px-4 py-2 border border-violet-300 rounded-lg focus:ring-2 focus:ring-violet-500 bg-violet-50 shadow"
             value={newCourseName}
             onChange={(e) => setNewCourseName(e.target.value)}
             aria-label="Course Name"
@@ -89,9 +90,11 @@ export function AddCourse({ courses, setCourses, setShowCourseModal }) {
 
         {/* Schedule Section */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-800 mb-2">Schedule</h2>
+          <h2 className="text-lg font-semibold text-violet-800 mb-2">
+            Schedule
+          </h2>
           <div className="space-y-4">
-            <label className="block text-gray-800 font-medium mb-1">
+            <label className="block text-violet-800 font-medium mb-1">
               Weekday
             </label>
             <select
@@ -102,7 +105,7 @@ export function AddCourse({ courses, setCourses, setShowCourseModal }) {
                   weekday: e.target.value,
                 })
               }
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-100 shadow"
+              className="w-full px-4 py-2 border border-violet-300 rounded-lg focus:ring-2 focus:ring-violet-500 bg-violet-50 shadow"
             >
               <option value="" disabled>
                 Select a day
@@ -116,7 +119,9 @@ export function AddCourse({ courses, setCourses, setShowCourseModal }) {
               <option value="Sunday">Sunday</option>
             </select>
 
-            <label className="block text-gray-800 font-medium mb-1">Time</label>
+            <label className="block text-violet-800 font-medium mb-1">
+              Time
+            </label>
             <input
               type="time"
               value={selectedSchedule?.time || ""}
@@ -126,7 +131,7 @@ export function AddCourse({ courses, setCourses, setShowCourseModal }) {
                   time: e.target.value,
                 })
               }
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-100 shadow"
+              className="w-full px-4 py-2 border border-violet-300 rounded-lg focus:ring-2 focus:ring-violet-500 bg-violet-50 shadow"
               aria-label="Course Time"
             />
           </div>
@@ -134,12 +139,12 @@ export function AddCourse({ courses, setCourses, setShowCourseModal }) {
 
         {/* Description Section */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-800 mb-2">
+          <h2 className="text-lg font-semibold text-violet-800 mb-2">
             Description
           </h2>
           <textarea
             placeholder="Enter Description"
-            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-100 shadow"
+            className="w-full px-4 py-2 border border-violet-300 rounded-lg focus:ring-2 focus:ring-violet-500 bg-violet-50 shadow"
             value={newCourseDescription}
             onChange={(e) => setNewCourseDescription(e.target.value)}
             aria-label="Course Description"

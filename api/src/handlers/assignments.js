@@ -1,23 +1,25 @@
 import { db } from "../util/db.js";
 
 export async function getAssignments(req, res) {
-  const { course_id } = req.query;
+  const { assignment_type } = req.query;
+
   try {
-    const query = db("assignments");
-    if (course_id) {
-      query.where({ "assignments.course_id": course_id });
-    }
-    query
+    const query = db("assignments")
       .select("assignments.*", "courses.name AS course_name")
       .leftJoin("courses", "courses.course_id", "assignments.course_id");
+
+    // Apply filter for assignment_type
+    if (assignment_type) {
+      query.where("assignment_type", assignment_type);
+    }
+
     const result = await query;
-    return res.json(result);
+    res.json(result);
   } catch (err) {
-    console.log("Error fetching assignments:", err);
-    return res.status(500).json({ error: "Internal server error" });
+    console.error("Error fetching assignments:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 }
-
 export async function getAssignmentById(req, res) {
   const { id } = req.params;
 

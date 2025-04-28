@@ -8,7 +8,6 @@ import {
   getStudentsInCourse,
   addStudentToCourse,
   removeStudentFromCourse,
-  postCourse,
 } from "../handlers/courses.js";
 
 import { requireAuth } from "../middleware/decodeAuthHeader.js";
@@ -20,7 +19,6 @@ router.use(requireAuth);
 router.get("/", getCourses);
 router.get("/:id", getCourseById);
 router.post("/", createCourse);
-// router.post("/post", postCourse); // For testing purposes, remove later
 router.patch("/:id", updateCourse);
 router.delete("/:id", deleteCourse);
 
