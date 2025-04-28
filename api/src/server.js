@@ -8,6 +8,7 @@ import assignments from "./routes/assignments.js";
 import scores from "./routes/scores.js";
 import events from "./routes/events.js";
 import { clerkMiddleware, createClerkClient, getAuth } from "@clerk/express";
+import { verifyUser } from "./middleware/verifyUser.js";
 
 const PORT = process.env.PORT || 3000;
 
@@ -30,6 +31,8 @@ if (process.env.FAKE_AUTH === "true") {
 } else {
   app.use(clerkMiddleware());
 }
+
+app.use(verifyUser);
 
 app.use((req, res, next) => {
   req.auth = getAuth(req);

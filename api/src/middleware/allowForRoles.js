@@ -9,7 +9,7 @@ export function allowForRoles(allowedRoles) {
     console.log("User role:", role);
 
     if (role === "admin" || allowedRoles.includes(role)) {
-      next();
+      return next();
     }
     console.log("User role:", role);
     return res.status(403).json({ error: "Forbidden" });
