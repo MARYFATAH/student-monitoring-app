@@ -160,149 +160,154 @@ export function CourseSection({ setActiveSection, setCourses }) {
     }
   };
   return (
-    <div className="space-y-6">
-      {/* Teacher Section */}
-      <div className="space-y-6">
-        {/* Course Name */}
-        <div>
-          <h2 className="text-lg font-semibold text-gray-800 mb-2">
-            Course Name
-          </h2>
-          <div className="text-base text-gray-700 bg-gray-100 p-4 rounded-lg shadow">
-            {isEditing ? (
-              <input
-                type="text"
-                onChange={(e) => setNewCourseName(e.target.value)}
-                value={newCourseName}
-                placeholder="Enter course name"
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-              />
-            ) : (
-              courseDetails?.name || "No course name available"
-            )}
-          </div>
-        </div>
-
-        {/* Schedule Section */}
-        <div>
-          <h2 className="text-lg font-semibold text-gray-800 mb-2">Schedule</h2>
-          <div className="text-base text-gray-700 bg-gray-100 p-4 rounded-lg shadow">
-            {isEditing ? (
-              <div className="space-y-4">
-                {/* Weekdays Dropdown */}
-                <label className="block text-gray-800 font-medium mb-1">
-                  Weekday
-                </label>
-                <select
-                  value={selectedSchedule.weeklyday}
-                  onChange={(e) =>
-                    setSelectedSchedule({
-                      ...selectedSchedule,
-                      weeklyday: e.target.value,
-                    })
-                  }
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-100 shadow"
-                >
-                  <option value="" disabled>
-                    Select a day
-                  </option>
-                  {[
-                    "Monday",
-                    "Tuesday",
-                    "Wednesday",
-                    "Thursday",
-                    "Friday",
-                    "Saturday",
-                    "Sunday",
-                  ].map((day) => (
-                    <option key={day} value={day}>
-                      {day}
-                    </option>
-                  ))}
-                </select>
-
-                {/* Time Input */}
-                <label className="block text-gray-800 font-medium mb-1">
-                  Time
-                </label>
+    <div className="flex">
+      {/* Main Content Area */}
+      <div className="flex-1 p-6 space-y-6 sm:px-4 md:px-6 lg:px-8">
+        {/* Teacher Section */}
+        <div className="space-y-6">
+          {/* Course Name */}
+          <div>
+            <h2 className="text-lg font-semibold text-violet-800 mb-2">
+              Course Name
+            </h2>
+            <div className="text-base text-violet-700 bg-violet-50 p-4 rounded-lg shadow">
+              {isEditing ? (
                 <input
-                  type="time"
-                  value={selectedSchedule.weeklytime}
-                  onChange={(e) =>
-                    setSelectedSchedule({
-                      ...selectedSchedule,
-                      weeklytime: e.target.value,
-                    })
-                  }
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-100 shadow"
+                  type="text"
+                  onChange={(e) => setNewCourseName(e.target.value)}
+                  value={newCourseName}
+                  placeholder="Enter course name"
+                  className="w-full px-4 py-2 border border-violet-300 rounded-lg focus:ring-2 focus:ring-violet-500"
                 />
-              </div>
-            ) : (
-              ` on ${courseDetails?.weeklyday || "Day not set"} at ${
-                courseDetails?.weeklytime || "Time not set"
-              }`
-            )}
+              ) : (
+                courseDetails?.name || "No course name available"
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Description Section */}
-        <div>
-          <h2 className="text-lg font-semibold text-gray-800 mb-2">
-            Description
-          </h2>
-          <div className="text-base text-gray-700 bg-gray-100 p-4 rounded-lg shadow">
+          {/* Schedule Section */}
+          <div>
+            <h2 className="text-lg font-semibold text-violet-800 mb-2">
+              Schedule
+            </h2>
+            <div className="text-base text-violet-700 bg-violet-50 p-4 rounded-lg shadow">
+              {isEditing ? (
+                <div className="space-y-4">
+                  {/* Weekdays Dropdown */}
+                  <label className="block text-violet-800 font-medium mb-1">
+                    Weekday
+                  </label>
+                  <select
+                    value={selectedSchedule.weeklyday}
+                    onChange={(e) =>
+                      setSelectedSchedule({
+                        ...selectedSchedule,
+                        weeklyday: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 border border-violet-300 rounded-lg focus:ring-2 focus:ring-violet-500 bg-violet-50 shadow"
+                  >
+                    <option value="" disabled>
+                      Select a day
+                    </option>
+                    {[
+                      "Monday",
+                      "Tuesday",
+                      "Wednesday",
+                      "Thursday",
+                      "Friday",
+                      "Saturday",
+                      "Sunday",
+                    ].map((day) => (
+                      <option key={day} value={day}>
+                        {day}
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* Time Input */}
+                  <label className="block text-violet-800 font-medium mb-1">
+                    Time
+                  </label>
+                  <input
+                    type="time"
+                    value={selectedSchedule.weeklytime}
+                    onChange={(e) =>
+                      setSelectedSchedule({
+                        ...selectedSchedule,
+                        weeklytime: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 border border-violet-300 rounded-lg focus:ring-2 focus:ring-violet-500 bg-violet-50 shadow"
+                  />
+                </div>
+              ) : (
+                ` on ${courseDetails?.weeklyday || "Day not set"} at ${
+                  courseDetails?.weeklytime || "Time not set"
+                }`
+              )}
+            </div>
+          </div>
+
+          {/* Description Section */}
+          <div>
+            <h2 className="text-lg font-semibold text-violet-800 mb-2">
+              Description
+            </h2>
+            <div className="text-base text-violet-700 bg-violet-50 p-4 rounded-lg shadow">
+              {isEditing ? (
+                <textarea
+                  onChange={(e) => setSelectedDescription(e.target.value)}
+                  value={selectedDescription}
+                  placeholder="Enter description"
+                  className="w-full px-4 py-2 border border-violet-300 rounded-lg focus:ring-2 focus:ring-violet-500 bg-violet-50 shadow"
+                />
+              ) : (
+                courseDetails?.description || "No description available"
+              )}
+            </div>
+          </div>
+
+          {/* Buttons */}
+          <div className="flex flex-wrap justify-center gap-4 mt-4">
+            <button
+              onClick={isEditing ? () => setIsEditing(false) : handleEditMode}
+              className="py-1 px-3 border border-violet-600 text-violet-600 rounded hover:bg-violet-200 shadow transition-all"
+            >
+              {isEditing ? "Cancel" : "Edit Course Details"}
+            </button>
+
             {isEditing ? (
-              <textarea
-                onChange={(e) => setSelectedDescription(e.target.value)}
-                value={selectedDescription}
-                placeholder="Enter description"
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-100 shadow"
-              />
+              <button
+                onClick={() =>
+                  handleSaveCourseDetails({
+                    name: newCourseName,
+                    weeklyday: selectedSchedule.weeklyday,
+                    weeklytime: selectedSchedule.weeklytime,
+                    description: selectedDescription,
+                  })
+                }
+                disabled={
+                  !newCourseName ||
+                  !selectedSchedule.weeklyday ||
+                  !selectedSchedule.weeklytime
+                }
+                className="py-1 px-3 border border-emerald-600 text-emerald-600 rounded hover:bg-emerald-100 shadow transition-all"
+              >
+                Save Changes
+              </button>
             ) : (
-              courseDetails?.description || "No description available"
+              <button
+                onClick={() => {
+                  handleDeleteCourse();
+                  setActiveSection("courses");
+                }}
+                className="py-1 px-3 border border-red-600 text-red-600 rounded hover:bg-red-100 shadow transition-all"
+              >
+                Delete Course
+              </button>
             )}
           </div>
-        </div>
-
-        {/* Buttons */}
-        <div className="flex justify-center space-x-4 mt-4">
-          <button
-            onClick={isEditing ? () => setIsEditing(false) : handleEditMode}
-            className="bg-indigo-700 hover:bg-indigo-800 text-white font-bold py-2 px-4 rounded-sm shadow transition-all duration-300"
-          >
-            {isEditing ? "Cancel" : "Edit Course Details"}
-          </button>
-
-          {isEditing ? (
-            <button
-              onClick={() =>
-                handleSaveCourseDetails({
-                  name: newCourseName,
-                  weeklyday: selectedSchedule.weeklyday,
-                  weeklytime: selectedSchedule.weeklytime,
-                  description: selectedDescription,
-                })
-              }
-              disabled={
-                !newCourseName ||
-                !selectedSchedule.weeklyday ||
-                !selectedSchedule.weeklytime
-              }
-              className="ml-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-sm shadow transition-all duration-300"
-            >
-              Save Changes
-            </button>
-          ) : (
-            <button
-              onClick={() => {
-                handleDeleteCourse();
-                setActiveSection("courses");
-              }}
-              className="ml-4 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 px-4 rounded-sm shadow transition-all duration-300"
-            >
-              Delete Course
-            </button>
-          )}
         </div>
       </div>
     </div>

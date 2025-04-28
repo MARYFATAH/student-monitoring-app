@@ -1,7 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "@clerk/clerk-react"; // Clerk for authentication
-import { useContext } from "react";
-import { useCourseContext } from "../../../Context/CourseContext"; // Import the actual context
+import { useCourseContext } from "../../../Context/CourseContext"; // Import course context
 
 export function TestSection({ tests, setTests }) {
   const { getToken } = useAuth(); // Authentication token
@@ -13,149 +12,251 @@ export function TestSection({ tests, setTests }) {
     setNewTestName,
     testDate,
     setTestDate,
-  } = useCourseContext(); // Accessing course students and student scores from CourseContext
+    descriptionTest,
+    setDescriptionTest,
+  } = useCourseContext(); // Access course-related data
+  const [editingTest, setEditingTest] = useState(null); // Track editing state
 
   useEffect(() => {
     console.log("Course students:", courseStudents);
     console.log("Student scores:", studentScores);
-  }, [courseStudents, studentScores]); // Debugging context values
+  }, [courseStudents, studentScores]);
 
-  const handleAddTest = () => {
-    if (!newTestName.trim()) {
-      alert("Test name cannot be empty.");
+  const handleAddTest = async () => {
+    if (!newTestName.trim() || !testDate.trim()) {
+      alert("Test name and due date cannot be empty.");
       return;
     }
 
-    if (!testDate.trim()) {
-      alert("Test date cannot be empty.");
-      return;
-    }
-
-    // Create a new test object with name and date
     const newTest = {
-      id: tests.length + 1,
+      id: tests.length + 1, // Temporary ID
       name: newTestName,
-      date: testDate, // Include date in the test object
+      assignment_type: "test", // Indicate this is a test
+      due_date: testDate,
+      description: descriptionTest,
     };
 
-    // Update the tests array with the new test
     setTests((prevTests) => [...prevTests, newTest]);
 
-    // Reset input fields
-    setNewTestName("");
-    setTestDate("");
-
-    // Update student scores to include the new test with a default score of 0
     const updatedStudentScores = { ...studentScores };
     courseStudents.forEach((student) => {
-      const studentKey = student.user_id || student.id; // Ensure correct ID reference
-
-      // Initialize scores object for this student if it doesn't exist
+      const studentKey = student.user_id || student.id;
       if (!updatedStudentScores[studentKey]) {
         updatedStudentScores[studentKey] = {};
       }
-
-      // Add a score of 0 for the new test
-      updatedStudentScores[studentKey][newTest.id] = 0;
+      updatedStudentScores[studentKey][newTest.id] = 0; // Default score
     });
-
     setStudentScores(updatedStudentScores);
+
+    try {
+      const token = await getToken();
+      const response = await fetch("http://localhost:3000/assignments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: newTestName,
+          assignment_type: "test",
+          due_date: testDate,
+          description: descriptionTest,
+          course_id: 1, // Replace with dynamic course ID
+        }),
+      });
+
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(
+          `HTTP error! Status: ${response.status}. ${errorMessage}`
+        );
+      }
+
+      const savedTest = await response.json();
+      setTests((prevTests) =>
+        prevTests.map((test) =>
+          test.id === newTest.id
+            ? { ...test, id: savedTest.assignment_id }
+            : test
+        )
+      );
+
+      alert("Test successfully added and saved!");
+    } catch (error) {
+      console.error("Error saving test:", error);
+      alert("Failed to save test. Please try again.");
+    }
+
+    setNewTestName("");
+    setTestDate("");
+    setDescriptionTest("");
   };
 
-  // save test logic
-  function saveTest() {
-    const token = getToken();
-    fetch("http://localhost:3000/tests", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        name: newTestName,
-        date: testDate,
-      }),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
+  const handleDeleteTest = async (testId) => {
+    try {
+      const token = await getToken();
+      const response = await fetch(
+        `http://localhost:3000/assignments/${testId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-        return response.json();
-      })
-      .then((data) => {
-        console.log("Test created:", data);
-      })
-      .catch((error) => {
-        console.error("Error creating test:", error);
-      });
-  }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      setTests((prevTests) => prevTests.filter((test) => test.id !== testId));
+      alert("Test deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting test:", error);
+      alert("Failed to delete test. Please try again.");
+    }
+  };
+
+  const handleUpdateTest = async () => {
+    if (!editingTest.name.trim() || !editingTest.due_date.trim()) {
+      alert("Test name and due date cannot be empty.");
+      return;
+    }
+
+    try {
+      const token = await getToken();
+      const response = await fetch(
+        `http://localhost:3000/assignments/${editingTest.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            name: editingTest.name,
+            due_date: editingTest.due_date,
+            description: editingTest.description,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(
+          `HTTP error! Status: ${response.status}. ${errorMessage}`
+        );
+      }
+
+      const updatedTest = await response.json();
+      setTests((prevTests) =>
+        prevTests.map((test) =>
+          test.id === updatedTest.id ? updatedTest : test
+        )
+      );
+      setEditingTest(null);
+      alert("Test updated successfully!");
+    } catch (error) {
+      console.error("Error updating test:", error);
+      alert("Failed to update test. Please try again.");
+    }
+  };
 
   return (
-    <div className="p-6 bg-gray-50 rounded-lg shadow-lg">
+    <div className="p-6 rounded-lg shadow-lg space-y-6 bg-gray-50">
       {/* Header Section */}
-      <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center justify-between">
+      <h2 className="text-3xl font-bold flex justify-between items-center text-violet-800">
         Test List
-        <span className="text-sm text-gray-600">
+        <span className="text-sm text-violet-600">
           {tests.length} {tests.length === 1 ? "test" : "tests"} added
         </span>
       </h2>
 
       {/* Test List Section */}
-      <div className="mb-6">
+      <div>
         {tests.length > 0 ? (
-          <ul className="space-y-2">
+          <ul className="space-y-4">
             {tests.map((test) => (
               <li
                 key={test.id}
-                className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm flex items-center"
+                className="p-4 border border-violet-300 rounded-lg shadow flex justify-between items-center hover:bg-violet-100 transition-colors"
               >
-                <span className="font-medium text-gray-900">{test.name}</span>
-                <span className="text-sm text-gray-500 ml-auto">
-                  {test.date
-                    ? new Date(test.date).toLocaleDateString()
-                    : "No date set"}
-                </span>
+                <div>
+                  <span className="font-medium text-violet-800 text-lg">
+                    {test.name}
+                  </span>
+                  <p className="text-sm text-violet-700">{test.description}</p>
+                  <p className="text-sm text-violet-600">
+                    Due: {new Date(test.due_date).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <button
+                    onClick={() => setEditingTest(test)}
+                    className="py-1 px-3 border border-violet-700 text-violet-700 rounded hover:bg-violet-200 transition-all shadow"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteTest(test.id)}
+                    className="py-1 px-3 border border-red-600 text-red-600 rounded hover:bg-red-100 transition-all shadow"
+                  >
+                    Delete
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="text-gray-500 text-center">
-            No tests added yet. Start by creating one below!
-          </p>
+          <p className="text-violet-500 text-center">No tests added yet...</p>
         )}
       </div>
 
-      {/* Add Test Section */}
+      {/* Add or Edit Test Section */}
       <div className="space-y-4">
-        {/* Test Name Input */}
+        <h2 className="text-2xl font-bold text-violet-800">
+          {editingTest ? "Edit Test" : "Add Test"}
+        </h2>
         <input
           type="text"
-          placeholder="Enter test name"
-          value={newTestName}
-          onChange={(e) => setNewTestName(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          placeholder="Test Name"
+          value={editingTest ? editingTest.name : newTestName}
+          onChange={(e) =>
+            editingTest
+              ? setEditingTest({ ...editingTest, name: e.target.value })
+              : setNewTestName(e.target.value)
+          }
+          className="w-full px-4 py-2 border border-violet-300 rounded-lg shadow focus:ring-2 focus:ring-violet-600 outline-none"
         />
-
-        {/* Test Date Picker */}
+        <textarea
+          placeholder="Test Description (optional)"
+          value={editingTest ? editingTest.description : descriptionTest}
+          onChange={(e) =>
+            editingTest
+              ? setEditingTest({ ...editingTest, description: e.target.value })
+              : setDescriptionTest(e.target.value)
+          }
+          className="w-full px-4 py-2 border border-violet-300 rounded-lg shadow focus:ring-2 focus:ring-violet-600 outline-none resize-none"
+        ></textarea>
         <input
           type="date"
-          placeholder="Select test date"
-          value={testDate}
-          onChange={(e) => setTestDate(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          value={editingTest ? editingTest.due_date : testDate}
+          onChange={(e) =>
+            editingTest
+              ? setEditingTest({ ...editingTest, due_date: e.target.value })
+              : setTestDate(e.target.value)
+          }
+          className="w-full px-4 py-2 border border-violet-300 rounded-lg shadow focus:ring-2 focus:ring-violet-600 outline-none"
         />
-
-        {/* Add Test Button */}
         <button
-          onClick={handleAddTest}
-          disabled={!newTestName.trim() || !testDate.trim()}
-          className={`w-full py-2 px-4 font-semibold rounded-lg transition-colors ${
-            newTestName.trim() && testDate.trim()
-              ? "bg-blue-600 hover:bg-blue-700 text-white"
-              : "bg-gray-300 text-gray-500 cursor-not-allowed"
-          }`}
+          onClick={editingTest ? handleUpdateTest : handleAddTest}
+          className={`w-full ${
+            editingTest
+              ? "bg-violet-600 hover:bg-violet-700"
+              : "bg-violet-700 hover:bg-violet-800"
+          } text-white font-bold py-2 px-4 rounded-lg shadow transition-all duration-300`}
         >
-          Add Test
+          {editingTest ? "Update Test" : "Add Test"}
         </button>
       </div>
     </div>

@@ -24,6 +24,7 @@ export function ProfileProvider({ children }) {
           },
         });
         const data = await response.json();
+        console.log("Profile data:", data); // Debugging line
 
         setProfile(data);
       } catch (err) {
