@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ParentDashboardSideBar } from "./ParentDashboardSideBar"; // Sidebar component
-import { EventList } from "../Events/EventList"; // Displays events related to their children
-import { StudentProfile } from "../Students/StudentProfile"; // Displays student profile
 import { useAuth } from "@clerk/clerk-react"; // For authentication
 import { ProfileContext } from "../../Context/ProfileContext";
-import { ProfileProvider } from "../../Context/ProfileProvider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"; // FontAwesome for icons
 import {
   faUser,
@@ -16,33 +13,31 @@ import {
 
 export function ParentDashboard() {
   const { profile } = React.useContext(ProfileContext); // Access profile context
-  console.log("Parent Profile Data:.................", profile); // Debugging line
   const { getToken } = useAuth(); // Authentication token for secure API access
-  const [activeSection, setActiveSection] = useState("students");
-  const [studentProfile, setStudentProfile] = useState({}); // Student profile data
+  const [activeSection, setActiveSection] = useState("students"); // Sidebar navigation state
+  const [scores, setScores] = useState([]); // Student scores
   const [homework, setHomework] = useState([]); // Homework data
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true); // Loading state
+  const [events, setEvents] = useState([]); // Events data
+  const [loading, setLoading] = useState(false); // Loading state
   const [error, setError] = useState(null); // Error state
 
-  // Fetch the events related to the students of the parent
+  // Fetch events related to the students
   useEffect(() => {
     const fetchEvents = async () => {
       setLoading(true);
       setError(null);
       try {
         const token = await getToken();
-        const response = await fetch(
-          "http://localhost:3000/assignments?assignment_type=test",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await fetch("http://localhost:3000/events", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
         if (!response.ok) {
           throw new Error(`HTTP Error! Status: ${response.status}`);
         }
+
         const data = await response.json();
         setEvents(data);
       } catch (err) {
@@ -52,10 +47,11 @@ export function ParentDashboard() {
         setLoading(false);
       }
     };
-    fetchEvents();
-  }, []);
 
-  // fetch homework
+    fetchEvents();
+  }, [getToken]);
+
+  // Fetch homework related to the students
   useEffect(() => {
     const fetchHomework = async () => {
       setLoading(true);
@@ -70,9 +66,11 @@ export function ParentDashboard() {
             },
           }
         );
+
         if (!response.ok) {
           throw new Error(`HTTP Error! Status: ${response.status}`);
         }
+
         const data = await response.json();
         setHomework(data);
       } catch (err) {
@@ -82,8 +80,44 @@ export function ParentDashboard() {
         setLoading(false);
       }
     };
+
     fetchHomework();
-  }, []);
+  }, [getToken]);
+
+  // Fetch scores related to the students
+  useEffect(() => {
+    const fetchScores = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const token = await getToken();
+        const response = await fetch("http://localhost:3000/scores", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          const errorMessage = await response.text();
+          throw new Error(
+            `HTTP Error! Status: ${response.status}. ${errorMessage}`
+          );
+        }
+
+        const data = await response.json();
+        console.log("Fetched scores:", data);
+        setScores(data);
+      } catch (err) {
+        console.error("Error fetching scores:", err.message || err);
+        setError(err.message || "Something went wrong.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchScores();
+  }, [getToken]);
 
   return (
     <div className="h-screen flex bg-gradient-to-r from-violet-100 to-purple-200">
@@ -95,10 +129,10 @@ export function ParentDashboard() {
       />
 
       {/* Main Content */}
-      <div className="flex-1 p-6 space-y-6 sm:px-4 md:px-6 lg:px-8 overflow-y-auto">
+      <div className="flex-1 p-6 space-y-6 sm:px-4 md:px-6 lg:px-8 overflow-y-auto bg-gradient-to-r from-blue-500 to-purple-500                                                                                                       ">
+        {/* Student Profile Section */}
         {activeSection === "students" && profile && (
           <div className="space-y-6">
-            {/* Student Profile Section */}
             <div className="transition hover:shadow-lg transform hover:-translate-y-1">
               <h2 className="text-xl font-semibold text-violet-800 mb-4 flex items-center space-x-2">
                 <FontAwesomeIcon icon={faUser} className="text-violet-600" />
@@ -140,107 +174,244 @@ export function ParentDashboard() {
                 </div>
               </div>
             </div>
-
-            {/* Welcome Section */}
-            <div className="bg-gradient-to-r from-purple-500 to-violet-500 p-4 rounded-lg shadow-md text-white text-center">
-              <h2 className="text-lg font-semibold mb-2">
-                Welcome, {profile.first_name}!
-              </h2>
-              <p className="text-sm">
-                Stay updated with your child’s progress, events, and more.
-                Explore your dashboard for more details!
-              </p>
-            </div>
-
-            {/* Interactive Buttons Section */}
-            <div className="flex justify-evenly">
-              <button
-                onClick={() => alert("Messages functionality coming soon!")}
-                className="py-2 px-4 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition shadow"
-              >
-                View Messages
-              </button>
-              <button
-                onClick={() => alert("Parent-Teacher Meeting scheduled!")}
-                className="py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition shadow"
-              >
-                Schedule Meeting
-              </button>
-            </div>
           </div>
         )}
 
         {/* Events Section */}
         {activeSection === "events" && (
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-800 mb-4">
-              Events
+          <div className="space-y-6">
+            <h1 className="text-3xl font-extrabold text-violet-800">
+              Upcoming Events
             </h1>
             {loading ? (
-              <p className="text-gray-500">Loading events...</p>
+              <div className="flex justify-center items-center">
+                <p className="text-gray-500 animate-pulse">Loading events...</p>
+              </div>
             ) : error ? (
-              <p className="text-red-500">Error: {error}</p>
+              <div className="text-center">
+                <p className="text-red-500 font-bold">Error: {error}</p>
+              </div>
             ) : events.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {events.map((event) => (
                   <div
                     key={event.id}
-                    className="bg-white p-4 rounded-lg shadow transition hover:shadow-lg hover:bg-violet-50"
+                    className="p-6 md:p-8 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg shadow-lg w-full max-w-3xl mx-auto hover:scale-105 transition-transform duration-300"
                   >
-                    <h2 className="text-lg font-bold text-gray-800 mb-2">
-                      {event.name}
-                    </h2>
-                    <p className="text-gray-600">
-                      <strong>Date:</strong> {event.date}
-                    </p>
-                    <p className="text-gray-600">
-                      <strong>Location:</strong> {event.location}
-                    </p>
-                    <p className="text-gray-600">{event.description}</p>
-                    <div className="flex justify-end mt-4">
-                      <button
-                        onClick={() =>
-                          alert(`You have RSVP’d to ${event.name}`)
-                        }
-                        className="py-1 px-3 bg-violet-600 text-white rounded hover:bg-violet-700 transition"
-                      >
-                        RSVP
-                      </button>
+                    <div className="bg-violet-500 text-white rounded-t-lg px-4 py-3 text-center shadow">
+                      <h2 className="text-lg font-bold">
+                        {event.name || "Event Name"}
+                      </h2>
+                    </div>
+                    <div className="grid grid-cols-3 gap-6 p-6">
+                      <div className="flex flex-col items-center bg-violet-50 rounded-lg shadow-md p-4">
+                        <span className="text-3xl font-extrabold text-violet-800">
+                          {new Date(event.event_date).toLocaleDateString(
+                            "en-US",
+                            { day: "2-digit" }
+                          )}
+                        </span>
+                        <span className="text-lg text-violet-600">
+                          {new Date(event.event_date).toLocaleDateString(
+                            "en-US",
+                            { month: "short" }
+                          )}
+                        </span>
+                        <span className="text-sm text-violet-500">
+                          {new Date(event.event_date).toLocaleDateString(
+                            "en-US",
+                            { weekday: "long" }
+                          )}
+                        </span>
+                      </div>
+                      <div className="col-span-2 bg-white rounded-lg shadow-md p-4">
+                        <p className="text-base text-gray-600 mb-4 break-words">
+                          {event.description || "No description available."}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          <span className="font-semibold text-gray-700">
+                            Location:{" "}
+                          </span>
+                          {event.location || "Not provided"}
+                        </p>
+                        {event.start_time && (
+                          <p className="text-sm text-gray-500">
+                            <span className="font-semibold text-gray-700">
+                              Start Time:{" "}
+                            </span>
+                            {event.start_time}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-gray-500">No events found.</p>
+              <div className="text-center">
+                <p className="text-gray-500">No upcoming events found.</p>
+              </div>
             )}
           </div>
         )}
-        {/* //homework section */}
+
+        {/* Homework Section */}
         {activeSection === "homework" && (
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-800 mb-4">
+          <div className="space-y-6">
+            <h1 className="text-3xl font-extrabold text-violet-800">
               Homework
             </h1>
             {loading ? (
-              <p className="text-gray-500">Loading homework...</p>
+              <div className="flex justify-center items-center">
+                <p className="text-gray-500 animate-pulse">
+                  Loading homework...
+                </p>
+              </div>
             ) : error ? (
-              <p className="text-red-500">Error: {error}</p>
+              <div className="text-center">
+                <p className="text-red-500 font-bold">Error: {error}</p>
+              </div>
             ) : homework.length > 0 ? (
-              <div className="space-y-4">
-                {homework.map((homework) => (
+              <div className="space-y-6">
+                {homework.map((hw) => (
                   <div
-                    key={homework.id}
-                    className="bg-white p-4 rounded-lg shadow transition hover:shadow-lg hover:bg-violet-50"
+                    key={hw.id}
+                    className="p-6 md:p-8 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg shadow-lg w-full max-w-3xl mx-auto hover:scale-105 transition-transform duration-300"
                   >
-                    <h2 className="text-lg font-bold text-gray-800 mb-2">
-                      {homework.name}
-                    </h2>
-                    <p className="text-gray-600">{homework.description}</p>
+                    <div className="bg-violet-500 text-white rounded-t-lg px-4 py-3 text-center shadow">
+                      <h2 className="text-lg font-bold">
+                        {hw.name || "Homework Name"}
+                      </h2>
+                    </div>
+                    <div className="grid grid-cols-3 gap-6 p-6">
+                      <div className="flex flex-col items-center bg-violet-50 rounded-lg shadow-md p-4">
+                        <span className="text-3xl font-extrabold text-violet-800">
+                          {new Date(hw.due_date).toLocaleDateString("en-US", {
+                            day: "2-digit",
+                          })}
+                        </span>
+                        <span className="text-lg text-violet-600">
+                          {new Date(hw.due_date).toLocaleDateString("en-US", {
+                            month: "short",
+                          })}
+                        </span>
+                        <span className="text-sm text-violet-500">
+                          {new Date(hw.due_date).toLocaleDateString("en-US", {
+                            weekday: "long",
+                          })}
+                        </span>
+                      </div>
+                      <div className="col-span-2 bg-white rounded-lg shadow-md p-4">
+                        <p className="text-base text-gray-600 mb-4 break-words">
+                          {hw.description || "No description available."}
+                        </p>
+                        <div className="text-sm text-gray-500">
+                          <p>
+                            <span className="font-semibold text-gray-700">
+                              Subject:{" "}
+                            </span>
+                            {hw.subject || "Not specified"}
+                          </p>
+                          <p>
+                            <span className="font-semibold text-gray-700">
+                              Due Date:{" "}
+                            </span>
+                            {new Date(hw.due_date).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-gray-500">No homework found.</p>
+              <div className="text-center">
+                <p className="text-gray-500">No homework found.</p>
+              </div>
+            )}
+          </div>
+        )}
+        {/* Scores Section */}
+        {activeSection === "scores" && (
+          <div className="space-y-6">
+            <h1 className="text-3xl font-extrabold text-violet-800">Scores</h1>
+            {loading ? (
+              <div className="flex justify-center items-center">
+                <p className="text-gray-500 animate-pulse">Loading scores...</p>
+              </div>
+            ) : error ? (
+              <div className="text-center">
+                <p className="text-red-500 font-bold">Error: {error}</p>
+              </div>
+            ) : scores.length > 0 ? (
+              <div className="space-y-6">
+                {/* Scores Section */}
+                {activeSection === "scores" && (
+                  <div className="space-y-6">
+                    {loading ? (
+                      <div className="flex justify-center items-center">
+                        <p className="text-gray-500 animate-pulse">
+                          Loading scores...
+                        </p>
+                      </div>
+                    ) : error ? (
+                      <div className="text-center">
+                        <p className="text-red-500 font-bold">Error: {error}</p>
+                      </div>
+                    ) : scores.filter(
+                        (score) => score.student_id === profile.user_id
+                      ).length > 0 ? (
+                      <div className="space-y-6">
+                        {scores
+                          .filter(
+                            (score) => score.student_id === profile.user_id
+                          ) // Filter scores for the authenticated student
+                          .map((score) => (
+                            <div
+                              key={score.assignment_id}
+                              className="p-6 md:p-8 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg shadow-lg w-full max-w-3xl mx-auto hover:scale-105 transition-transform duration-300"
+                            >
+                              <div className="bg-violet-500 text-white rounded-t-lg px-4 py-3 text-center shadow">
+                                <h2 className="text-lg font-bold">
+                                  {score.assignment_name || "Assignment Name"}
+                                </h2>
+                              </div>
+                              <div className="grid grid-cols-3 gap-6 p-6">
+                                {/* Left Column - Score */}
+                                <div className="flex flex-col items-center bg-violet-50 rounded-lg shadow-md p-4">
+                                  <p>Your Score:</p>
+                                  <span className="text-3xl font-extrabold text-violet-800">
+                                    {score.score}
+                                  </span>
+                                </div>
+                                {/* Right Column - Additional Info */}
+                                <div className="col-span-2 bg-white rounded-lg shadow-md p-4">
+                                  <p className="text-base text-gray-600 mb-4 break-words">
+                                    Student ID: {score.student_id || "Unknown"}
+                                  </p>
+                                  <p className="text-sm text-gray-500">
+                                    Course ID:{" "}
+                                    {score.assignment_name || "Unknown"}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    ) : (
+                      <div className="text-center">
+                        <p className="text-gray-500">
+                          No scores available for this student.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-center">
+                <p className="text-gray-500">No scores found.</p>
+              </div>
             )}
           </div>
         )}

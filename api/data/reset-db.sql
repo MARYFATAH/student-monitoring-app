@@ -98,6 +98,7 @@ CREATE TABLE studentapp.events(
     start_time TIME,
     end_time TIME,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    location VARCHAR(255),
     FOREIGN KEY (course_id) REFERENCES studentapp.courses(course_id) ON DELETE CASCADE,
     FOREIGN KEY (related_assignment_id) REFERENCES studentapp.assignments(assignment_id) ON DELETE CASCADE
 );
@@ -174,7 +175,8 @@ VALUES
     (3, 'test', 'Science Test 1', 'Test on chapter 3', '2025-05-25'),
     (7,'homework', 'History Homework 15', 'Complete the lab report', '2025-05-10'),
     (6,'homework', 'History homework 15', 'Test on chapter 3', '2025-05-25'),
-    (6,'homework', 'History homework 15', 'Test on chapter 3', '2025-05-25');
+    (6, 'test', 'History Test 1', 'Test on chapter 2', '2025-05-20');
+
 
 INSERT INTO studentapp.scores (student_id, assignment_id, score)
 VALUES
@@ -182,7 +184,12 @@ VALUES
     ('clerkId5', 1, 3),
     ('clerkId6', 1, 2),
     ('clerkId4', 2, 5),
-    ('clerkId5', 2, -1);
+    ('clerkId5', 2, -1),
+    ('user_2vTtGULPmuR6g4tCGOodztViTjk', 3, 4),
+    ('user_2vTtGULPmuR6g4tCGOodztViTjk', 5, 2),
+    ('user_2vTtGULPmuR6g4tCGOodztViTjk', 6, 3);
+   
+
 
 INSERT INTO studentapp.events (course_id, related_assignment_id, name, description, event_date, start_time, end_time)
 VALUES
