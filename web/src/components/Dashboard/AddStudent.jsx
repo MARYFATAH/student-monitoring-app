@@ -6,8 +6,7 @@ import { Modal } from "./Modal";
 
 export function AddStudent({
   courses,
-  // students,
-  // setStudents,
+
   setShowStudentModal,
 }) {
   const [newStudentFirstName, setNewStudentFirstName] = useState("");

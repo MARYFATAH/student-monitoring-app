@@ -50,7 +50,9 @@ export async function createEvent(req, res) {
     course_id,
     start_time,
     end_time,
+    location,
   } = req.body;
+  console.log("Creating event with data:", req.body);
   try {
     const [newEvent] = await db("events")
       .insert({
@@ -61,6 +63,7 @@ export async function createEvent(req, res) {
         event_date,
         start_time,
         end_time,
+        location,
       })
       .returning("*");
     return res.status(201).json(newEvent);

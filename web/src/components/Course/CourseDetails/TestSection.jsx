@@ -1,9 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@clerk/clerk-react"; // Clerk for authentication
 import { useCourseContext } from "../../../Context/CourseContext"; // Import course context
+import { v4 as uuidv4 } from "uuid"; // UUID for unique IDs
 
 export function TestSection({ tests, setTests }) {
   const { getToken } = useAuth(); // Authentication token
+  const [deletingTestId, setDeletingTestId] = useState(null);
+
   const {
     courseStudents,
     setStudentScores,
@@ -14,13 +17,50 @@ export function TestSection({ tests, setTests }) {
     setTestDate,
     descriptionTest,
     setDescriptionTest,
+    courseDetails,
   } = useCourseContext(); // Access course-related data
   const [editingTest, setEditingTest] = useState(null); // Track editing state
+  const [loading, setLoading] = useState(true); // Track loading state
+
+  const fetchTests = useCallback(
+    async function () {
+      try {
+        const token = await getToken();
+        console.log("coursedetails", courseDetails);
+        const url = `http://localhost:3000/assignments?assignment_type=test&course_id=${courseDetails.course_id}`;
+        console.log("url", url);
+
+        const response = await fetch(
+          url,
+
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          const errorMessage = await response.text();
+          throw new Error(
+            `HTTP error! Status: ${response.status}. ${errorMessage}`
+          );
+        }
+
+        const data = await response.json();
+        setTests(data);
+      } catch (error) {
+        console.error("Error fetching tests:", error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [getToken, setTests]
+  );
 
   useEffect(() => {
-    console.log("Course students:", courseStudents);
-    console.log("Student scores:", studentScores);
-  }, [courseStudents, studentScores]);
+    fetchTests();
+  }, [getToken, setTests]);
 
   const handleAddTest = async () => {
     if (!newTestName.trim() || !testDate.trim()) {
@@ -28,15 +68,26 @@ export function TestSection({ tests, setTests }) {
       return;
     }
 
+    const isDuplicate = tests.some(
+      (test) =>
+        test.name === newTestName &&
+        new Date(test.due_date).toISOString().slice(0, 10) === testDate
+    );
+
+    if (isDuplicate) {
+      alert("A test with this name and due date already exists.");
+      return;
+    }
+
     const newTest = {
-      id: tests.length + 1, // Temporary ID
+      id: uuidv4(), // Generate unique temporary ID
       name: newTestName,
-      assignment_type: "test", // Indicate this is a test
+      assignment_type: "test",
       due_date: testDate,
       description: descriptionTest,
     };
 
-    setTests((prevTests) => [...prevTests, newTest]);
+    setTests((prevTests) => [...prevTests, newTest]); // Update frontend state
 
     const updatedStudentScores = { ...studentScores };
     courseStudents.forEach((student) => {
@@ -61,7 +112,7 @@ export function TestSection({ tests, setTests }) {
           assignment_type: "test",
           due_date: testDate,
           description: descriptionTest,
-          course_id: 1, // Replace with dynamic course ID
+          course_id: courseDetails.course_id, // Dynamic course ID
         }),
       });
 
@@ -90,31 +141,6 @@ export function TestSection({ tests, setTests }) {
     setNewTestName("");
     setTestDate("");
     setDescriptionTest("");
-  };
-
-  const handleDeleteTest = async (testId) => {
-    try {
-      const token = await getToken();
-      const response = await fetch(
-        `http://localhost:3000/assignments/${testId}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      setTests((prevTests) => prevTests.filter((test) => test.id !== testId));
-      alert("Test deleted successfully!");
-    } catch (error) {
-      console.error("Error deleting test:", error);
-      alert("Failed to delete test. Please try again.");
-    }
   };
 
   const handleUpdateTest = async () => {
@@ -162,23 +188,51 @@ export function TestSection({ tests, setTests }) {
     }
   };
 
+  const handleDeleteTest = async (assignment_id) => {
+    setDeletingTestId(assignment_id);
+    try {
+      const token = await getToken();
+      const response = await fetch(
+        `http://localhost:3000/assignments/${assignment_id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      // setTests((prevTests) =>
+      //   prevTests.filter((test) => test.assignment_id !== assignment_id)
+      // );
+      fetchTests();
+      alert("Test deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting test:", error);
+      alert("Failed to delete test. Please try again.");
+    } finally {
+      setDeletingTestId(null);
+    }
+  };
+
   return (
     <div className="p-6 rounded-lg shadow-lg space-y-6 bg-gray-50">
-      {/* Header Section */}
       <h2 className="text-3xl font-bold flex justify-between items-center text-violet-800">
         Test List
         <span className="text-sm text-violet-600">
           {tests.length} {tests.length === 1 ? "test" : "tests"} added
         </span>
       </h2>
-
-      {/* Test List Section */}
       <div>
         {tests.length > 0 ? (
           <ul className="space-y-4">
             {tests.map((test) => (
               <li
-                key={test.id}
+                key={test.assignment_id}
                 className="p-4 border border-violet-300 rounded-lg shadow flex justify-between items-center hover:bg-violet-100 transition-colors"
               >
                 <div>
@@ -198,7 +252,7 @@ export function TestSection({ tests, setTests }) {
                     Edit
                   </button>
                   <button
-                    onClick={() => handleDeleteTest(test.id)}
+                    onClick={() => handleDeleteTest(test.assignment_id)}
                     className="py-1 px-3 border border-red-600 text-red-600 rounded hover:bg-red-100 transition-all shadow"
                   >
                     Delete
@@ -211,8 +265,6 @@ export function TestSection({ tests, setTests }) {
           <p className="text-violet-500 text-center">No tests added yet...</p>
         )}
       </div>
-
-      {/* Add or Edit Test Section */}
       <div className="space-y-4">
         <h2 className="text-2xl font-bold text-violet-800">
           {editingTest ? "Edit Test" : "Add Test"}

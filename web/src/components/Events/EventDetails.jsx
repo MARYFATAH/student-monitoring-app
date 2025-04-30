@@ -1,8 +1,20 @@
 export function EventDetails({ event }) {
-  const eventDate = new Date(event.date);
+  const eventDate = new Date(event.event_date);
+  const startTime = event.start_time
+    ? new Date(`1970-01-01T${event.start_time}`).toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : null;
+  const endTime = event.end_time
+    ? new Date(`1970-01-01T${event.end_time}`).toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : null;
 
   return (
-    <div className="p-6 md:p-8 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg shadow-lg w-full max-w-3xl mx-auto h-[65vh] overflow-y-auto">
+    <div className="p-6 md:p-8 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg shadow-lg w-full max-w-3xl mx-auto h-[40vh] overflow-y-auto hoverflow-x-hidden transition-transform duration-300 ease-in-out transform hover:scale-105">
       {/* Top Section - Calendar Header */}
       <div className="bg-violet-500 text-white rounded-t-lg px-4 py-3 text-center shadow">
         <h2 className="text-lg font-bold">Next Event</h2>
@@ -35,6 +47,28 @@ export function EventDetails({ event }) {
             <span className="font-semibold text-gray-700">Location: </span>
             {event.location || "Not provided"}
           </p>
+          <p className="text-sm text-gray-500">
+            <span className="font-semibold text-gray-700">
+              Related Assignment:{" "}
+            </span>
+            {event.related_assignment_id || "None"}
+          </p>
+          <p className="text-sm text-gray-500">
+            <span className="font-semibold text-gray-700">Course ID: </span>
+            {event.course_id || "Not provided"}
+          </p>
+          {startTime && (
+            <p className="text-sm text-gray-500">
+              <span className="font-semibold text-gray-700">Start Time: </span>
+              {startTime}
+            </p>
+          )}
+          {endTime && (
+            <p className="text-sm text-gray-500">
+              <span className="font-semibold text-gray-700">End Time: </span>
+              {endTime}
+            </p>
+          )}
         </div>
       </div>
     </div>
