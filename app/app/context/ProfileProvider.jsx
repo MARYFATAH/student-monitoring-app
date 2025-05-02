@@ -2,6 +2,8 @@ import { useAuth } from "@clerk/clerk-react";
 import { useEffect, useState } from "react";
 import { ProfileContext } from "./ProfileContext.js";
 
+const API_HOST = process.env.EXPO_PUBLIC_API_HOST;
+
 export function ProfileProvider({ children }) {
   const { getToken } = useAuth();
   const [profile, setProfile] = useState(null);
@@ -10,23 +12,25 @@ export function ProfileProvider({ children }) {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      setLoading(true);
-      setError(null);
-
       try {
         const token = await getToken();
-        console.log("Auth Token:", token); // Debugging line
+        console.log("Auth Token:", token); // Debugging Line
+        console.log(`${API_HOST}/users/my-profile`);
 
-        const response = await fetch(`http://localhost:3000/users/my-profile`, {
+        const response = await fetch(`${API_HOST}/users/my-profile`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         });
-        const data = await response.json();
-        console.log("Profile data:", data); // Debugging line
 
+        if (!response.ok) {
+          throw new Error(`HTTP Error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("Profile Data:", data); // Debugging Line
         setProfile(data);
       } catch (err) {
         console.error("Error fetching profile:", err);
@@ -37,7 +41,7 @@ export function ProfileProvider({ children }) {
     };
 
     fetchProfile();
-  }, [getToken]);
+  }, []);
 
   return (
     <ProfileContext.Provider value={{ profile, loading, error }}>
