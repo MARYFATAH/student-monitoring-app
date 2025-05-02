@@ -44,6 +44,9 @@ export function ScoreSection({ tests, setTests }) {
         console.log("url", "http://localhost:3000/users?role=student");
 
         // Fetch existing scores (adjust URL & query as needed)
+        console.log(
+          `http://localhost:3000/scores?course_id=${courseDetails.course_id}`
+        );
         const scoresResponse = await fetch(
           `http://localhost:3000/scores?course_id=${courseDetails.course_id}`,
           { headers: { Authorization: `Bearer ${token}` } }

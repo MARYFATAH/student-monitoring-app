@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth, useUser } from "@clerk/clerk-react";
 import { useEffect, useState } from "react";
 import { ProfileContext } from "./ProfileContext.js";
 
@@ -6,6 +6,7 @@ const API_HOST = process.env.EXPO_PUBLIC_API_HOST;
 
 export function ProfileProvider({ children }) {
   const { getToken } = useAuth();
+  const { isSignedIn } = useUser();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -39,9 +40,10 @@ export function ProfileProvider({ children }) {
         setLoading(false);
       }
     };
-
-    fetchProfile();
-  }, []);
+    if (isSignedIn) {
+      fetchProfile();
+    }
+  }, [isSignedIn]);
 
   return (
     <ProfileContext.Provider value={{ profile, loading, error }}>

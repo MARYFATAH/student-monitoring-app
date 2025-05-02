@@ -8,7 +8,7 @@ import {
   FlatList,
   StyleSheet,
 } from "react-native";
-import { ProfileContext } from "../context/ProfileContext";
+import { ProfileContext } from "../../context/ProfileContext";
 import { useAuth } from "@clerk/clerk-expo";
 import Ionicons from "react-native-vector-icons/Ionicons";
 

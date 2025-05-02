@@ -4,6 +4,8 @@ export async function getScores(req, res) {
   const { course_id, student_id } = req.query;
   const { userId, role } = req.auth;
 
+  console.log("getScores called with:", req.query);
+
   // Validate roles and permissions
   // if (role !== "teacher" && userId !== student_id) {
   //   return res
@@ -36,11 +38,8 @@ export async function getScores(req, res) {
     }
 
     const result = await query;
-    if (result.length === 0) {
-      return res
-        .status(404)
-        .json({ error: "No scores found for the given criteria." });
-    }
+
+    console.log("Scores fetched successfully:", result);
 
     return res.json(result);
   } catch (err) {
@@ -77,12 +76,9 @@ export async function updateScore(req, res) {
   // Split the composite id into student_id and assignment_id.
   const [student_id, assignment_id_str] = id.split("-");
   if (!student_id || !assignment_id_str) {
-    return res
-      .status(400)
-      .json({
-        error:
-          "Invalid composite id format. Expected 'studentId-assignmentId'.",
-      });
+    return res.status(400).json({
+      error: "Invalid composite id format. Expected 'studentId-assignmentId'.",
+    });
   }
   const assignment_id = parseInt(assignment_id_str, 10);
   if (isNaN(assignment_id)) {
