@@ -22,7 +22,6 @@ export function Login() {
     //     "phone_number": null,
     //     "address": null,
     //     "first_name": "Sascha",
-    //     "last_name": "Teacher",
     //     "dob": null,
     //     "email": null,
     //   >>>>>>>>>>>>>>>  "role": "teacher", <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

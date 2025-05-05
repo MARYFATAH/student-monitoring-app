@@ -41,8 +41,12 @@ export function ScoreSection({ tests, setTests }) {
         const studentsData = await studentResponse.json();
         console.log("Fetched students:", studentsData);
         setCourseStudents(studentsData);
+        console.log("url", "http://localhost:3000/users?role=student");
 
         // Fetch existing scores (adjust URL & query as needed)
+        console.log(
+          `http://localhost:3000/scores?course_id=${courseDetails.course_id}`
+        );
         const scoresResponse = await fetch(
           `http://localhost:3000/scores?course_id=${courseDetails.course_id}`,
           { headers: { Authorization: `Bearer ${token}` } }
@@ -52,6 +56,10 @@ export function ScoreSection({ tests, setTests }) {
         }
         const scoresData = await scoresResponse.json();
         console.log("Fetched scores:", scoresData);
+        console.log(
+          "url",
+          `http://localhost:3000/scores?course_id=${courseDetails.course_id}`
+        );
 
         // Build the studentScores state. Use composite keys "studentId-assignmentId".
         const updatedScores = studentsData.reduce((acc, student) => {

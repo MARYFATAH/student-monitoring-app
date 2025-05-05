@@ -1,32 +1,37 @@
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth, useUser } from "@clerk/clerk-expo";
 import { useEffect, useState } from "react";
 import { ProfileContext } from "./ProfileContext.js";
 
+const API_HOST = process.env.EXPO_PUBLIC_API_HOST;
+
 export function ProfileProvider({ children }) {
   const { getToken } = useAuth();
+  const { isSignedIn } = useUser();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
-      setLoading(true);
-      setError(null);
-
       try {
         const token = await getToken();
-        console.log("Auth Token:", token); // Debugging line
+        console.log("Auth Token:", token); // Debugging Line
+        console.log(`${API_HOST}/users/my-profile`);
 
-        const response = await fetch(`http://localhost:3000/users/my-profile`, {
+        const response = await fetch(`${API_HOST}/users/my-profile`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         });
-        const data = await response.json();
-        console.log("Profile data:", data); // Debugging line
 
+        if (!response.ok) {
+          throw new Error(`HTTP Error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("Profile Data:", data); // Debugging Line
         setProfile(data);
       } catch (err) {
         console.error("Error fetching profile:", err);
@@ -35,9 +40,10 @@ export function ProfileProvider({ children }) {
         setLoading(false);
       }
     };
-
-    fetchProfile();
-  }, [getToken]);
+    if (isSignedIn) {
+      fetchProfile();
+    }
+  }, [isSignedIn]);
 
   return (
     <ProfileContext.Provider value={{ profile, loading, error }}>
