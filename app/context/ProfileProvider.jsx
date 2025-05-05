@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { useAuth, useUser } from "@clerk/clerk-expo";
+=======
+import { useAuth, useUser } from "@clerk/clerk-react";
+>>>>>>> 732bf8d00eb2edb80ea9fd5b6e11eebf6142c207
 import { useEffect, useState } from "react";
 import { ProfileContext } from "./ProfileContext.js";
 
