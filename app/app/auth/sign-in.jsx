@@ -59,14 +59,14 @@ export default function LoginScreen() {
           autoCapitalize="none"
           value={emailAddress}
           placeholder="Enter email"
-          placeholderTextColor="#B39DDB"
+          placeholderTextColor="#D8B4FE"
           onChangeText={setEmailAddress}
         />
         <TextInput
           style={styles.input}
           value={password}
           placeholder="Enter password"
-          placeholderTextColor="#B39DDB"
+          placeholderTextColor="#D8B4FE"
           secureTextEntry
           onChangeText={setPassword}
         />
@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#6A0DAD", // Purple background
+    backgroundColor: "#7C3AED", // Matches Parent Dashboard color
     padding: 20,
   },
   title: {
@@ -101,12 +101,12 @@ const styles = StyleSheet.create({
     padding: 12,
     borderWidth: 1,
     borderRadius: 8,
-    backgroundColor: "#9C27B0",
+    backgroundColor: "#6D28D9",
     color: "#FFFFFF",
     marginBottom: 10,
   },
   button: {
-    backgroundColor: "#8E24AA",
+    backgroundColor: "#581C87", // Darker purple shade for buttons
     padding: 15,
     borderRadius: 8,
     alignItems: "center",

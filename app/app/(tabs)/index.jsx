@@ -2,19 +2,27 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
+import { useAuth } from "@clerk/clerk-expo";
+import { useEffect } from "react";
 
 export default function HeroPage() {
   const router = useRouter();
+  const { isSignedIn } = useAuth();
+  const handleStart = () => {
+    if (isSignedIn) {
+      router.replace("/(tabs)/parentdashboard");
+    } else {
+      router.push("/auth/sign-in");
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Welcome to the Student Monitoring App</Text>
       <Text style={styles.subtitle}>
         Here we can help smooth the education process!
       </Text>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => router.push("/auth/sign-in")}
-      >
+      <TouchableOpacity style={styles.button} onPress={handleStart}>
         <Text style={styles.buttonText}>Let's Start</Text>
       </TouchableOpacity>
     </View>
