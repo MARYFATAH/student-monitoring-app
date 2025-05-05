@@ -8,11 +8,7 @@ export default function RootLayout() {
   return (
     <ClerkProvider tokenCache={tokenCache}>
       <ProfileProvider>
-<<<<<<< HEAD
         <Stack screenOptions={{ headerShown: false }}>
-=======
-        <Stack>
->>>>>>> 732bf8d00eb2edb80ea9fd5b6e11eebf6142c207
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen
             name="auth/sign-in"
