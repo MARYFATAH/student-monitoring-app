@@ -8,11 +8,13 @@ import {
   StyleSheet,
   TouchableOpacity,
   Animated,
+  Button,
+  Pressable,
 } from "react-native";
 import { ProfileContext } from "../../context/ProfileContext";
 import { useAuth } from "@clerk/clerk-expo";
 import Ionicons from "react-native-vector-icons/Ionicons";
-
+import { useNavigation } from "@react-navigation/native";
 const Tab = createMaterialTopTabNavigator();
 const API_HOST = process.env.EXPO_PUBLIC_API_HOST;
 
@@ -20,6 +22,9 @@ const API_HOST = process.env.EXPO_PUBLIC_API_HOST;
 function ProfileScreen() {
   const { profile } = useContext(ProfileContext);
   const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  const { signOut } = useAuth();
+  const navigation = useNavigation();
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -48,6 +53,15 @@ function ProfileScreen() {
       ) : (
         <Text style={styles.error}>Profile not available</Text>
       )}
+      <Pressable
+        style={styles.button}
+        title="Sign Out"
+        onPress={() => {
+          signOut();
+        }}
+      >
+        <Text style={styles.buttonText}>Sign Out</Text>
+      </Pressable>
     </Animated.View>
   );
 }
@@ -113,7 +127,7 @@ function HomeworkScreen() {
               </View>
               <View style={styles.cardContent}>
                 <Text style={styles.text}>
-                  Subject: {item.subject || "Not specified"}
+                  Subject: {item.description || "Not specified"}
                 </Text>
                 <Text style={styles.text}>
                   Due Date: {new Date(item.due_date).toLocaleDateString()}
@@ -380,6 +394,28 @@ const styles = StyleSheet.create({
 
   cardContent: { padding: 12 },
 
+  button: {
+    backgroundColor: "#3730A3",
+
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 10,
+    width: "100%",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5, // Adds shadow for Android devices
+  },
+
+  buttonText: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "bold",
+  },
+
   text: {
     fontSize: 16,
     color: "#3730A3", // Light pastel for smooth contrast
@@ -393,6 +429,14 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 12,
     fontWeight: "bold",
+  },
+  signOutButton: {
+    backgroundColor: "#581C87", // Darker purple shade for buttons
+    padding: 15,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 10,
+    marginBottom: 10,
   },
 
   noData: {
