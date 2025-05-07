@@ -91,16 +91,20 @@ export function ScoreSection({ tests, setTests }) {
     fetchData();
   }, [getToken, setCourseStudents, setStudentScores, tests, courseDetails]);
 
+  /*************  ✨ Windsurf Command 🌟  *************/
   // Handle updating a student's score.
   // Valid values are -1 to indicate absent, or any number >= 0.
-  const handleUpdateScore = async (studentId, testId, newScore) => {
+  const handleUpdateScore = async (studentId, test_id, newScore) => {
+    console.log(
+      `Updating score for student ${studentId} for test ${test_id}: ${newScore}`
+    );
     if (newScore < -1) {
       alert("Score cannot be less than -1.");
       return;
     }
 
     const currentScoreEntry =
-      studentScores[studentId] && studentScores[studentId][testId];
+      studentScores[studentId] && studentScores[studentId][test_id];
     if (!currentScoreEntry) {
       alert("Score record not found.");
       return;
@@ -111,7 +115,7 @@ export function ScoreSection({ tests, setTests }) {
       ...prev,
       [studentId]: {
         ...prev[studentId],
-        [testId]: {
+        [test_id]: {
           ...currentScoreEntry,
           score: newScore,
         },
@@ -120,6 +124,7 @@ export function ScoreSection({ tests, setTests }) {
 
     try {
       const token = await getToken();
+      console.log("Updating score on the server:", token);
       const scoreId = currentScoreEntry.score_id;
       const response = await fetch(`http://localhost:3000/scores/${scoreId}`, {
         method: "PATCH",
@@ -128,18 +133,19 @@ export function ScoreSection({ tests, setTests }) {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          assignment_id: testId,
+          assignment_id: test_id,
           score: newScore,
           course_id: courseDetails.course_id,
           student_id: studentId,
         }),
       });
 
+      console.log("Response from server:", response);
       if (!response.ok) {
         throw new Error(`HTTP Error! Status: ${response.status}`);
       }
       console.log(
-        `Updated score for student ${studentId} for test ${testId}: ${newScore}`
+        `Updated score for student ${studentId} for test ${test_id}: ${newScore}`
       );
     } catch (err) {
       console.error("Error updating score on the server:", err);
@@ -147,6 +153,7 @@ export function ScoreSection({ tests, setTests }) {
       // Optionally, revert the optimistic update if needed.
     }
   };
+  /*******  8201523b-2943-4ef0-84bb-b3a1b1f1445b  *******/
 
   // Render loading, error, or main content.
   if (!courseDetails) {

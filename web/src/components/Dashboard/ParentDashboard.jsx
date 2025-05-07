@@ -386,12 +386,19 @@ export function ParentDashboard() {
                                 </div>
                                 {/* Right Column - Additional Info */}
                                 <div className="col-span-2 bg-white rounded-lg shadow-md p-4">
-                                  <p className="text-base text-gray-600 mb-4 break-words">
-                                    Student ID: {score.student_id || "Unknown"}
-                                  </p>
-                                  <p className="text-sm text-gray-500">
-                                    Course ID:{" "}
-                                    {score.assignment_name || "Unknown"}
+                                  <p className="text-base text-gray-600 mb-4 break-words text-center font-semibold align-items-center">
+                                    {console.log("Score value:", score.score)}{" "}
+                                    {/* Log before returning */}
+                                    {score.score <= 2 ? (
+                                      <span className="text-teal-600">
+                                        You did well in this assignment. Keep up
+                                        the good work!
+                                      </span>
+                                    ) : (
+                                      <span className="text-rose-600">
+                                        Keep trying! You can improve on this.
+                                      </span>
+                                    )}
                                   </p>
                                 </div>
                               </div>

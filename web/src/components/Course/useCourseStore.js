@@ -8,13 +8,13 @@ const useCourseStore = create((set) => ({
   isEditing: false,
 
   setCourses: (courses) => set({ courses }),
-  updateStudentScore: (studentId, testId, score) =>
+  updateStudentScore: (studentId, test_id, score) =>
     set((state) => ({
       studentScores: {
         ...state.studentScores,
         [studentId]: {
           ...state.studentScores[studentId],
-          [testId]: score,
+          [test_id]: score,
         },
       },
     })),
