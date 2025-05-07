@@ -19,26 +19,19 @@ export function TestSection({ tests, setTests }) {
     setDescriptionTest,
     courseDetails,
   } = useCourseContext(); // Access course-related data
-  const [editingTest, setEditingTest] = useState(null); // Track editing state
-  const [loading, setLoading] = useState(true); // Track loading state
-
+  const [editingTest, setEditingTest] = useState(null);
+  const [loading, setLoading] = useState(true);
   const fetchTests = useCallback(
     async function () {
       try {
         const token = await getToken();
-        console.log("coursedetails", courseDetails);
         const url = `http://localhost:3000/assignments?assignment_type=test&course_id=${courseDetails.course_id}`;
         console.log("url", url);
-
-        const response = await fetch(
-          url,
-
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         if (!response.ok) {
           const errorMessage = await response.text();

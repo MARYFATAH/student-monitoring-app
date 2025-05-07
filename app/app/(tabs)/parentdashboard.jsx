@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import aminPic from "../../assets/images/aminpic.jpg";
+
 import {
+  Image,
   View,
   Text,
   ActivityIndicator,
@@ -36,37 +39,41 @@ function ProfileScreen() {
 
   return (
     <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
-      <Text style={styles.title}>Profile</Text>
+      {/* Student's Picture - Now centered above */}
+      <Text style={styles.title}>{profile.first_name}'s Profile</Text>
+      <Image source={aminPic} style={styles.kidImage} />
+
       {profile ? (
         <View style={styles.profileCard}>
           <Text style={styles.profileText}>
-            Name: {profile.first_name} {profile.last_name}
-          </Text>
-          <Text style={styles.profileText}>Email: {profile.email}</Text>
-          <Text style={styles.profileText}>
-            Phone: {profile.phone_number || "N/A"}
+            <Text style={{ fontWeight: "bold" }}> Name: </Text>
+            {profile.first_name} {profile.last_name}
           </Text>
           <Text style={styles.profileText}>
-            Address: {profile.address || "N/A"}
+            <Text style={{ fontWeight: "bold" }}> Email: </Text>
+            {profile.email}
+          </Text>
+          <Text style={styles.profileText}>
+            <Text style={{ fontWeight: "bold" }}> Phone Number: </Text>{" "}
+            {profile.phone_number || "N/A"}
+          </Text>
+          <Text style={styles.profileText}>
+            <Text style={{ fontWeight: "bold" }}> Address: </Text>{" "}
+            {profile.address || "N/A"}
           </Text>
         </View>
       ) : (
         <Text style={styles.error}>Profile not available</Text>
       )}
-      <Pressable
-        style={styles.button}
-        title="Sign Out"
-        onPress={() => {
-          signOut();
-        }}
-      >
+
+      <Pressable style={styles.button} onPress={signOut}>
         <Text style={styles.buttonText}>Sign Out</Text>
       </Pressable>
     </Animated.View>
   );
 }
 
-// 📌 **Animated Homework Screen**
+// **Animated Homework Screen**
 function HomeworkScreen() {
   const { getToken } = useAuth();
   const [homework, setHomework] = useState([]);
@@ -143,7 +150,7 @@ function HomeworkScreen() {
   );
 }
 
-// 📌 **Animated Scores Screen**
+// **Animated Scores Screen**
 function ScoresScreen() {
   const { profile } = useContext(ProfileContext);
   const { getToken } = useAuth();
@@ -203,9 +210,12 @@ function ScoresScreen() {
                 </Text>
               </View>
               <View style={styles.cardContent}>
-                <Text style={styles.text}>Score: {item.score}</Text>
+                <Text style={styles.text}>Your Score: {item.score}</Text>
                 <Text style={styles.text}>
-                  Student ID: {item.student_id || "Unknown"}
+                  Note:{" "}
+                  {item.score <= 2
+                    ? "Good Job, Keep up the good work"
+                    : "Better luck next time"}
                 </Text>
               </View>
             </TouchableOpacity>
@@ -326,124 +336,111 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: "#4F46E5", // Dark blue-violet background
+    backgroundColor: "#4F46E5",
   },
 
   title: {
-    fontSize: 26,
+    fontSize: 24,
+    fontFamily: "Nunito",
     fontWeight: "bold",
-    color: "#E0E7FF", // Soft pastel contrast
-    marginBottom: 15,
+    color: "#E0E7FF",
+    marginBottom: 12,
     textAlign: "center",
-    letterSpacing: 1,
+    letterSpacing: 1.2,
   },
 
   profileCard: {
-    backgroundColor: "#4338CA", // Slightly lighter purple for depth
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 6,
-    alignItems: "start",
-    marginBottom: 15,
+    backgroundColor: "#3F3D9B",
+    borderRadius: 10,
+    padding: 18,
+    marginBottom: 10,
+    alignItems: "flex-start",
+    flex: 0.5,
+    margin: 10,
   },
 
   profileText: {
     fontSize: 18,
-    color: "#E0E7FF", // Light pastel for visibility
-    marginBottom: 10,
-    fontWeight: "500",
-    textAlign: "center",
+    fontFamily: "Nunito",
+    color: "#E0E7FF",
+    marginBottom: 8,
   },
 
   card: {
-    backgroundColor: "#d6d5ff",
-    borderRadius: 12,
+    backgroundColor: "#D1D5DB",
+    borderRadius: 10,
+    padding: 16,
     marginBottom: 12,
-    padding: 18,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 5,
   },
 
   cardHeader: {
     backgroundColor: "#3730A3",
     padding: 12,
-    borderRadius: 10,
+    borderRadius: 8,
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5,
   },
 
   cardTitle: {
-    color: "#F9FAFB", // Soft white for readability
+    color: "#F9FAFB",
     fontSize: 20,
+    fontFamily: "Nunito",
     fontWeight: "bold",
-    textTransform: "uppercase",
-    letterSpacing: 1,
   },
 
   cardContent: { padding: 12 },
 
   button: {
     backgroundColor: "#3730A3",
-
-    padding: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 18,
     borderRadius: 8,
     alignItems: "center",
-    justifyContent: "center",
-    marginTop: 10,
-    width: "100%",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 5, // Adds shadow for Android devices
+    marginTop: 20,
   },
 
   buttonText: {
     color: "#fff",
-    fontSize: 15,
+    fontSize: 17,
+    fontFamily: "Nunito",
     fontWeight: "bold",
   },
 
   text: {
-    fontSize: 16,
-    color: "#3730A3", // Light pastel for smooth contrast
-    marginTop: 6,
-    fontWeight: "500",
+    fontSize: 15,
+    fontFamily: "Nunito",
+    color: "#3730A3",
+    marginTop: 5,
   },
 
   error: {
     fontSize: 18,
-    color: "#EF4444", // Bright red for clear alert visibility
+    fontFamily: "Nunito",
+    color: "#EF4444",
     textAlign: "center",
-    marginTop: 12,
-    fontWeight: "bold",
   },
+
   signOutButton: {
-    backgroundColor: "#581C87", // Darker purple shade for buttons
-    padding: 15,
+    backgroundColor: "#581C87",
+    padding: 14,
     borderRadius: 8,
     alignItems: "center",
-    marginTop: 10,
-    marginBottom: 10,
   },
 
   noData: {
     textAlign: "center",
-    color: "#D1D5DB", // Muted grayish-white for elegance
+    color: "#D1D5DB",
     fontSize: 18,
-    marginTop: 12,
-    fontStyle: "italic",
+    fontFamily: "Nunito",
+  },
+
+  kidImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    marginBottom: 15,
+    alignSelf: "center", // Ensures centering above the profile card
+    borderWidth: 3,
+    borderColor: "#fff",
+    marginTop: 15,
   },
 });

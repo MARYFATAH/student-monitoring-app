@@ -1,7 +1,7 @@
 {
   "type": "excalidraw",
   "version": 2,
-  "source": "https://excalidraw.com",
+  "source": "https://marketplace.visualstudio.com/items?itemName=pomdtr.excalidraw-editor",
   "elements": [
     {
       "id": "89ENETP1yfDM_4Fn0qW92",
@@ -361,8 +361,8 @@
     {
       "id": "Ex5icwFeTqNS10BZfTDgG",
       "type": "arrow",
-      "x": 597.3500626451088,
-      "y": 460.6623503054693,
+      "x": 558.7690381801132,
+      "y": 416.1458881177523,
       "width": 385.8778916437985,
       "height": 3.910864095078165,
       "angle": 0,
@@ -380,11 +380,11 @@
         "type": 2
       },
       "seed": 705022362,
-      "version": 382,
-      "versionNonce": 332918470,
+      "version": 438,
+      "versionNonce": 779359450,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1743427585103,
+      "updated": 1746603926423,
       "link": null,
       "locked": false,
       "points": [
@@ -751,8 +751,8 @@
     {
       "id": "cmou-HzhwQrgiFTXWuRsO",
       "type": "image",
-      "x": -189.2197443063493,
-      "y": -826.8839978368387,
+      "x": -721.0637795468487,
+      "y": 1684.0041821211341,
       "width": 1309.79616568433,
       "height": 873.1974437895533,
       "angle": 0,
@@ -768,11 +768,11 @@
       "index": "aN",
       "roundness": null,
       "seed": 337811526,
-      "version": 224,
-      "versionNonce": 447435290,
+      "version": 343,
+      "versionNonce": 818960538,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1743431545011,
+      "updated": 1746603940148,
       "link": null,
       "locked": false,
       "status": "saved",
@@ -1346,11 +1346,11 @@
         "type": 3
       },
       "seed": 352864326,
-      "version": 135,
-      "versionNonce": 1253064666,
+      "version": 137,
+      "versionNonce": 149215238,
       "isDeleted": false,
       "boundElements": [],
-      "updated": 1743429760245,
+      "updated": 1746533781974,
       "link": null,
       "locked": false
     },
@@ -4137,52 +4137,6 @@
       "originalText": "/students/id",
       "autoResize": true,
       "lineHeight": 1.25
-    },
-    {
-      "id": "kv24zRPsNDAO4JOdjeuby",
-      "type": "arrow",
-      "x": 4824.650885935988,
-      "y": 1061.8218533154143,
-      "width": 973.6032126649707,
-      "height": 624.5333101090337,
-      "angle": 0,
-      "strokeColor": "#1971c2",
-      "backgroundColor": "transparent",
-      "fillStyle": "solid",
-      "strokeWidth": 2,
-      "strokeStyle": "solid",
-      "roughness": 1,
-      "opacity": 100,
-      "groupIds": [],
-      "frameId": null,
-      "index": "b1N",
-      "roundness": {
-        "type": 2
-      },
-      "seed": 916777990,
-      "version": 759,
-      "versionNonce": 1059836186,
-      "isDeleted": false,
-      "boundElements": [],
-      "updated": 1743431380814,
-      "link": null,
-      "locked": false,
-      "points": [
-        [
-          0,
-          0
-        ],
-        [
-          973.6032126649707,
-          624.5333101090337
-        ]
-      ],
-      "lastCommittedPoint": null,
-      "startBinding": null,
-      "endBinding": null,
-      "startArrowhead": null,
-      "endArrowhead": "arrow",
-      "elbowed": false
     },
     {
       "id": "vyNK1l3QPMXlmkO8JH3IB",

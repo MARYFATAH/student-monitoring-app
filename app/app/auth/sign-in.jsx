@@ -53,7 +53,7 @@ export default function LoginScreen() {
   return (
     <View style={styles.container}>
       <SignedOut>
-        <Text style={styles.title}>Sign In</Text>
+        <Text style={styles.title}> Sign In </Text>
         <TextInput
           style={styles.input}
           autoCapitalize="none"
@@ -62,6 +62,7 @@ export default function LoginScreen() {
           placeholderTextColor="#D8B4FE"
           onChangeText={setEmailAddress}
         />
+
         <TextInput
           style={styles.input}
           value={password}
@@ -71,7 +72,7 @@ export default function LoginScreen() {
           onChangeText={setPassword}
         />
         <TouchableOpacity style={styles.button} onPress={onSignInPress}>
-          <Text style={styles.buttonText}>Continue</Text>
+          <Text style={styles.buttonText}>Go to Dashboard</Text>
         </TouchableOpacity>
       </SignedOut>
 
@@ -106,11 +107,12 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   button: {
-    backgroundColor: "#581C87", // Darker purple shade for buttons
+    backgroundColor: "#3b086e",
     padding: 15,
     borderRadius: 8,
     alignItems: "center",
     marginTop: 10,
+    width: "100%",
   },
   buttonText: {
     color: "#FFFFFF",
